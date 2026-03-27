@@ -1,10 +1,25 @@
 # Polemicon: Hebrew Polemic Corpus Analysis Pipeline
 
 ## Status Update (2026-03-27)
-- Repository reset and pushed to GitHub with only code/config files (no large data)
-- .gitignore expanded to exclude all large/model files
-- Streamlit app deployed from src/streamlit_app.py
-- Ready for further development, annotation, or deployment steps
+
+### Completed
+- **Phase A (Corpus + Vectorization):** TF-IDF vectorization (char 3-5 grams + word 1-2 grams, 50K+30K features), TruncatedSVD to 300 dims, FAISS index. Outlier bypc_5539 (317K-word academic book) dropped. 33,513 texts.
+- **Phase B.3 (Keyword baseline):** Hebrew polemic lexicon scoring. Weak signal alone (mean 0.10, only 6 texts >0.3). Useful as supplementary feature.
+- **Phase C.1 (Clustering):** UMAP + HDBSCAN → 409 clusters, 41% noise. 2D UMAP coords saved for future visualization.
+- **Pilot sample:** 200 texts stratified by source/score/cluster → `data/pilot_sample.parquet`
+- **Streamlit app:** Rewritten with real corpus data, navigation, filters, annotation UI. Deployed on Streamlit Cloud.
+
+### Next: Phase B.2 — Dual-model LLM classification pilot
+- Run 4 models on the same 200 pilot texts: Claude Opus, Claude Sonnet, Gemini Pro, Gemini Flash
+- Compare agreement to determine which cheaper models are viable for the 2K calibration run
+- Surface disagreements in Streamlit app for researcher review
+- API keys needed in `.env` file (to be created)
+- Gemini model selection: check https://ai.google.dev/gemini-api/docs/models for latest available (Gemini 3.x are preview as of 2026-03-27)
+
+### Deferred
+- Clustering visualization page in Streamlit (interactive UMAP scatter plot)
+- Dense embeddings (Tier 2/3) — only if TF-IDF clustering proves insufficient
+- Git credential helper: fixed broken global config, used http.postBuffer increase for large pushes
 
 ## Context
 

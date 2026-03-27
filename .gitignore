@@ -35,6 +35,7 @@ venv/
 ENV/
 .env
 .env.*
+!.env.template
 # Ignore VS Code settings
 .vscode/
 # Ignore logs
