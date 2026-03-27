@@ -13,10 +13,10 @@ from loaders import load_press_articles, load_egeret_letters, load_polemic_candi
 from cleaning import remove_by_footer, normalize_hebrew, detect_non_hebrew_segments, compute_quality_score, is_long_enough
 
 # Paths
-PRESS_PATH = '../MGD-LBN-MLZ-HZF-HZTfull2021-08-14-(1)-tsv.csv'
-EGERET_PATH = '../e-geret-batch-export.tsv'
-POLEMIC_PATH = '../Ben-Yehuda-Project-polemic-candidates.csv'
-BY_METADATA_PATH = '../benyehuda-full-metadata.tsv'
+PRESS_PATH = 'MGD-LBN-MLZ-HZF-HZTfull2021-08-14-(1)-tsv.csv'
+EGERET_PATH = 'e-geret-batch-export.tsv'
+POLEMIC_PATH = 'Ben-Yehuda-Project-polemic-candidates.csv'
+BY_METADATA_PATH = 'benyehuda-full-metadata.tsv'
 
 # Overlap window (enlarged)
 START_YEAR = 1850
@@ -41,7 +41,7 @@ def recover_candidate_dates(candidates_df, by_meta_df):
         return int(m.group(1)) if m else None
     candidates_df['by_id'] = candidates_df['File'].apply(extract_id)
     by_meta_df['id'] = pd.to_numeric(by_meta_df['id'], errors='coerce')
-    merged = candidates_df.merge(by_meta_df[['id', 'date', 'title', 'author', 'genre']], left_on='by_id', right_on='id', how='left')
+    merged = candidates_df.merge(by_meta_df[['id', 'orig_publication_date', 'title', 'author_string', 'genre']], left_on='by_id', right_on='id', how='left')
     return merged
 
 def main():
@@ -53,7 +53,7 @@ def main():
 
     # Clean and filter
     press['text'] = press['text'].apply(clean_text)
-    egeret['text'] = egeret['text'].apply(clean_text)
+    egeret['text'] = egeret['Content'].apply(clean_text)
     candidates['text'] = candidates['Column 1'].apply(clean_text)
 
     press['keep'], press['quality_score'] = zip(*press['text'].map(filter_and_score))
@@ -76,7 +76,10 @@ def main():
 
     press['year'] = press['date'].apply(get_year) if 'date' in press else None
     egeret['year'] = egeret['date'].apply(get_year) if 'date' in egeret else None
-    candidates['year'] = candidates['date'].apply(get_year)
+    # Use 'orig_publication_date' for candidates
+    candidates['date'] = candidates['orig_publication_date'] if 'orig_publication_date' in candidates else None
+    candidates['author'] = candidates['author_string'] if 'author_string' in candidates else None
+    candidates['year'] = candidates['date'].apply(get_year) if 'date' in candidates else None
 
     press['in_overlap'] = press['year'].between(START_YEAR, END_YEAR, inclusive='both')
     egeret['in_overlap'] = egeret['year'].between(START_YEAR, END_YEAR, inclusive='both')
