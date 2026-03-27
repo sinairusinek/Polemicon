@@ -16,7 +16,12 @@
 *.tar.gz
 *.rar
 *.7z
+*.index
+*.joblib
 .DS_Store
+# Allow annotation data for Streamlit Cloud
+!data/
+!data/*.parquet
 # Ignore Jupyter notebook checkpoints
 .ipynb_checkpoints/
 # Ignore Python cache and environment files

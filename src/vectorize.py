@@ -1,65 +1,76 @@
 """
-vectorize.py - Vectorization for the Polemicon project
+vectorize.py - TF-IDF vectorization for the Polemicon project
 
-- Dense: multilingual-e5-large embeddings (512-token window, 256 stride, mean pool)
-- Sparse: char n-gram TF-IDF (3-5), word n-gram TF-IDF (1-2)
-- Only chunk texts >512 tokens
+- Char n-gram TF-IDF (3-5 grams, 50K features) — OCR-robust
+- Word n-gram TF-IDF (1-2 grams, 30K features)
+- TruncatedSVD to 300 dims for FAISS nearest-neighbor search
+- Saves sparse matrices, SVD-reduced dense matrix, FAISS index, and fitted vectorizers
 """
+import os
 import numpy as np
 import pandas as pd
-from sentence_transformers import SentenceTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.decomposition import TruncatedSVD
+from scipy import sparse
 import faiss
-import os
+import joblib
 
-def chunk_text(text, window=512, stride=256):
-    tokens = text.split()  # crude tokenization; replace with model tokenizer for production
-    if len(tokens) <= window:
-        return [' '.join(tokens)]
-    chunks = []
-    for i in range(0, len(tokens), stride):
-        chunk = tokens[i:i+window]
-        if len(chunk) < window and i != 0:
-            break
-        chunks.append(' '.join(chunk))
-    return chunks
-
-def mean_pool(vectors):
-    return np.mean(vectors, axis=0)
 
 def main():
-    corpus = pd.read_parquet('corpus.parquet')
-    model = SentenceTransformer('intfloat/multilingual-e5-large')
-    dense_vectors = []
-    doc_ids = []
-    for idx, row in corpus.iterrows():
-        text = row['text']
-        chunks = chunk_text(text)
-        chunk_vecs = model.encode(chunks, batch_size=32, show_progress_bar=False)
-        if len(chunk_vecs) > 1:
-            vec = mean_pool(chunk_vecs)
-        else:
-            vec = chunk_vecs[0]
-        dense_vectors.append(vec)
-        doc_ids.append(row['doc_id'])
-    dense_vectors = np.stack(dense_vectors)
-    np.save('dense_vectors.npy', dense_vectors)
-    with open('doc_ids.txt', 'w') as f:
-        for doc_id in doc_ids:
-            f.write(f"{doc_id}\n")
-    # Build FAISS index
-    index = faiss.IndexFlatIP(dense_vectors.shape[1])
-    index.add(dense_vectors.astype('float32'))
-    faiss.write_index(index, 'dense_faiss.index')
-    # Sparse vectorization
-    char_vectorizer = TfidfVectorizer(analyzer='char_wb', ngram_range=(3,5), max_features=50000)
-    word_vectorizer = TfidfVectorizer(analyzer='word', ngram_range=(1,2), max_features=30000)
-    char_tfidf = char_vectorizer.fit_transform(corpus['text'])
-    word_tfidf = word_vectorizer.fit_transform(corpus['text'])
-    from scipy import sparse
-    sparse.save_npz('char_tfidf.npz', char_tfidf)
-    sparse.save_npz('word_tfidf.npz', word_tfidf)
-    print('Vectorization complete.')
+    os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-if __name__ == '__main__':
+    print("Loading corpus...")
+    corpus = pd.read_parquet("corpus.parquet")
+    # Drop known outlier: bypc_5539 (317K-word academic book, not a polemic text)
+    before = len(corpus)
+    corpus = corpus[corpus["doc_id"] != "bypc_5539"].reset_index(drop=True)
+    print(f"  {before} texts loaded, {before - len(corpus)} outlier(s) dropped, {len(corpus)} remaining.")
+    texts = corpus["text"].fillna("").tolist()
+    doc_ids = corpus["doc_id"].tolist()
+
+    # Char n-gram TF-IDF
+    print("Fitting char n-gram TF-IDF (3-5 grams, 50K features)...")
+    char_vec = TfidfVectorizer(analyzer="char_wb", ngram_range=(3, 5), max_features=50000)
+    char_tfidf = char_vec.fit_transform(texts)
+    print(f"  char_tfidf shape: {char_tfidf.shape}")
+
+    # Word n-gram TF-IDF
+    print("Fitting word n-gram TF-IDF (1-2 grams, 30K features)...")
+    word_vec = TfidfVectorizer(analyzer="word", ngram_range=(1, 2), max_features=30000)
+    word_tfidf = word_vec.fit_transform(texts)
+    print(f"  word_tfidf shape: {word_tfidf.shape}")
+
+    # Save sparse matrices
+    print("Saving sparse matrices...")
+    sparse.save_npz("char_tfidf.npz", char_tfidf)
+    sparse.save_npz("word_tfidf.npz", word_tfidf)
+
+    # Combine + SVD for FAISS
+    print("Running TruncatedSVD (300 components) on combined TF-IDF...")
+    combined = sparse.hstack([char_tfidf, word_tfidf])
+    svd = TruncatedSVD(n_components=300, random_state=42)
+    dense_reduced = svd.fit_transform(combined)
+    explained = svd.explained_variance_ratio_.sum()
+    print(f"  SVD explained variance: {explained:.1%}")
+    np.save("tfidf_svd_300.npy", dense_reduced)
+
+    # FAISS index on L2-normalized SVD vectors (cosine similarity via inner product)
+    print("Building FAISS index...")
+    dense_reduced = dense_reduced.astype("float32")
+    faiss.normalize_L2(dense_reduced)
+    index = faiss.IndexFlatIP(300)
+    index.add(dense_reduced)
+    faiss.write_index(index, "tfidf_faiss.index")
+    print(f"  FAISS index: {index.ntotal} vectors")
+
+    # Save vectorizers and doc IDs
+    joblib.dump({"char_vec": char_vec, "word_vec": word_vec, "svd": svd}, "vectorizers.joblib")
+    with open("doc_ids.txt", "w") as f:
+        for did in doc_ids:
+            f.write(f"{did}\n")
+
+    print("Vectorization complete.")
+
+
+if __name__ == "__main__":
     main()

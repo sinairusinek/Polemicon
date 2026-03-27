@@ -1,5 +1,11 @@
 # Polemicon: Hebrew Polemic Corpus Analysis Pipeline
 
+## Status Update (2026-03-27)
+- Repository reset and pushed to GitHub with only code/config files (no large data)
+- .gitignore expanded to exclude all large/model files
+- Streamlit app deployed from src/streamlit_app.py
+- Ready for further development, annotation, or deployment steps
+
 ## Context
 
 The project contains ~80K Hebrew texts across 4 datasets (19th-century press articles, letters, polemic candidates) with near-zero polemic labels. The goal is to build a vectorized corpus from the overlap period, classify polemic texts, and detect debate threads. The main challenges are: OCR noise in the press dataset, absence of training labels, and linking texts across sources/media.
@@ -108,8 +114,10 @@ Since there are effectively zero labels, Claude bootstraps the initial labeled s
 Rule-based scoring using a polemic indicator lexicon:
 - Debate markers: אך, אבל, אולם, להפך, חלילה
 - Address markers: השיב, ענה, טען, כתב
-- Evaluative intensifiers: שקר, כזב, הבל, טעות, סכלות
-- Rhetorical question density (`?`, `?!`)
+- negative superlatives: איום, נורא, מרעיש
+- sarcastive superlatives: נאצל, נכבד, גבוה, רם
+- Evaluative intensifiers: שקר, כזב, הבל, טעות, סכלות, טמא, עוון, חטא, חשוך, רפה, זוהמה, מרעיש, שערוריה, צבוע, מתחסד
+- Rhetorical question density (`?`, `?!`) and quotation density ('')
 - Named references to other writers/newspapers
 
 Use as comparison baseline and supplementary feature for fine-tuning.
