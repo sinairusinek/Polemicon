@@ -1,0 +1,36 @@
+# Ignore large data and model files
+*.csv
+*.tsv
+*.xlsx
+*.xls
+*.parquet
+*.npy
+*.npz
+*.faiss
+*.pkl
+*.pickle
+*.h5
+*.hdf5
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+.DS_Store
+# Ignore Jupyter notebook checkpoints
+.ipynb_checkpoints/
+# Ignore Python cache and environment files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+.venv/
+venv/
+ENV/
+.env
+.env.*
+# Ignore VS Code settings
+.vscode/
+# Ignore logs
+*.log
