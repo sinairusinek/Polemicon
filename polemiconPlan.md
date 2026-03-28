@@ -1,6 +1,6 @@
 # Polemicon: Hebrew Polemic Corpus Analysis Pipeline
 
-## Status Update (2026-03-27)
+## Status Update (2026-03-28)
 
 ### Completed
 - **Phase A (Corpus + Vectorization):** TF-IDF vectorization (char 3-5 grams + word 1-2 grams, 50K+30K features), TruncatedSVD to 300 dims, FAISS index. Outlier bypc_5539 (317K-word academic book) dropped. 33,513 texts.
@@ -8,18 +8,26 @@
 - **Phase C.1 (Clustering):** UMAP + HDBSCAN → 409 clusters, 41% noise. 2D UMAP coords saved for future visualization.
 - **Pilot sample:** 200 texts stratified by source/score/cluster → `data/pilot_sample.parquet`
 - **Streamlit app:** Rewritten with real corpus data, navigation, filters, annotation UI. Deployed on Streamlit Cloud.
+- **Phase B.2 (4-model LLM classification pilot):** All 4 models (Claude Opus, Sonnet, Gemini Pro 2.5, Flash 2.5) ran on 200 pilot texts. 0 API errors, 4 minor parse errors. Key finding: Claude models (~24% polemic rate) and Gemini models (~70%) diverge sharply — within-family agreement ~90%, cross-family ~53%. 37 unanimous polemic, 49 unanimous not, 94 expensive-model disagreements queued for human review. See `data/agreement_report.txt`.
+- **Metadata backfill:** Enriched `corpus.parquet` with newspaper codes (23,444 press texts), authors (9,811 texts: 100% e-geret, 96.5% polemic candidates), recipients (2,359 e-geret), headlines (17,319 press), and 1,622 press intertextual references.
+- **Reference extraction:** Two-layer approach on pilot texts. Mechanical: 6,959 references (newspaper mentions, attribution patterns, footnotes) across all 200 texts. LLM (Sonnet): 562 categorized references across 56 texts with 3+ polemic model votes — biblical (197), contemporary persons (112), Talmudic (76), contemporary publications (46), contemporary texts (44), scholarly (22). 8 `response_to` references are direct thread signals. All displayed in Streamlit app.
+- **Display fix:** `restore_final_forms()` in cleaning.py reverses final-form normalization (ם→מ etc.) for readable Hebrew display. Applied in Streamlit app.
+- **Vocab extraction (2026-03-29):** Sonnet re-ran on 94 disagreement texts with prompt asking for 3-5 polemic marker words/phrases per text. 460 markers extracted (459 unique). Stored in `data/pilot_vocab.parquet`. Displayed in Streamlit app with per-marker approve/reject buttons for reviewer curation.
+- **Reviewer comments (2026-03-29):** Free-text comment field added to Streamlit annotation panel. Comments stored per doc_id, exported in annotations CSV.
+- **Keyword export updated (2026-03-29):** CSV export now includes human keyword suggestions + model-suggested vocabulary with approved/rejected status.
 
-### Next: Phase B.2 — Dual-model LLM classification pilot
-- Run 4 models on the same 200 pilot texts: Claude Opus, Claude Sonnet, Gemini Pro, Gemini Flash
-- Compare agreement to determine which cheaper models are viable for the 2K calibration run
-- Surface disagreements in Streamlit app for researcher review
-- API keys needed in `.env` file (to be created)
-- Gemini model selection: check https://ai.google.dev/gemini-api/docs/models for latest available (Gemini 3.x are preview as of 2026-03-27)
+### Next: Metadata display + cluster characterization
+- **Priority 1:** Display full metadata (author, recipient, headline, newspaper, title, Ben-Yehuda link) for all 200 pilot texts in Streamlit. Data exists in `corpus.parquet` but not yet joined into the app.
+- **Priority 2:** Cluster characterization — extract top 10 distinctive TF-IDF terms per cluster from `word_tfidf.npz`, save to `data/cluster_labels.parquet`, display in app. Optional: Sonnet-generated topic labels for top 20 clusters.
+- **Priority 3:** Researcher reviews the 94 disagreement cases (now with vocab markers and comments) to establish gold labels.
+- **Priority 4:** Based on review, decide model selection for 2K calibration run.
+- **After review:** Phase B.2 calibration run (2,000 texts) with the chosen model(s).
 
 ### Deferred
 - Clustering visualization page in Streamlit (interactive UMAP scatter plot)
 - Dense embeddings (Tier 2/3) — only if TF-IDF clustering proves insufficient
-- Git credential helper: fixed broken global config, used http.postBuffer increase for large pushes
+- Phase C.2 (thread detection) — approach discussed: tiered edge signals (strong/medium/weak), expect loose topical clusters with partial name/vocab overlap rather than strict reply chains. Will be more effective after polemic labels are established.
+- Full-corpus reference extraction — current approach validated on 56 polemic pilot texts; scale to all polemic texts after B.4 classification.
 
 ## Context
 

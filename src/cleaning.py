@@ -31,6 +31,17 @@ def normalize_hebrew(text):
     text = re.sub(r'[–—]', '-', text)
     return text
 
+# 2b. Restore final forms for display (reverse of normalize step)
+def restore_final_forms(text):
+    """Replace word-final כ מ נ פ צ with their final forms ך ם ן ף ץ."""
+    # Map: regular form -> final form
+    to_final = {'כ': 'ך', 'מ': 'ם', 'נ': 'ן', 'פ': 'ף', 'צ': 'ץ'}
+    # Replace at end of word: Hebrew letter followed by non-Hebrew or end of string
+    for regular, final in to_final.items():
+        text = re.sub(regular + r'(?=\s|[^\u05D0-\u05EA]|$)', final, text)
+    return text
+
+
 # 3. Non-Hebrew segment detection
 def detect_non_hebrew_segments(text):
     # Returns True if non-Hebrew (Latin, German) segments are detected

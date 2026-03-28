@@ -128,3 +128,94 @@ Stratified 200-text sample for annotation pilot:
 - Stratified by keyword score quartile and cluster diversity
 - 158 clusters represented
 - Saved to `data/pilot_sample.parquet`
+
+---
+
+## Phase B.2: 4-Model LLM Classification Pilot
+
+**Date:** 2026-03-28
+
+**Script:** `src/classify_pilot.py`
+
+**Models:** Claude Opus 4.6, Claude Sonnet 4.6, Gemini 2.5 Pro, Gemini 2.5 Flash (stable, not 3.x preview).
+
+Ran all 4 models on the 200-text pilot sample. Each model classifies: `is_polemic`, `confidence`, `polemic_type` (attack/defense/debate/satire/critique), `target`, `evidence`, `topic`. Texts truncated to 4,000 words for cost control.
+
+**Results:**
+
+| Model | Polemic Rate | Avg Confidence | Tier |
+|-------|-------------|---------------|------|
+| Claude Opus | 23.5% (47/200) | 0.87 | expensive |
+| Claude Sonnet | 24.1% (48/199) | 0.88 | cheap |
+| Gemini Pro | 70.0% (140/200) | 0.96 | expensive |
+| Gemini Flash | 69.0% (136/197) | 0.97 | cheap |
+
+**Inter-model agreement:**
+- Claude Opus vs Sonnet: 91.8% (within-family)
+- Gemini Pro vs Flash: 88.8% (within-family)
+- Cross-family: ~53% — massive divergence
+- All 4 agree polemic: 37 texts
+- All 4 agree not polemic: 49 texts
+- Expensive models disagree: 94 texts (priority for human review)
+- Full 4-model agreement: 43.9% (86/196)
+- Polemic type agreement (among unanimous polemic): 29.7%
+
+**Key finding:** Gemini models have a much broader definition of "polemic" than Claude. The dominant disagreement pattern is Gemini=polemic + Claude=not-polemic. Human review of the 94 disagreement cases will determine the correct threshold.
+
+**Output files:**
+| File | Description |
+|------|-------------|
+| `data/pilot_classifications.parquet` | 800 rows (200 texts × 4 models) |
+| `data/pilot_disagreements.parquet` | Agreement category per text |
+| `data/agreement_report.txt` | Full inter-model agreement analysis |
+
+**API errors:** 0. **Parse errors:** 4 (Gemini Flash, minor).
+
+---
+
+## Metadata Backfill
+
+**Date:** 2026-03-28
+
+**Script:** `src/backfill_metadata.py`
+
+Enriched `corpus.parquet` with metadata from source files that was not carried through during initial corpus construction:
+
+| Field | Coverage | Source |
+|-------|----------|--------|
+| newspaper | 23,444 (70%) | Press: HZF, MGD, HZT, HLB, HMZ |
+| author | 9,811 (29%) | E-geret: 100%, polemic candidates: 96.5%, press: 0% |
+| recipient | 2,359 (7%) | E-geret letters |
+| headline | 17,319 (52%) | Press articles |
+| intertextual_reference | 1,622 (5%) | Press articles (pre-annotated) |
+
+Top authors: Ahad Ha'am (456), Berl Katznelson (455), David Yellin (398), Bialik (354), Shadal (312), Y.L. Gordon (278).
+
+Corpus now has 15 columns (was 12).
+
+---
+
+## Reference Extraction (Pilot)
+
+**Date:** 2026-03-28
+
+**Script:** `src/extract_references.py`
+
+Two-layer intertextual reference extraction on pilot texts:
+
+**Layer 1 — Mechanical (all 200 texts):**
+- Newspaper name regex (13 newspapers + abbreviations): 6,128 hits
+- Attribution pattern matching (כתב/אמר + name): 829 hits
+- Footnote markers (↩ in Ben-Yehuda texts): 2 hits (low because footnote *content* needs LLM to parse)
+
+**Layer 2 — LLM/Sonnet (56 texts with 3+ polemic model votes):**
+- 562 categorized references (~10/text)
+- Categories: biblical (197), contemporary person (112), Talmudic (76), other/medieval (65), contemporary publication (46), contemporary text (44), scholarly (22)
+- Reference types: allusion (260), attribution (200), explicit citation (86), response_to (8), footnote (8)
+- The 8 `response_to` references are direct thread signals for C.2
+
+**Design decision:** Extract ALL reference types (not just contemporary/dialogical), categorize each. Biblical/Talmudic citations reveal rhetorical strategies — who marshals which sources in polemic arguments. This is a finding in its own right.
+
+**Ben-Yehuda footnote patterns:** 3,311/7,457 polemic candidate texts (44%) contain footnotes (↩ markers with `&nbsp;`). Many contain publication references ("נדפס בהמליצ"), editorial notes (הערת פב"י), and scholarly citations. Rich source for full-corpus extraction later.
+
+**Output:** `data/pilot_references.parquet` (7,521 rows). Displayed in Streamlit app with contemporary references highlighted and biblical/Talmudic in expandable section.

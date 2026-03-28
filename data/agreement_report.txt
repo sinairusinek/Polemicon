@@ -1,0 +1,143 @@
+======================================================================
+POLEMICON PILOT — INTER-MODEL AGREEMENT REPORT
+======================================================================
+Date: 2026-03-28 00:49
+Models: gemini_flash, gemini_pro, opus, sonnet
+Total texts: 200
+Texts with all 4 models: 196
+
+--- Per-Model Polemic Rate ---
+  Gemini Flash: 69.0% (136/197)
+  Gemini Pro: 70.0% (140/200)
+  Claude Opus: 23.5% (47/200)
+  Claude Sonnet: 24.1% (48/199)
+
+--- Agreement Categories ---
+  All 4 agree POLEMIC:     37
+  All 4 agree NOT polemic:  49
+  Expensive agree, cheap diverge:  16
+  Expensive models DISAGREE:        94 ← PRIORITY FOR REVIEW
+
+  Full agreement rate: 86/196 (43.9%)
+
+--- Pairwise Agreement (% same is_polemic) ---
+  Gemini Flash vs Gemini Pro: 88.8%
+  Gemini Flash vs Claude Opus: 54.1%
+  Gemini Flash vs Claude Sonnet: 55.1%
+  Gemini Pro vs Claude Opus: 52.0%
+  Gemini Pro vs Claude Sonnet: 53.1%
+  Claude Opus vs Claude Sonnet: 91.8%
+
+--- Polemic Type Agreement (texts all agree are polemic) ---
+  Type agreement rate: 29.7%
+
+--- Confidence Distribution ---
+  Gemini Flash: mean=0.97, median=1.00, min=0.75, max=1.00
+  Gemini Pro: mean=0.96, median=1.00, min=0.70, max=1.00
+  Claude Opus: mean=0.87, median=0.92, min=0.55, max=0.99
+  Claude Sonnet: mean=0.88, median=0.88, min=0.62, max=0.99
+
+--- Priority Review Queue (expensive models disagree) ---
+  bypc_1343:
+    Claude Opus: polemic=False, conf=0.92, type=none
+    Claude Sonnet: polemic=False, conf=0.85, type=none
+    Gemini Pro: polemic=True, conf=1.0, type=critique
+    Gemini Flash: polemic=True, conf=0.95, type=critique
+  bypc_1346:
+    Claude Opus: polemic=False, conf=0.9, type=none
+    Claude Sonnet: polemic=False, conf=0.85, type=none
+    Gemini Pro: polemic=True, conf=0.95, type=critique
+    Gemini Flash: polemic=True, conf=1.0, type=critique
+  bypc_1631:
+    Claude Opus: polemic=False, conf=0.82, type=none
+    Claude Sonnet: polemic=False, conf=0.82, type=none
+    Gemini Pro: polemic=True, conf=1.0, type=debate
+    Gemini Flash: polemic=True, conf=1.0, type=attack
+  bypc_1930:
+    Claude Opus: polemic=False, conf=0.9, type=none
+    Claude Sonnet: polemic=False, conf=0.82, type=none
+    Gemini Pro: polemic=True, conf=0.95, type=satire
+    Gemini Flash: polemic=True, conf=0.9, type=satire
+  bypc_2637:
+    Claude Opus: polemic=False, conf=0.92, type=none
+    Claude Sonnet: polemic=False, conf=0.92, type=none
+    Gemini Pro: polemic=True, conf=0.85, type=critique
+    Gemini Flash: polemic=False, conf=0.9, type=none
+  bypc_4125:
+    Claude Opus: polemic=False, conf=0.75, type=none
+    Claude Sonnet: polemic=True, conf=0.85, type=attack
+    Gemini Pro: polemic=True, conf=1.0, type=attack
+    Gemini Flash: polemic=True, conf=1.0, type=attack
+  bypc_4337:
+    Claude Opus: polemic=False, conf=0.88, type=none
+    Claude Sonnet: polemic=False, conf=0.9, type=none
+    Gemini Pro: polemic=True, conf=0.9, type=critique
+    Gemini Flash: polemic=True, conf=0.9, type=critique
+  bypc_4575:
+    Claude Opus: polemic=False, conf=0.82, type=none
+    Claude Sonnet: polemic=False, conf=0.82, type=none
+    Gemini Pro: polemic=True, conf=1.0, type=critique
+    Gemini Flash: polemic=True, conf=0.95, type=critique
+  bypc_459:
+    Claude Opus: polemic=False, conf=0.75, type=none
+    Claude Sonnet: polemic=False, conf=0.82, type=none
+    Gemini Pro: polemic=True, conf=1.0, type=critique
+    Gemini Flash: polemic=True, conf=0.9, type=critique
+  bypc_4751:
+    Claude Opus: polemic=False, conf=0.95, type=none
+    Claude Sonnet: polemic=False, conf=0.95, type=none
+    Gemini Pro: polemic=True, conf=0.95, type=critique
+    Gemini Flash: polemic=True, conf=1.0, type=critique
+  bypc_4838:
+    Claude Opus: polemic=False, conf=0.95, type=none
+    Claude Sonnet: polemic=False, conf=0.92, type=none
+    Gemini Pro: polemic=True, conf=0.9, type=defense
+    Gemini Flash: polemic=False, conf=1.0, type=none
+  bypc_4958:
+    Claude Opus: polemic=False, conf=0.88, type=none
+    Claude Sonnet: polemic=False, conf=0.88, type=none
+    Gemini Pro: polemic=True, conf=0.9, type=critique
+    Gemini Flash: polemic=True, conf=0.95, type=critique
+  bypc_4983:
+    Claude Opus: polemic=False, conf=0.72, type=none
+    Claude Sonnet: polemic=False, conf=0.82, type=none
+    Gemini Pro: polemic=True, conf=0.95, type=critique
+    Gemini Flash: polemic=True, conf=0.95, type=critique
+  bypc_5072:
+    Claude Opus: polemic=False, conf=0.95, type=none
+    Claude Sonnet: polemic=False, conf=0.95, type=none
+    Gemini Pro: polemic=True, conf=0.75, type=critique
+    Gemini Flash: polemic=True, conf=0.9, type=critique
+  bypc_5639:
+    Claude Opus: polemic=False, conf=0.92, type=none
+    Claude Sonnet: polemic=False, conf=0.85, type=none
+    Gemini Pro: polemic=True, conf=0.7, type=critique
+    Gemini Flash: polemic=True, conf=0.9, type=critique
+  bypc_5990:
+    Claude Opus: polemic=False, conf=0.82, type=none
+    Claude Sonnet: polemic=False, conf=0.82, type=none
+    Gemini Pro: polemic=True, conf=1.0, type=critique
+    Gemini Flash: polemic=True, conf=1.0, type=debate
+  bypc_6064:
+    Claude Opus: polemic=False, conf=0.82, type=none
+    Claude Sonnet: polemic=False, conf=0.85, type=none
+    Gemini Pro: polemic=True, conf=1.0, type=defense
+    Gemini Flash: polemic=True, conf=0.98, type=critique
+  bypc_6082:
+    Claude Opus: polemic=False, conf=0.82, type=none
+    Claude Sonnet: polemic=False, conf=0.82, type=none
+    Gemini Pro: polemic=True, conf=0.95, type=critique
+    Gemini Flash: polemic=True, conf=0.95, type=critique
+  bypc_781:
+    Claude Opus: polemic=False, conf=0.78, type=none
+    Claude Sonnet: polemic=False, conf=0.72, type=none
+    Gemini Pro: polemic=True, conf=1.0, type=debate
+    Gemini Flash: polemic=True, conf=0.95, type=critique
+  bypc_853:
+    Claude Opus: polemic=False, conf=0.88, type=none
+    Claude Sonnet: polemic=False, conf=0.82, type=none
+    Gemini Pro: polemic=True, conf=1.0, type=critique
+    Gemini Flash: polemic=True, conf=1.0, type=critique
+  ... and 74 more
+
+======================================================================
