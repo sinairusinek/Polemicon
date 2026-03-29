@@ -22,12 +22,6 @@ from cleaning import restore_final_forms
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
 
-# Debug: show resolved data path and available files (remove after confirming deployment)
-_resolved = os.path.abspath(DATA_DIR)
-_files = os.listdir(_resolved) if os.path.isdir(_resolved) else []
-st.sidebar.caption(f"Data dir: {_resolved}")
-st.sidebar.caption(f"Files: {', '.join(_files)}")
-
 
 @st.cache_data
 def load_pilot_sample():
