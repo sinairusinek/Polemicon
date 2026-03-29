@@ -54,30 +54,31 @@ def load_cluster_labels():
     return None
 
 
+@st.cache_data(ttl=3600)
 def load_classifications():
     path = os.path.join(DATA_DIR, "pilot_classifications.parquet")
     if os.path.exists(path):
         return pd.read_parquet(path)
-    st.warning(f"Classifications not found at {path}")
     return None
 
 
+@st.cache_data(ttl=3600)
 def load_disagreements():
     path = os.path.join(DATA_DIR, "pilot_disagreements.parquet")
     if os.path.exists(path):
         return pd.read_parquet(path)
-    st.warning(f"Disagreements not found at {path}")
     return None
 
 
+@st.cache_data(ttl=3600)
 def load_references():
     path = os.path.join(DATA_DIR, "pilot_references.parquet")
     if os.path.exists(path):
         return pd.read_parquet(path)
-    st.warning(f"References not found at {path}")
     return None
 
 
+@st.cache_data(ttl=3600)
 def load_vocab():
     path = os.path.join(DATA_DIR, "pilot_vocab.parquet")
     if os.path.exists(path):
@@ -91,7 +92,6 @@ def load_vocab():
             lambda x: json.loads(x) if pd.notna(x) else []
         )
         return vdf
-    st.warning(f"Vocab not found at {path}")
     return None
 
 
