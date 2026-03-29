@@ -29,7 +29,29 @@ def load_pilot_sample():
     if not os.path.exists(path):
         st.error("Pilot sample not found. Run src/sample_pilot.py first.")
         st.stop()
-    return pd.read_parquet(path)
+    pilot = pd.read_parquet(path)
+    # Merge full metadata from corpus
+    corpus_path = os.path.join(DATA_DIR, "..", "corpus.parquet")
+    if os.path.exists(corpus_path):
+        meta_cols = ["doc_id", "author", "recipient", "headline", "newspaper", "title"]
+        corpus_meta = pd.read_parquet(corpus_path, columns=meta_cols)
+        # Drop pilot's own author/title (incomplete), replace with corpus versions
+        pilot = pilot.drop(columns=["author", "title"], errors="ignore")
+        pilot = pilot.merge(corpus_meta, on="doc_id", how="left")
+    return pilot
+
+
+@st.cache_data
+def load_cluster_labels():
+    path = os.path.join(DATA_DIR, "cluster_labels.parquet")
+    if os.path.exists(path):
+        import json
+        cl = pd.read_parquet(path)
+        cl["top_terms_list"] = cl["top_terms"].apply(
+            lambda x: json.loads(x) if pd.notna(x) else []
+        )
+        return cl
+    return None
 
 
 @st.cache_data
@@ -83,6 +105,7 @@ clf_df = load_classifications()
 disagree_df = load_disagreements()
 refs_df = load_references()
 vocab_df = load_vocab()
+cluster_labels_df = load_cluster_labels()
 
 # --- Session state ---
 
@@ -214,16 +237,53 @@ if jump - 1 != st.session_state["current_idx"]:
 row = filtered.iloc[st.session_state["current_idx"]]
 doc_id = row["doc_id"]
 
-# Metadata bar
-meta_cols = st.columns(5)
-meta_cols[0].metric("Source", row["source"])
-meta_cols[1].metric("Year", int(row["year"]) if pd.notna(row.get("year")) else "N/A")
-meta_cols[2].metric("Keyword Score", f"{row['polemic_score']:.3f}")
+# Metadata bar — Row 1: key identifiers
+row1 = st.columns(5)
+row1[0].metric("Source", row["source"])
+row1[1].metric("Year", int(row["year"]) if pd.notna(row.get("year")) else "N/A")
+row1[2].metric("Keyword Score", f"{row['polemic_score']:.3f}")
 if "cluster_id" in row and pd.notna(row.get("cluster_id")):
-    meta_cols[3].metric("Cluster", int(row["cluster_id"]))
+    row1[3].metric("Cluster", int(row["cluster_id"]))
 else:
-    meta_cols[3].metric("Cluster", "N/A")
-meta_cols[4].metric("Doc ID", doc_id)
+    row1[3].metric("Cluster", "N/A")
+row1[4].metric("Doc ID", doc_id)
+
+# Metadata bar — Row 2: conditional fields (only non-null)
+row2_items = []
+if pd.notna(row.get("author")):
+    row2_items.append(("Author", restore_final_forms(str(row["author"]))))
+if pd.notna(row.get("newspaper")):
+    row2_items.append(("Newspaper", restore_final_forms(str(row["newspaper"]))))
+if pd.notna(row.get("headline")):
+    row2_items.append(("Headline", restore_final_forms(str(row["headline"]))))
+if pd.notna(row.get("title")):
+    title_display = restore_final_forms(str(row["title"]))
+    # Add Ben-Yehuda link for polemic_candidates
+    if doc_id.startswith("bypc_"):
+        byid = doc_id.replace("bypc_", "")
+        title_display += f' <a href="https://benyehuda.org/read/{byid}" target="_blank">🔗</a>'
+    row2_items.append(("Title", title_display))
+if pd.notna(row.get("recipient")):
+    row2_items.append(("Recipient", restore_final_forms(str(row["recipient"]))))
+
+if row2_items:
+    row2 = st.columns(len(row2_items))
+    for i, (label, value) in enumerate(row2_items):
+        row2[i].markdown(
+            f'<div dir="rtl" style="text-align:right;">'
+            f'<small style="color:#888;">{label}</small><br>'
+            f'<b>{value}</b></div>',
+            unsafe_allow_html=True,
+        )
+
+# Cluster top terms
+if cluster_labels_df is not None and pd.notna(row.get("cluster_id")):
+    cid = int(row["cluster_id"])
+    cl_row = cluster_labels_df[cluster_labels_df["cluster_id"] == cid]
+    if len(cl_row) > 0:
+        terms = cl_row.iloc[0]["top_terms_list"]
+        displayed = ", ".join(restore_final_forms(t) for t in terms[:7])
+        st.caption(f"Cluster {cid} top terms: {displayed}")
 
 # Text display
 st.subheader("Text")

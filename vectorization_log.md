@@ -219,3 +219,35 @@ Two-layer intertextual reference extraction on pilot texts:
 **Ben-Yehuda footnote patterns:** 3,311/7,457 polemic candidate texts (44%) contain footnotes (↩ markers with `&nbsp;`). Many contain publication references ("נדפס בהמליצ"), editorial notes (הערת פב"י), and scholarly citations. Rich source for full-corpus extraction later.
 
 **Output:** `data/pilot_references.parquet` (7,521 rows). Displayed in Streamlit app with contemporary references highlighted and biblical/Talmudic in expandable section.
+
+---
+
+## Cluster Characterization
+
+**Date:** 2026-03-29
+
+**Script:** `src/cluster_top_terms.py`
+
+For each of 409 clusters, computed top 10 distinctive TF-IDF terms using the word-level TF-IDF matrix (30K features). "Distinctive" = cluster mean TF-IDF minus corpus-wide mean — terms that characterize this cluster relative to the whole corpus, not just frequent terms.
+
+**Output:** `data/cluster_labels.parquet` (409 rows)
+- `cluster_id`, `top_terms` (JSON list of 10 terms), `n_texts`, `mean_polemic_score` (keyword baseline, not a classification label)
+
+**Note:** `mean_polemic_score` is the keyword baseline score (Phase B.3), not a human or LLM polemic label. It reflects lexicon density, not true polemic classification.
+
+---
+
+## Cluster Visualization
+
+**Date:** 2026-03-29
+
+**Page:** `src/pages/Cluster_Map.py`
+
+Interactive UMAP scatter plot of all 33,513 corpus texts using Plotly Scattergl (WebGL). Added as a second Streamlit page.
+
+**Features:**
+- Color modes: cluster membership, source (press/egeret/polemic_candidates), keyword score heatmap
+- Cluster selector: highlights selected cluster in red, shows detail panel with top terms, size, source breakdown
+- Source filter to isolate one dataset
+- Sortable table of all 409 clusters with top 5 terms each
+- All Hebrew terms displayed with `restore_final_forms()`

@@ -1,6 +1,6 @@
 # Polemicon: Hebrew Polemic Corpus Analysis Pipeline
 
-## Status Update (2026-03-28)
+## Status Update (2026-03-29)
 
 ### Completed
 - **Phase A (Corpus + Vectorization):** TF-IDF vectorization (char 3-5 grams + word 1-2 grams, 50K+30K features), TruncatedSVD to 300 dims, FAISS index. Outlier bypc_5539 (317K-word academic book) dropped. 33,513 texts.
@@ -15,16 +15,17 @@
 - **Vocab extraction (2026-03-29):** Sonnet re-ran on 94 disagreement texts with prompt asking for 3-5 polemic marker words/phrases per text. 460 markers extracted (459 unique). Stored in `data/pilot_vocab.parquet`. Displayed in Streamlit app with per-marker approve/reject buttons for reviewer curation.
 - **Reviewer comments (2026-03-29):** Free-text comment field added to Streamlit annotation panel. Comments stored per doc_id, exported in annotations CSV.
 - **Keyword export updated (2026-03-29):** CSV export now includes human keyword suggestions + model-suggested vocabulary with approved/rejected status.
+- **Metadata display in Streamlit (2026-03-29):** Full metadata (author, recipient, headline, newspaper, title) merged from `corpus.parquet` into pilot texts at load time. Two-row metadata bar shows only non-null fields per text. Ben-Yehuda Project links generated for `bypc_*` doc IDs.
+- **Cluster characterization (2026-03-29):** Top 10 distinctive TF-IDF terms per cluster computed (cluster mean minus corpus mean). 409 clusters labeled in `data/cluster_labels.parquet`. Terms displayed in annotation app metadata bar.
+- **Cluster visualization (2026-03-29):** Interactive UMAP scatter plot page (`src/pages/Cluster_Map.py`) showing all 33,513 texts. Color by cluster/source/keyword score. Cluster selector highlights points and shows top terms, size, source breakdown. Sortable table of all 409 clusters.
 
-### Next: Metadata display + cluster characterization
-- **Priority 1:** Display full metadata (author, recipient, headline, newspaper, title, Ben-Yehuda link) for all 200 pilot texts in Streamlit. Data exists in `corpus.parquet` but not yet joined into the app.
-- **Priority 2:** Cluster characterization — extract top 10 distinctive TF-IDF terms per cluster from `word_tfidf.npz`, save to `data/cluster_labels.parquet`, display in app. Optional: Sonnet-generated topic labels for top 20 clusters.
-- **Priority 3:** Researcher reviews the 94 disagreement cases (now with vocab markers and comments) to establish gold labels.
-- **Priority 4:** Based on review, decide model selection for 2K calibration run.
+### Next: Human review + calibration
+- **Priority 1:** Researcher reviews the 94 disagreement cases (now with vocab markers, metadata, cluster terms, and comments) to establish gold labels.
+- **Priority 2:** Based on review, decide model selection for 2K calibration run.
 - **After review:** Phase B.2 calibration run (2,000 texts) with the chosen model(s).
+- **Optional:** Sonnet-generated topic labels for top 20 clusters (beyond keyword-based labels).
 
 ### Deferred
-- Clustering visualization page in Streamlit (interactive UMAP scatter plot)
 - Dense embeddings (Tier 2/3) — only if TF-IDF clustering proves insufficient
 - Phase C.2 (thread detection) — approach discussed: tiered edge signals (strong/medium/weak), expect loose topical clusters with partial name/vocab overlap rather than strict reply chains. Will be more effective after polemic labels are established.
 - Full-corpus reference extraction — current approach validated on 56 polemic pilot texts; scale to all polemic texts after B.4 classification.
