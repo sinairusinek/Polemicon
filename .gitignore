@@ -22,6 +22,15 @@
 # Allow annotation data for Streamlit Cloud
 !data/
 !data/*.parquet
+!data/compact_memory/
+!data/compact_memory/*.parquet
+!data/compact_memory/*.json
+!data/compact_memory/*.md
+!data/compact_memory/extracted/
+!data/compact_memory/extracted/*.parquet
+# Exclude raw PDFs (3.1 GB)
+data/compact_memory/raw/
+data/compact_memory/sample_*.pdf
 # Ignore Jupyter notebook checkpoints
 .ipynb_checkpoints/
 # Ignore Python cache and environment files

@@ -28,8 +28,11 @@ def main():
     corpus = pd.read_parquet("corpus.parquet")
     print(f"  {len(corpus)} texts")
 
-    # Extract numeric index from doc_id
-    corpus["_src_idx"] = corpus["doc_id"].str.replace(r"^[a-z]+_", "", regex=True).astype(int)
+    # Extract numeric index from doc_id (skip compact_memory — no source file to backfill from)
+    corpus["_src_idx"] = pd.to_numeric(
+        corpus["doc_id"].str.replace(r"^[a-z]+_", "", regex=True),
+        errors="coerce"
+    )
 
     # --- Press ---
     print("\nBackfilling press metadata...")

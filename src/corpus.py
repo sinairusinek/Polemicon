@@ -2,14 +2,14 @@
 corpus.py - Build unified corpus for the Polemicon project
 
 - Overlap window: 1862-1900 (extended)
-- Unifies press, e-geret, and polemic candidates datasets
+- Unifies press, e-geret, polemic candidates, and Compact Memory datasets
 - Applies cleaning and filtering
 - Recovers dates for polemic candidates via Ben-Yehuda metadata
 - Outputs corpus.parquet
 """
 import pandas as pd
 import os
-from loaders import load_press_articles, load_egeret_letters, load_polemic_candidates
+from loaders import load_press_articles, load_egeret_letters, load_polemic_candidates, load_compact_memory
 from cleaning import remove_by_footer, normalize_hebrew, detect_non_hebrew_segments, compute_quality_score, is_long_enough
 
 # Paths
@@ -17,6 +17,7 @@ PRESS_PATH = 'MGD-LBN-MLZ-HZF-HZTfull2021-08-14-(1)-tsv.csv'
 EGERET_PATH = 'e-geret-batch-export.tsv'
 POLEMIC_PATH = 'Ben-Yehuda-Project-polemic-candidates.csv'
 BY_METADATA_PATH = 'benyehuda-full-metadata.tsv'
+CM_PATH = 'data/compact_memory/extracted/cm_articles.parquet'
 
 # Overlap window (enlarged)
 START_YEAR = 1850
@@ -67,6 +68,11 @@ def main():
     # Recover dates for candidates
     candidates = recover_candidate_dates(candidates, by_meta)
 
+    # Load Compact Memory articles (already cleaned and filtered in extract.py)
+    cm = load_compact_memory(CM_PATH)
+    # Text is already normalized; just ensure consistent cleaning
+    cm['text'] = cm['text'].apply(clean_text)
+
     # Build unified DataFrame
     def get_year(date):
         try:
@@ -84,28 +90,35 @@ def main():
     press['in_overlap'] = press['year'].between(START_YEAR, END_YEAR, inclusive='both')
     egeret['in_overlap'] = egeret['year'].between(START_YEAR, END_YEAR, inclusive='both')
     candidates['in_overlap'] = candidates['year'].between(START_YEAR, END_YEAR, inclusive='both')
+    # CM in_overlap already set in extract.py, but recalculate for consistency
+    cm['in_overlap'] = cm['year'].between(START_YEAR, END_YEAR, inclusive='both')
 
     press['doc_id'] = 'press_' + press.index.astype(str)
     egeret['doc_id'] = 'egeret_' + egeret.index.astype(str)
     candidates['doc_id'] = 'bypc_' + candidates.index.astype(str)
+    # CM doc_ids already set in extract.py (cm_<periodical>_<vol>_<page>)
 
     press['source'] = 'press'
     egeret['source'] = 'egeret'
     candidates['source'] = 'polemic_candidates'
+    # CM source already set to 'compact_memory' in extract.py
 
     # Standardize columns
     columns = ['doc_id', 'source', 'text', 'date', 'year', 'author', 'title', 'genre', 'newspaper', 'quality_score', 'in_overlap', 'אזכור מכ״ע']
     press['אזכור מכ״ע'] = None
     egeret['אזכור מכ״ע'] = None
     candidates['newspaper'] = None
+    cm['אזכור מכ״ע'] = None
 
     press = press.reindex(columns=columns, fill_value=None)
     egeret = egeret.reindex(columns=columns, fill_value=None)
     candidates = candidates.reindex(columns=columns, fill_value=None)
+    cm = cm.reindex(columns=columns, fill_value=None)
 
-    corpus = pd.concat([press, egeret, candidates], ignore_index=True)
+    corpus = pd.concat([press, egeret, candidates, cm], ignore_index=True)
     corpus.to_parquet('corpus.parquet', index=False)
     print(f'Unified corpus saved: {len(corpus)} texts')
+    print(f'  Sources: {corpus["source"].value_counts().to_dict()}')
 
 if __name__ == '__main__':
     main()

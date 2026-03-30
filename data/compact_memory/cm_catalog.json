@@ -1,0 +1,1040 @@
+{
+  "4785731": {
+    "cm_id": "4785731",
+    "title": "Kokhve Yitsḥaḳ",
+    "hebrew": "כוכבי יצחק",
+    "dates": "1845-1873",
+    "place": "Wien",
+    "type": "Literary almanac",
+    "date_filter": [
+      1850,
+      1900
+    ],
+    "status": "ok",
+    "mods_dates": [
+      "1845",
+      "1.1845 - 37.1873",
+      "2014"
+    ],
+    "struct_map_summary": {
+      "total_divisions": 25,
+      "page_count": 0,
+      "issue_count": 24,
+      "div_types": [
+        "newspaper",
+        "volume"
+      ]
+    },
+    "file_groups": {
+      "TEASER": {
+        "count": 24,
+        "sample_urls": [
+          "https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4785735",
+          "https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4787955",
+          "https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4789297"
+        ]
+      }
+    },
+    "top_level_divisions": [
+      {
+        "map_type": "LOGICAL",
+        "type": "newspaper",
+        "label": "Kokhve Yitsḥaḳ",
+        "order": "194302",
+        "id": "log4785731",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "1 (1845)",
+        "order": "2",
+        "id": "log6731297",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "2 (1846)",
+        "order": "5",
+        "id": "log6613229",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "3 (1847)",
+        "order": "12",
+        "id": "log6613232",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "4 (1848)",
+        "order": "17",
+        "id": "log6613241",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "5 (1850)",
+        "order": "19",
+        "id": "log4786146",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "6 (1851)",
+        "order": "20",
+        "id": "log4786244",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "7 (1852)",
+        "order": "22",
+        "id": "log4786440",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "8 (1853)",
+        "order": "24",
+        "id": "log4786642",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "9 (1854)",
+        "order": "25",
+        "id": "log4786740",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "10 (1855)",
+        "order": "27",
+        "id": "log4786934",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "11 (1856)",
+        "order": "28",
+        "id": "log4787016",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "12 (1857)",
+        "order": "30",
+        "id": "log4787198",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "13 (1858)",
+        "order": "31",
+        "id": "log4787280",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "14 (1860)",
+        "order": "32",
+        "id": "log4787378",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "15 (1861)",
+        "order": "33",
+        "id": "log4787506",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "16 (1862)",
+        "order": "34",
+        "id": "log4787607",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "17 (1863)",
+        "order": "36",
+        "id": "log4787844",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "18 (1864)",
+        "order": "44",
+        "id": "log4788047",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "19 (1865)",
+        "order": "45",
+        "id": "log4788177",
+        "file_pointer_count": 1
+      }
+    ]
+  },
+  "9582285": {
+    "cm_id": "9582285",
+    "title": "Ōṣar neḥmād",
+    "hebrew": "אוצר נחמד",
+    "dates": "1856-1863",
+    "place": "Wien",
+    "type": "Letters on faith/wisdom",
+    "date_filter": [
+      1850,
+      1900
+    ],
+    "status": "ok",
+    "mods_dates": [
+      "Im Digitalisierungsprozess",
+      "1856-1863",
+      "1856",
+      "1863",
+      "2021",
+      "2021"
+    ],
+    "struct_map_summary": {
+      "total_divisions": 5,
+      "page_count": 0,
+      "issue_count": 4,
+      "div_types": [
+        "newspaper",
+        "volume"
+      ]
+    },
+    "file_groups": {
+      "TEASER": {
+        "count": 4,
+        "sample_urls": [
+          "https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/9591224",
+          "https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/9591415",
+          "https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/9591676"
+        ]
+      }
+    },
+    "top_level_divisions": [
+      {
+        "map_type": "LOGICAL",
+        "type": "newspaper",
+        "label": "Ôṣar neḥmād",
+        "order": "199919",
+        "id": "log9582285",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "1 (1856)",
+        "order": "2",
+        "id": "log9592532",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "2 (1857)",
+        "order": "3",
+        "id": "log9591414",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "3 (1860)",
+        "order": "4",
+        "id": "log9591674",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "4 (1863)",
+        "order": "5",
+        "id": "log9591873",
+        "file_pointer_count": 1
+      }
+    ]
+  },
+  "3769475": {
+    "cm_id": "3769475",
+    "title": "Jeschurun (Hebr. Abth.)",
+    "hebrew": "ישורון",
+    "dates": "1857-1878",
+    "place": "Lemberg",
+    "type": "Hebrew academic journal",
+    "date_filter": [
+      1850,
+      1900
+    ],
+    "status": "ok",
+    "mods_dates": [
+      "1.1857 - 9.1878",
+      "1857",
+      "2008",
+      "2013"
+    ],
+    "struct_map_summary": {
+      "total_divisions": 7,
+      "page_count": 0,
+      "issue_count": 6,
+      "div_types": [
+        "newspaper",
+        "volume"
+      ]
+    },
+    "file_groups": {
+      "TEASER": {
+        "count": 6,
+        "sample_urls": [
+          "https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/3768404",
+          "https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/3768980",
+          "https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/3768725"
+        ]
+      }
+    },
+    "top_level_divisions": [
+      {
+        "map_type": "LOGICAL",
+        "type": "newspaper",
+        "label": "Jeschurun",
+        "order": "199345",
+        "id": "log3769475",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "(1856/57)",
+        "order": "1",
+        "id": "log9763195",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "Zweiter Jahrgang. (1857/8)",
+        "order": "5",
+        "id": "log9763194",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "שנה שלישית ה' תרי''ט",
+        "order": "6",
+        "id": "log9763202",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "שנה רביעית. (1864)",
+        "order": "7",
+        "id": "log9768225",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "שנה חמישית. (1865)",
+        "order": "8",
+        "id": "log9768230",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "כרך שביעי (1871)",
+        "order": "9",
+        "id": "log9802321",
+        "file_pointer_count": 1
+      }
+    ]
+  },
+  "8003959": {
+    "cm_id": "8003959",
+    "title": "Pardes",
+    "hebrew": "פרדס",
+    "dates": "1892-1896",
+    "place": "Odessa",
+    "type": "Literary collection",
+    "date_filter": [
+      1850,
+      1900
+    ],
+    "status": "ok",
+    "mods_dates": [
+      "1892-1896",
+      "2017",
+      "2017",
+      "2017"
+    ],
+    "struct_map_summary": {
+      "total_divisions": 4,
+      "page_count": 0,
+      "issue_count": 3,
+      "div_types": [
+        "newspaper",
+        "volume"
+      ]
+    },
+    "file_groups": {
+      "TEASER": {
+        "count": 4,
+        "sample_urls": [
+          "https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/8004582",
+          "https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/8003966",
+          "https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/8004272"
+        ]
+      }
+    },
+    "top_level_divisions": [
+      {
+        "map_type": "LOGICAL",
+        "type": "newspaper",
+        "label": "Pardes",
+        "order": "12412",
+        "id": "log8003959",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "1 (1892)",
+        "order": "3",
+        "id": "log8003960",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "2 (1894)",
+        "order": "4",
+        "id": "log8004266",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "3 (1896)",
+        "order": "5",
+        "id": "log8004574",
+        "file_pointer_count": 1
+      }
+    ]
+  },
+  "10719318": {
+    "cm_id": "10719318",
+    "title": "Aḥiasaf",
+    "hebrew": "אחיאסף",
+    "dates": "1893-1924",
+    "place": "Warsaw",
+    "type": "Literary almanac",
+    "date_filter": [
+      1850,
+      1900
+    ],
+    "status": "ok",
+    "mods_dates": [
+      "No. 1 (1893/1894)-[No. 13 (1922/1923)] [?]",
+      "1893-1924",
+      "2019",
+      "2019"
+    ],
+    "struct_map_summary": {
+      "total_divisions": 14,
+      "page_count": 0,
+      "issue_count": 13,
+      "div_types": [
+        "newspaper",
+        "volume"
+      ]
+    },
+    "file_groups": {
+      "TEASER": {
+        "count": 13,
+        "sample_urls": [
+          "https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/10748537",
+          "https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/10748790",
+          "https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/10749208"
+        ]
+      }
+    },
+    "top_level_divisions": [
+      {
+        "map_type": "LOGICAL",
+        "type": "newspaper",
+        "label": "Aḥiasaf",
+        "order": "208855",
+        "id": "log10719318",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "1 (1893/4)",
+        "order": "8",
+        "id": "log10749702",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "2 (1894/5)",
+        "order": "9",
+        "id": "log10749703",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "3 (1895/6)",
+        "order": "10",
+        "id": "log10749704",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "4 (1896/7)",
+        "order": "11",
+        "id": "log10751474",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "5 (1897/8)",
+        "order": "12",
+        "id": "log10751475",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "6 (1898/9)",
+        "order": "14",
+        "id": "log10754472",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "7 (1899/0)",
+        "order": "15",
+        "id": "log10761479",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "8 (1900/1)",
+        "order": "16",
+        "id": "log10761480",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "9 (1901/2)",
+        "order": "17",
+        "id": "log10761481",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "10 (1902/3)",
+        "order": "18",
+        "id": "log10761488",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "11 (1903/4)",
+        "order": "19",
+        "id": "log10772218",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "12 (1904/5)",
+        "order": "20",
+        "id": "log10772223",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "13 (1922/3)",
+        "order": "21",
+        "id": "log10772228",
+        "file_pointer_count": 1
+      }
+    ]
+  },
+  "4789469": {
+    "cm_id": "4789469",
+    "title": "Luaḥ erets Yiśraʾel",
+    "hebrew": "לוח ארץ ישראל",
+    "dates": "1895-1916",
+    "place": "Jerusalem",
+    "type": "Practical+literary almanac",
+    "date_filter": [
+      1850,
+      1900
+    ],
+    "status": "ok",
+    "mods_dates": [
+      "1.1895 - 21.1916",
+      "1895",
+      "2014"
+    ],
+    "struct_map_summary": {
+      "total_divisions": 21,
+      "page_count": 0,
+      "issue_count": 20,
+      "div_types": [
+        "newspaper",
+        "volume"
+      ]
+    },
+    "file_groups": {
+      "TEASER": {
+        "count": 20,
+        "sample_urls": [
+          "https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4789474",
+          "https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4792330",
+          "https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4792714"
+        ]
+      }
+    },
+    "top_level_divisions": [
+      {
+        "map_type": "LOGICAL",
+        "type": "newspaper",
+        "label": "Luaḥ erets Yiśraʾel",
+        "order": "194315",
+        "id": "log4789469",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "שנת התרנ״ו - שנה א׳ - 1895",
+        "order": "5",
+        "id": "log6446741",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "שנת התרנ״ז - שנה שניה - 1896",
+        "order": "7",
+        "id": "log6446785",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "שנת התרנ״ח - שנה שלישית - 1897",
+        "order": "8",
+        "id": "log6448698",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "שנת התרנ״ט - שנה רביעית - 1898",
+        "order": "9",
+        "id": "log6448699",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "שנת התר״ס - שנה חמישית - 1899",
+        "order": "10",
+        "id": "log6448701",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "שנת התרס״א - שנה ששית - 1900",
+        "order": "11",
+        "id": "log6448702",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "שנת התרס״ב - שנה שביעית - 1901",
+        "order": "12",
+        "id": "log6448703",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "שנת התרס״ג - שנה שמינית - 1902",
+        "order": "13",
+        "id": "log6448705",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "שנת התרס״ד - שנה תשיעית - 1903",
+        "order": "14",
+        "id": "log6448706",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "שנת התרס״ה - שנה עשירית - 1904",
+        "order": "15",
+        "id": "log6446748",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "שנת התרס״ו - שנה אחד עשרה - 1905",
+        "order": "16",
+        "id": "log6446754",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "שנת התרס״ז - שנה שתיים עשרה - 1906",
+        "order": "17",
+        "id": "log6446756",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "שנת התרס״ח - שנה שלש עשרה - 1907",
+        "order": "18",
+        "id": "log6446767",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "שנת התרס״ט - שנה ארבע עשרה - 1908",
+        "order": "19",
+        "id": "log6446769",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "שנת התר״ע - שנה חמש עשרה - 1909",
+        "order": "20",
+        "id": "log6446779",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "שנת התרע״א - שנה שש עשרה - 1910",
+        "order": "21",
+        "id": "log6446781",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "שנת התרע״ב - שנה שבע עשרה - 1911",
+        "order": "22",
+        "id": "log6446782",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "שנת התרע״ג - שנה שמונה עשרה - 1912",
+        "order": "23",
+        "id": "log6448710",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "שנת התרע״ד - שנה תשע עשרה - 1913",
+        "order": "25",
+        "id": "log6446784",
+        "file_pointer_count": 1
+      }
+    ]
+  },
+  "3773345": {
+    "cm_id": "3773345",
+    "title": "Ha-Eshkol",
+    "hebrew": "האשכול",
+    "dates": "1898-1913",
+    "place": "Krakau",
+    "type": "Literary/scientific",
+    "date_filter": [
+      1850,
+      1900
+    ],
+    "status": "ok",
+    "mods_dates": [
+      "1898-1913",
+      "1898",
+      "1913",
+      "2021",
+      "2021"
+    ],
+    "struct_map_summary": {
+      "total_divisions": 8,
+      "page_count": 0,
+      "issue_count": 7,
+      "div_types": [
+        "newspaper",
+        "volume"
+      ]
+    },
+    "file_groups": {
+      "TEASER": {
+        "count": 7,
+        "sample_urls": [
+          "https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/3773349",
+          "https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/3773634",
+          "https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/3773935"
+        ]
+      }
+    },
+    "top_level_divisions": [
+      {
+        "map_type": "LOGICAL",
+        "type": "newspaper",
+        "label": "Ha- Eshkol",
+        "order": "199300",
+        "id": "log3773345",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "האשכול. שנה ראשונה (1898)",
+        "order": "1",
+        "id": "log5103602",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "האשכול. כרך שני (1899)",
+        "order": "2",
+        "id": "log5103604",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "האשכול. כרך שלישי (1900)",
+        "order": "3",
+        "id": "log5103612",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "האשכול. כרך רביעי (1902)",
+        "order": "4",
+        "id": "log5103626",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "האשכול. כרך חמישי (1905)",
+        "order": "5",
+        "id": "log5103628",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "האשכול. כרך ששי (1909)",
+        "order": "9",
+        "id": "log5103630",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "האשכול. כרך שביעי (1913)",
+        "order": "10",
+        "id": "log5103632",
+        "file_pointer_count": 1
+      }
+    ]
+  },
+  "9582265": {
+    "cm_id": "9582265",
+    "title": "Ha-Meʾasef",
+    "hebrew": "המאסף",
+    "dates": "1783-1811",
+    "place": "Berlin/Breslau/Königsberg",
+    "type": "First Hebrew Haskalah journal",
+    "date_filter": null,
+    "status": "ok",
+    "mods_dates": [
+      "1783-1811",
+      "1784",
+      "2008",
+      "2013"
+    ],
+    "struct_map_summary": {
+      "total_divisions": 12,
+      "page_count": 0,
+      "issue_count": 11,
+      "div_types": [
+        "newspaper",
+        "volume"
+      ]
+    },
+    "file_groups": {
+      "TEASER": {
+        "count": 12,
+        "sample_urls": [
+          "https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/9593862",
+          "https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/9593297",
+          "https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/9594064"
+        ]
+      }
+    },
+    "top_level_divisions": [
+      {
+        "map_type": "LOGICAL",
+        "type": "newspaper",
+        "label": "Ha- Meʾasef",
+        "order": "199916",
+        "id": "log9582265",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "תקמד (1783-1784) (1783)",
+        "order": "8",
+        "id": "log9593291",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "תקמה (1784-1785) (1785)",
+        "order": "9",
+        "id": "log9593580",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "(1785-1786) תקמו (1785)",
+        "order": "10",
+        "id": "log9593920",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "(1787-1788) תקמח (1787)",
+        "order": "11",
+        "id": "log9594190",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "(1788-1789) תקמט (1788)",
+        "order": "12",
+        "id": "log9594708",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "(1789-1790) תקן (1789)",
+        "order": "13",
+        "id": "log9595255",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "כרך השביעי (1794) (1794)",
+        "order": "14",
+        "id": "log10194166",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "כרך השביעי (1797) (1797)",
+        "order": "15",
+        "id": "log9595700",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "(1808-1809) תקסט (1808)",
+        "order": "16",
+        "id": "log9596150",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "(1809-1810) תקע (1809)",
+        "order": "18",
+        "id": "log9596590",
+        "file_pointer_count": 1
+      },
+      {
+        "map_type": "LOGICAL",
+        "type": "volume",
+        "label": "(1810-1811) תקעא (1810)",
+        "order": "19",
+        "id": "log9597015",
+        "file_pointer_count": 1
+      }
+    ]
+  }
+}

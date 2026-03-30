@@ -5,6 +5,7 @@ Handles loading of:
 - Press articles (CSV, large text fields)
 - E-Geret letters (TSV, BOM-encoded)
 - Polemic candidates (CSV, sparse dates)
+- Compact Memory articles (parquet, ToC-segmented)
 """
 import pandas as pd
 import csv
@@ -23,6 +24,10 @@ def load_egeret_letters(path):
 # Loader for Polemic candidates
 def load_polemic_candidates(path):
     return pd.read_csv(path)
+
+# Loader for Compact Memory articles
+def load_compact_memory(path='data/compact_memory/extracted/cm_articles.parquet'):
+    return pd.read_parquet(path)
 
 # Example usage (uncomment to test)
 # press_df = load_press_articles('MGD-LBN-MLZ-HZF-HZTfull2021-08-14-(1)-tsv.csv')
