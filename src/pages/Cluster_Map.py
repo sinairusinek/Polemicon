@@ -85,7 +85,7 @@ else:
 point_size = st.sidebar.slider("Point size", 1, 8, 2)
 
 # Color by
-color_by_options = ["Cluster", "Source", "Polemic score"]
+color_by_options = ["Cluster", "Source", "Initial vocab score"]
 if calib is not None:
     color_by_options.append("Calibration labels")
 color_by = st.sidebar.radio("Color by", color_by_options)
@@ -150,7 +150,7 @@ elif color_by == "Source":
             name=f"{src} ({len(sub):,})",
         ))
 
-elif color_by == "Polemic score":
+elif color_by == "Initial vocab score":
     fig.add_trace(go.Scatter(
         x=plot_clustered["umap_x"],
         y=plot_clustered["umap_y"],
@@ -163,7 +163,7 @@ elif color_by == "Polemic score":
             colorbar=dict(title="Score"),
         ),
         text=plot_clustered.apply(
-            lambda r: f"{r['doc_id']}<br>cluster {int(r['cluster_id'])}<br>score {r['polemic_score']:.3f}",
+            lambda r: f"{r['doc_id']}<br>cluster {int(r['cluster_id'])}<br>vocab score {r['polemic_score']:.3f}",
             axis=1,
         ),
         hoverinfo="text",
@@ -261,7 +261,7 @@ if selected_cid is not None and cl is not None:
 
         cols = st.columns(3)
         cols[0].metric("Texts", info["n_texts"])
-        cols[1].metric("Mean polemic score", f"{info['mean_polemic_score']:.3f}")
+        cols[1].metric("Mean initial vocab score", f"{info['mean_polemic_score']:.3f}")
 
         c_sources = ca[ca["cluster_id"] == selected_cid]["source"].value_counts()
         cols[2].metric("Sources", ", ".join(f"{s}: {n}" for s, n in c_sources.items()))

@@ -502,7 +502,7 @@ doc_id = row["doc_id"]
 row1 = st.columns(5)
 row1[0].metric("Source", row["source"])
 row1[1].metric("Year", int(row["year"]) if pd.notna(row.get("year")) else "N/A")
-row1[2].metric("Keyword Score", f"{row['polemic_score']:.3f}")
+row1[2].metric("Initial vocab score", f"{row['polemic_score']:.3f}")
 if "cluster_id" in row and pd.notna(row.get("cluster_id")):
     row1[3].metric("Cluster", int(row["cluster_id"]))
 else:
