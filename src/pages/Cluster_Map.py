@@ -170,28 +170,28 @@ elif color_by == "Polemic score":
         name=f"Clustered ({len(plot_clustered):,})",
     ))
 
-else:  # Calibration labels
-    # Unlabeled points in muted grey first
-    labeled_ids = set(calib["doc_id"])
-    unlabeled = plot_clustered[~plot_clustered["doc_id"].isin(labeled_ids)]
+else:  # Calibration labels — polemic types highlighted, everything else grey
+    merged = plot_clustered.merge(calib, on="doc_id", how="left")
+    background = merged[merged["polemic_label"].isna() | (merged["polemic_label"] == "non-polemic")]
     fig.add_trace(go.Scatter(
-        x=unlabeled["umap_x"],
-        y=unlabeled["umap_y"],
+        x=background["umap_x"],
+        y=background["umap_y"],
         mode="markers",
         marker=dict(size=point_size, color="#cccccc", opacity=0.25),
-        text=unlabeled["doc_id"],
+        text=background.apply(
+            lambda r: f"{r['doc_id']}<br>{'non-polemic' if pd.notna(r['polemic_label']) else 'unlabeled'}",
+            axis=1,
+        ),
         hoverinfo="text",
-        name=f"Unlabeled ({len(unlabeled):,})",
+        name=f"Non-polemic / unlabeled ({len(background):,})",
     ))
 
-    label_colors = {
-        "non-polemic": "#4575b4",
-        "implicit polemic": "#fee090",
-        "explicit polemic": "#d73027",
-        "meta-polemic (descriptive)": "#74add1",
+    polemic_colors = {
+        "implicit polemic": "#f4a261",
+        "explicit polemic": "#e63946",
+        "meta-polemic (descriptive)": "#a8dadc",
     }
-    merged = plot_clustered.merge(calib, on="doc_id", how="inner")
-    for label in ["non-polemic", "implicit polemic", "explicit polemic", "meta-polemic (descriptive)"]:
+    for label in ["implicit polemic", "explicit polemic", "meta-polemic (descriptive)"]:
         sub = merged[merged["polemic_label"] == label]
         if len(sub) == 0:
             continue
@@ -200,9 +200,9 @@ else:  # Calibration labels
             y=sub["umap_y"],
             mode="markers",
             marker=dict(
-                size=point_size + 1,
-                color=label_colors.get(label, "grey"),
-                opacity=0.8,
+                size=point_size + 2,
+                color=polemic_colors[label],
+                opacity=0.9,
                 line=dict(width=0.5, color="white"),
             ),
             text=sub.apply(
