@@ -18,14 +18,13 @@ st.set_page_config(page_title="Cluster Map", layout="wide")
 st.title("Cluster Map")
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data")
-ROOT_DIR = os.path.join(os.path.dirname(__file__), "..", "..")
 
 
 @st.cache_data
 def load_cluster_data():
-    ca = pd.read_parquet(os.path.join(ROOT_DIR, "cluster_assignments.parquet"))
+    ca = pd.read_parquet(os.path.join(DATA_DIR, "cluster_assignments.parquet"))
     ks = pd.read_parquet(
-        os.path.join(ROOT_DIR, "keyword_scores.parquet"),
+        os.path.join(DATA_DIR, "keyword_scores.parquet"),
         columns=["doc_id", "polemic_score", "source"],
     )
     ca = ca.merge(ks, on="doc_id", how="left")
@@ -44,8 +43,17 @@ def load_cluster_labels():
     return None
 
 
+@st.cache_data
+def load_calibration():
+    path = os.path.join(DATA_DIR, "calibration_v2.parquet")
+    if os.path.exists(path):
+        return pd.read_parquet(path, columns=["doc_id", "polemic_label", "confidence"])
+    return None
+
+
 ca = load_cluster_data()
 cl = load_cluster_labels()
+calib = load_calibration()
 
 noise = ca[ca["cluster_id"] == -1]
 clustered = ca[ca["cluster_id"] != -1]
@@ -77,7 +85,19 @@ else:
 point_size = st.sidebar.slider("Point size", 1, 8, 2)
 
 # Color by
-color_by = st.sidebar.radio("Color by", ["Cluster", "Source", "Polemic score"])
+color_by_options = ["Cluster", "Source", "Polemic score"]
+if calib is not None:
+    color_by_options.append("Calibration labels")
+color_by = st.sidebar.radio("Color by", color_by_options)
+
+# --- Calibration sidebar summary ---
+if calib is not None:
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("**Calibration (2K sample)**")
+    label_counts = calib["polemic_label"].value_counts()
+    total = len(calib)
+    for label, count in label_counts.items():
+        st.sidebar.markdown(f"- {label}: **{count}** ({count/total:.0%})")
 
 # --- Apply source filter ---
 if selected_source != "all":
@@ -102,7 +122,6 @@ fig.add_trace(go.Scattergl(
 ))
 
 if color_by == "Cluster":
-    # All clustered points in a muted blue
     fig.add_trace(go.Scattergl(
         x=plot_clustered["umap_x"],
         y=plot_clustered["umap_y"],
@@ -114,8 +133,9 @@ if color_by == "Cluster":
         hoverinfo="text",
         name=f"Clustered ({len(plot_clustered):,})",
     ))
+
 elif color_by == "Source":
-    source_colors = {"press": "#1f77b4", "egeret": "#ff7f0e", "polemic_candidates": "#2ca02c"}
+    source_colors = {"press": "#1f77b4", "egeret": "#ff7f0e", "polemic_candidates": "#2ca02c", "compact_memory": "#9467bd"}
     for src in sorted(plot_clustered["source"].dropna().unique()):
         sub = plot_clustered[plot_clustered["source"] == src]
         fig.add_trace(go.Scattergl(
@@ -129,7 +149,8 @@ elif color_by == "Source":
             hoverinfo="text",
             name=f"{src} ({len(sub):,})",
         ))
-else:  # Polemic score
+
+elif color_by == "Polemic score":
     fig.add_trace(go.Scattergl(
         x=plot_clustered["umap_x"],
         y=plot_clustered["umap_y"],
@@ -148,6 +169,49 @@ else:  # Polemic score
         hoverinfo="text",
         name=f"Clustered ({len(plot_clustered):,})",
     ))
+
+else:  # Calibration labels
+    # Unlabeled points in muted grey first
+    labeled_ids = set(calib["doc_id"])
+    unlabeled = plot_clustered[~plot_clustered["doc_id"].isin(labeled_ids)]
+    fig.add_trace(go.Scattergl(
+        x=unlabeled["umap_x"],
+        y=unlabeled["umap_y"],
+        mode="markers",
+        marker=dict(size=point_size, color="#cccccc", opacity=0.25),
+        text=unlabeled["doc_id"],
+        hoverinfo="text",
+        name=f"Unlabeled ({len(unlabeled):,})",
+    ))
+
+    label_colors = {
+        "non-polemic": "#4575b4",
+        "implicit polemic": "#fee090",
+        "explicit polemic": "#d73027",
+        "meta-polemic (descriptive)": "#74add1",
+    }
+    merged = plot_clustered.merge(calib, on="doc_id", how="inner")
+    for label in ["non-polemic", "implicit polemic", "explicit polemic", "meta-polemic (descriptive)"]:
+        sub = merged[merged["polemic_label"] == label]
+        if len(sub) == 0:
+            continue
+        fig.add_trace(go.Scattergl(
+            x=sub["umap_x"],
+            y=sub["umap_y"],
+            mode="markers",
+            marker=dict(
+                size=point_size + 1,
+                color=label_colors.get(label, "grey"),
+                opacity=0.8,
+                line=dict(width=0.5, color="white"),
+            ),
+            text=sub.apply(
+                lambda r: f"{r['doc_id']}<br>{r['polemic_label']}<br>cluster {int(r['cluster_id'])}",
+                axis=1,
+            ),
+            hoverinfo="text",
+            name=f"{label} ({len(sub):,})",
+        ))
 
 # Highlighted cluster on top
 if selected_cid is not None:
@@ -176,6 +240,18 @@ fig.update_layout(
 
 st.plotly_chart(fig, use_container_width=True)
 
+# --- Calibration label breakdown by cluster ---
+if color_by == "Calibration labels" and calib is not None and selected_cid is not None:
+    cluster_calib = ca[ca["cluster_id"] == selected_cid].merge(calib, on="doc_id", how="inner")
+    if len(cluster_calib) > 0:
+        st.subheader(f"Calibration labels in cluster {selected_cid}")
+        lc = cluster_calib["polemic_label"].value_counts().reset_index()
+        lc.columns = ["label", "count"]
+        lc["pct"] = (lc["count"] / lc["count"].sum() * 100).round(1)
+        st.dataframe(lc, use_container_width=False, hide_index=True)
+    else:
+        st.info(f"No calibration-labeled docs in cluster {selected_cid}.")
+
 # --- Cluster detail panel ---
 if selected_cid is not None and cl is not None:
     cl_row = cl[cl["cluster_id"] == selected_cid]
@@ -187,11 +263,9 @@ if selected_cid is not None and cl is not None:
         cols[0].metric("Texts", info["n_texts"])
         cols[1].metric("Mean polemic score", f"{info['mean_polemic_score']:.3f}")
 
-        # Source breakdown
         c_sources = ca[ca["cluster_id"] == selected_cid]["source"].value_counts()
         cols[2].metric("Sources", ", ".join(f"{s}: {n}" for s, n in c_sources.items()))
 
-        # Top terms with final forms restored
         terms = info["top_terms_list"]
         st.markdown("**Top distinctive terms:**")
         term_display = " &nbsp;|&nbsp; ".join(
