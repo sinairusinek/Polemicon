@@ -4,54 +4,87 @@ Copy-paste this to start the next session:
 
 ---
 
-Continuing the Polemicon project. Read `polemiconPlan.md` (Status Update section) and `vectorization_log.md` for full context.
+Continuing the Polemicon project. Read `polemiconPlan.md` (Status Update section) for full context.
 
-**Where we left off:** B.2 pilot classification (4 models on 200 texts) is complete. Vocabulary extraction (`src/extract_vocab.py`) was run on the 94 disagreement texts — check if `data/pilot_vocab.parquet` exists and has 94 rows. The Streamlit app already has code to display the vocab markers and reviewer comments (added this session).
+**Where we left off:** The Sonnet v2 classification prompt (4-tier label scheme) has been built, tested, and accepted with documented limitations. The acceptance test scored 65.2% (15/23) against RA gold labels — the formal 78% threshold was not met, but the decision was made to proceed rather than continue prompt tuning. The failure patterns are documented in the plan and are considered acceptable limitations, not prompt bugs.
 
-**Two tasks for this session:**
+## Task for this session: 2K calibration run + Streamlit v2 display
 
-## Task 1: Display metadata for all 200 pilot texts in Streamlit
+### Step 1: Run the 2K calibration
 
-The pilot sample (`data/pilot_sample.parquet`) has `author`, `title`, `year`, `date` but is missing `recipient`, `headline`, and `newspaper`. These exist in `corpus.parquet` (15 columns total). The fill rates for the 200 pilot texts are:
+```bash
+cd /Users/sinairusinek/Documents/GitHub/Polemicon
+source .venv/bin/activate
+python src/classify_pilot.py --v2 --calibration --calibration-n 2000
+```
 
-| Field | press (100) | egeret (50) | polemic_candidates (50) |
-|-------|------------|-------------|------------------------|
-| author | 0 | 50 | 46 |
-| recipient | 0 | 42 | 0 |
-| headline | 73 | 0 | 0 |
-| title | 0 | 50 | 0 |
-| newspaper | 100 | 0 | 0 |
+This runs Sonnet-v2 on a stratified 2,000-text sample (source × cluster × keyword score). Output → `data/pilot_classifications_v2.parquet`. Cost ~$20–25 (Hebrew is 2–3× more token-heavy than English; earlier $5 estimate was wrong). ~30–60 min. The script already has checkpointing — if it interrupts, rerun the same command to resume.
 
-What to do:
-- Join `corpus.parquet` metadata (headline, recipient, newspaper) into the Streamlit app at load time (merge on `doc_id`).
-- Expand the metadata bar (currently 5 `st.columns`: Source, Year, Keyword Score, Cluster, Doc ID) to also show: **author**, **recipient** (egeret only), **headline** (press), **newspaper** (press), **title** (egeret/polemic_candidates).
-- For polemic_candidates with a Ben-Yehuda Project ID in the doc_id (e.g. `bypc_12345`), generate a link to `https://benyehuda.org/read/<id>`. Display as a clickable link next to the title.
-- Keep it clean — only show fields that are non-null for each text. Use a two-row metadata layout if needed (the current single row of 5 metrics will be crowded with 8+ fields).
+### Step 2: Review the output distribution
 
-## Task 2: Cluster characterization (top terms + optional summaries)
+After the run completes, check:
+- Per-source polemic-rate: press should be 10–30% combined-polemic (explicit + implicit); polemic_candidates much higher.
+- `broader_polemic_link=clear` cases — these are candidates for RA spot-check.
+- Any parse errors or unexpected label values in the output.
 
-409 clusters exist (`cluster_assignments.parquet`, 33,513 texts). 41% noise. No topic labels have been generated yet.
+### Step 3: Update Streamlit app
 
-What to do:
-1. Load the fitted TF-IDF vectorizers from `vectorizers.joblib` and the sparse TF-IDF matrices (`word_tfidf.npz`). The word-level TF-IDF (1-2 grams, 30K features) is more interpretable than char n-grams for labeling.
-2. For each of the 409 clusters, compute the top 10 TF-IDF terms (using cluster-centroid or mean TF-IDF vector, compared against corpus-wide means — i.e., terms that are distinctive for this cluster, not just frequent).
-3. Save to `data/cluster_labels.parquet` with columns: `cluster_id`, `top_terms` (JSON list of 10 terms), `n_texts`, `mean_polemic_score`.
-4. Display in the Streamlit app: show the cluster's top terms alongside the cluster ID in the metadata bar (e.g., as a tooltip or expandable section).
-5. **Optional (ask me first about cost):** For the top 20 largest clusters, send the top terms + 3 central texts to Sonnet and ask for a one-line topic label in English.
+The app (`src/streamlit_app.py`) already has stub loaders for `pilot_classifications_v2.parquet` and `ra_gold_labels.parquet`, and a display section for the v2 label and `broader_polemic_link`. Verify these work correctly once the v2 parquet exists. The annotation panel for each text should show:
+- **Sonnet v2 label** (color-coded by tier: explicit=red, implicit=orange, meta=blue, non=green)
+- **broader_polemic_link** (none/suspected/clear + justification text)
+- **RA gold label** (where available from `ra_gold_labels.parquet`) as an `st.info` box
+- The old v1 binary labels (from `pilot_classifications.parquet`) should remain visible for comparison
 
-**Key files:**
-- `src/streamlit_app.py` — the annotation app (already has vocab display + comments from this session)
-- `corpus.parquet` — full corpus with all 15 metadata columns
-- `data/pilot_sample.parquet` — 200-text pilot
-- `vectorizers.joblib` — fitted TfidfVectorizer + TruncatedSVD
-- `word_tfidf.npz` — sparse word TF-IDF matrix (33,513 x 30,000)
-- `cluster_assignments.parquet` — doc_id, cluster_id, umap_x, umap_y
-- `doc_ids.txt` — ordered doc IDs matching the TF-IDF matrix rows
-- `keyword_scores.parquet` — per-doc polemic scores
+---
 
-**Important context:**
-- Always use `restore_final_forms()` from `src/cleaning.py` when displaying Hebrew text — it reverses final-form normalization.
-- The Streamlit app is deployed on Streamlit Cloud. Test locally with `streamlit run src/streamlit_app.py`.
-- Discuss your plan before implementing. I want to review the approach.
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `src/classify_pilot.py` | Main classification script. `--v2 --calibration --calibration-n 2000` for the next run. |
+| `src/streamlit_app.py` | Annotation + review app. Deployed on Streamlit Cloud (auto-deploys from main). |
+| `src/ingest_ra_gold.py` | Parses RA annotation sources → `data/ra_gold_labels.parquet`. Already run; no need to re-run unless RA delivers new annotations. |
+| `data/pilot_classifications_v2.parquet` | **Does not exist yet** — created by the calibration run. |
+| `data/ra_gold_labels.parquet` | 102 RA gold labels across 4 sources. Already generated. |
+| `data/pilot_classifications.parquet` | Original v1 binary labels (4 models, 200 texts). Keep for comparison. |
+| `data/pilot_sample.parquet` | 200-text pilot sample used for v1. The 2K calibration uses a separate stratified sample. |
+
+---
+
+## v2 prompt schema (for reference)
+
+`CLASSIFICATION_PROMPT_V2` in `src/classify_pilot.py` outputs:
+
+```json
+{
+  "polemic_label": "non-polemic | implicit polemic | explicit polemic | meta-polemic (descriptive)",
+  "confidence": 0.0-1.0,
+  "polemic_type": "attack | defense | debate | satire | critique | description | none",
+  "broader_polemic_link": "none | suspected | clear",
+  "broader_polemic_justification": "one-line explanation",
+  "target": "name of target or null",
+  "evidence": "quoted or paraphrased supporting text",
+  "topic": "one-sentence topic summary"
+}
+```
+
+The 4-tier label maps to RA Hebrew labels: `כן`→explicit, `לדיון`→implicit, `לא`+describes=`כן`→meta, `לא`+`לא`→non-polemic.
+
+---
+
+## Known v2 limitations (do not re-fix these)
+
+Three failure patterns identified across 3 prompt iterations — accepted as-is:
+1. Texts that rhetorically claim "universal agreement" while actually advancing a contested position get classified as non-polemic (the `broader_polemic_link` field captures the signal, but not the label).
+2. Texts defending a position against *historical* opposition (past generations' views) are occasionally over-classified as implicit polemic.
+3. Truncated texts in the pilot sample — 3 of the 8 mismatches involve texts where polemic content is in a continuation section not included in the excerpt.
+
+---
+
+## Important reminders
+
+- Always use `restore_final_forms()` from `src/cleaning.py` when displaying Hebrew text.
+- The Streamlit app is deployed on Streamlit Cloud; auto-deploys from `main` branch. Test locally with `streamlit run src/streamlit_app.py` before pushing.
+- Discuss approach before implementing non-trivial changes.
 
 ---

@@ -1,6 +1,6 @@
 # Polemicon: Hebrew Polemic Corpus Analysis Pipeline
 
-## Status Update (2026-03-29)
+## Status Update (2026-05-06)
 
 ### Completed
 - **Phase A (Corpus + Vectorization):** TF-IDF vectorization (char 3-5 grams + word 1-2 grams, 50K+30K features), TruncatedSVD to 300 dims, FAISS index. Outlier bypc_5539 (317K-word academic book) dropped. 33,513 texts.
@@ -18,12 +18,29 @@
 - **Metadata display in Streamlit (2026-03-29):** Full metadata (author, recipient, headline, newspaper, title) merged from `corpus.parquet` into pilot texts at load time. Two-row metadata bar shows only non-null fields per text. Ben-Yehuda Project links generated for `bypc_*` doc IDs.
 - **Cluster characterization (2026-03-29):** Top 10 distinctive TF-IDF terms per cluster computed (cluster mean minus corpus mean). 409 clusters labeled in `data/cluster_labels.parquet`. Terms displayed in annotation app metadata bar.
 - **Cluster visualization (2026-03-29):** Interactive UMAP scatter plot page (`src/pages/Cluster_Map.py`) showing all 33,513 texts. Color by cluster/source/keyword score. Cluster selector highlights points and shows top terms, size, source breakdown. Sortable table of all 409 clusters.
+- **RA gold labels ingested (2026-05-05):** 102 gold labels from 4 RA sources (16 cheap-diverge CSV, 7 disagree CSV, 50 Letters Excel, 29 BenYehudaProject Excel) → `data/ra_gold_labels.parquet`. Label distribution: non-polemic=53, implicit=15, uncertain=15, meta-polemic=10, explicit=9.
+- **Sonnet v2 prompt + schema (2026-05-05):** `CLASSIFICATION_PROMPT_V2` in `src/classify_pilot.py` replaces binary label with RA's 4-tier scheme (non-polemic / implicit polemic / explicit polemic / meta-polemic (descriptive)). Adds `broader_polemic_link` field (none/suspected/clear + justification), metadata injection (year, author, headline, recipient), continuation detection regex (`is_continuation`). Run via `--v2` flag.
+- **Acceptance test (2026-05-05):** Sonnet-v2 scored 65.2% (15/23) on the 23 RA-annotated cases. Formal threshold (78%) not met; decision is to proceed with documented limitations rather than further prompt tuning.
+- **2K calibration run (2026-05-06):** Sonnet-v2 via `claude -p` CLI (Max plan) classified 1,999/2,000 stratified texts → `data/calibration_v2.parquet`. 4 runs required due to per-session rate limits on Max plan (~1,000–1,200 calls per session); resume logic handled automatically. Final distribution: non-polemic 67.8% (1,355), implicit polemic 17.6% (351), explicit polemic 10.7% (214), meta-polemic 4.0% (79). Combined polemic rate 32.2%. `broader_polemic_link`: clear 32.6%, suspected 26.5%, none 41.0%. Confidence highest for non-polemic (0.90) and explicit (0.87), lower for implicit (0.76) and meta (0.73).
+- **Streamlit calibration browser (2026-05-06):** App updated with (1) sidebar stats panel showing label and broader_polemic_link distribution, (2) "Calibration Browser" view mode — browse explicit/implicit/meta-polemic texts with metadata, confidence, topic, broader_polemic_link badge, and RTL text preview. Accessed via sidebar "View" radio.
+- **B.4a comparison script (2026-05-06):** `src/finetune_compare.py` written. Compares `dicta-il/dictabert` vs `avichr/heBERT` on 4-tier classification using calibration_v2 labels. Balanced class weights, AdamW lr=2e-5, 3 epochs, stratified 80/20 split. Run with `python src/finetune_compare.py`.
 
-### Next: Human review + calibration
-- **Priority 1:** Researcher reviews the 94 disagreement cases (now with vocab markers, metadata, cluster terms, and comments) to establish gold labels.
-- **Priority 2:** Based on review, decide model selection for 2K calibration run.
-- **After review:** Phase B.2 calibration run (2,000 texts) with the chosen model(s).
-- **Optional:** Sonnet-generated topic labels for top 20 clusters (beyond keyword-based labels).
+### Known Sonnet v2 limitations (documented, not fixed)
+Three systematic failure patterns identified across 3 prompt iterations:
+1. **Rhetorical denial of controversy** — texts that open with "everyone agrees on X" while actually advancing a contested position (e.g., press_34463). Sonnet takes the claim at face value; the polemic signal is in a reference to a prior article, which Sonnet flags as `broader_polemic_link=suspected` but doesn't escalate to the label.
+2. **Historical vs. current opposition** — texts defending a position against past/generational criticism (e.g., bypc_7349, defending Jewish chosenness against historical mockery) get classified as implicit polemic when they should be non-polemic.
+3. **Truncated texts** — 3 of the 8 mismatches (bypc_988, bypc_1286, press_49005) involve texts where the RA's own notes say the polemical content is in the continuation not included in the pilot sample. These are not model errors.
+The remaining 2 failures (egeret_3213, bypc_5681) are edge cases where the RA notes themselves express uncertainty.
+
+### Next: B.4a model selection
+- **Run `python src/finetune_compare.py`** — fine-tunes `dicta-il/dictabert` vs `avichr/heBERT` on calibration_v2 labels, prints macro-F1 comparison, saves `data/b4a_model_comparison.json`. Update this section with results.
+- **Then B.4:** Fine-tune chosen model on full calibration set, classify all 33K corpus texts.
+
+### Deferred
+- Dense embeddings (Tier 2/3) — only if TF-IDF clustering proves insufficient
+- Phase C.2 (thread detection) — approach discussed: tiered edge signals (strong/medium/weak), expect loose topical clusters with partial name/vocab overlap rather than strict reply chains. Will be more effective after polemic labels are established.
+- Full-corpus reference extraction — current approach validated on 56 polemic pilot texts; scale to all polemic texts after B.4 classification.
+- Sonnet-generated topic labels for top 20 clusters.
 
 ### Deferred
 - Dense embeddings (Tier 2/3) — only if TF-IDF clustering proves insufficient
@@ -102,12 +119,22 @@ Save as `corpus.parquet`. Expected size: ~77K-78K texts.
 
 ### A.4 Vectorization (`src/vectorize.py`)
 
-**Dual representation:**
+**Current implementation (Phase A, completed):**
+- Sparse: Character n-gram TF-IDF (`char_wb`, 3-5 grams, 50K features) + word-level TF-IDF (1-2 grams, 30K features). Chosen for OCR robustness on press texts.
+- TruncatedSVD to 300 dims, FAISS index.
 
-1. **Dense:** `multilingual-e5-large` embeddings. Sliding window (512 tokens, stride 256) + mean pool for long texts. Batch size 32. Store as numpy memmap + FAISS `IndexFlatIP`.
-2. **Sparse:** Character n-gram TF-IDF (`char_wb`, 3-5 grams, 50K features) -- deliberately character-level for OCR robustness. Also word-level TF-IDF (1-2 grams, 30K features).
+**Decision point (revisit at B.4a): unified dense vs. hybrid strategy**
 
-**Estimated time:** ~30 min for embeddings on Apple Silicon.
+The OCR robustness argument applies only to the press corpus. Ben-Yehuda Project and e-geret texts are clean and would benefit from a stronger semantic model. Two strategies:
+
+| Strategy | When to use | Trade-off |
+|----------|-------------|-----------|
+| **Unified dense** | If the chosen model (B.4a) tokenizes at sub-word/char level and degrades gracefully on OCR noise | Simpler; cross-source similarity works natively |
+| **Hybrid per-task** | If dense model performs poorly on noisy press text | Better per-source quality, but cross-source thread detection (C.2) requires a separate alignment step |
+
+**Test to run at B.4a:** Take 20 high-noise press texts + their manually corrected equivalents (or clean same-author texts). Compute cosine similarity under the candidate dense model. If mean similarity > 0.7, the model is OCR-robust enough to unify. If not, use hybrid: dense for BenYehuda/e-geret classification, TF-IDF retained for cross-source linking.
+
+**Dense model plan (if unified):** Sliding window (512 tokens, stride 256) + mean pool for long texts. Batch size 32. Store as numpy memmap + FAISS `IndexFlatIP`. Estimated ~30 min on Apple Silicon.
 
 ### A.5 Verification
 - Spot-check 20 texts per source after cleaning
@@ -129,7 +156,7 @@ Since there are effectively zero labels, Claude bootstraps the initial labeled s
 
 **Staged rollout:**
 1. **Pilot (200 texts):** 50 from each source. Researcher manually reviews Claude's output. Iterate on prompt until Cohen's kappa > 0.6.
-2. **Calibration (2,000 texts):** Stratified sample (~$18 with Sonnet). Estimate polemic prevalence, set confidence thresholds. Researcher reviews a subset to create gold labels.
+2. **Calibration (2,000 texts):** Stratified sample (~$20–25 with Sonnet; Hebrew is 2–3× more token-heavy than English — earlier $5/$18 estimates were wrong). Estimate polemic prevalence, set confidence thresholds. Researcher reviews a subset to create gold labels.
 
 **Classification output per text:** `is_polemic`, `confidence`, `polemic_type` (attack/defense/debate/satire/critique), `target`, `evidence`, `topic`.
 
@@ -146,18 +173,39 @@ Rule-based scoring using a polemic indicator lexicon:
 
 Use as comparison baseline and supplementary feature for fine-tuning.
 
-### B.4 Fine-tune AlephBERT (primary classifier for full corpus)
+### B.4a Hebrew model selection (do before fine-tuning)
 
-This is the core classification step -- Claude bootstraps labels, AlephBERT scales:
+Before committing to AlephBERT, survey available Hebrew-capable models on HuggingFace and recent literature. Criteria:
+
+| Criterion | Notes |
+|-----------|-------|
+| Hebrew pre-training | Must be trained on Hebrew text (not just multilingual) |
+| Text length | Corpus texts average several hundred words — models with >512 token limit preferred |
+| Classification track record | Any reported results on Hebrew NLP tasks (sentiment, NER, classification) |
+| License | Must allow research use |
+| Size / CPU feasibility | Fine-tuning must be feasible without a GPU (or document GPU requirement) |
+
+**Candidates evaluated:**
+- `dicta-il/dictabert` — chosen candidate: DictaBERT base, trained on modern + historical Hebrew (19th-century register appropriate). Use base model, not dictabert-sentiment (sentiment fine-tuning biases intermediate layers toward emotional tone markers, hurting polemic/non-polemic distinction).
+- `avichr/heBERT` — trained on a larger, more varied Hebrew corpus. Second candidate.
+- Ruled out: `onlplab/alephbert-base` (modern Hebrew only, Wikipedia/news), `dicta-il/MsBERT` (first-millennium manuscripts — wrong era), `dictabert-sentiment` (sentiment bias).
+
+**Comparison script:** `src/finetune_compare.py`. Run `python src/finetune_compare.py` (both models) or `--model dictabert` (one). Results saved to `data/b4a_model_comparison.json`.
+
+**Decision output:** *(pending run)* Update with chosen model and macro-F1. Revisit if F1 < 0.75 after fine-tuning.
+
+### B.4 Fine-tune chosen Hebrew model (primary classifier for full corpus)
+
+This is the core classification step -- Claude bootstraps labels, the fine-tuned model scales:
 
 1. Combine Claude's 2K silver labels + researcher's gold labels (target: 500-1000 human-reviewed)
-2. Fine-tune `onlplab/alephbert-base` with a classification head for binary polemic detection
+2. Fine-tune chosen model (see B.4a) with a classification head for 4-tier polemic detection
 3. Add keyword baseline scores as auxiliary features (hybrid model)
 4. Train with 5-fold cross-validation; evaluate on gold set (target F1 > 0.8)
 5. **Run fine-tuned model on the full corpus** -- fast and free compared to API calls
 6. For uncertain predictions (0.3-0.7 confidence), optionally send to Claude for a second opinion
 
-**Cost:** ~$18 for Claude bootstrap + compute time for fine-tuning (minutes on CPU). Much cheaper than $700 for full API classification.
+**Cost:** ~$20–25 for Claude bootstrap (2K calibration) + compute time for fine-tuning (minutes on CPU). Much cheaper than ~$300–350 for full API classification of all 33K texts at the same per-token rate.
 
 ### B.5 Verification
 - Researcher labels 100 texts, compare to Claude: target kappa > 0.6
@@ -231,7 +279,7 @@ Core logic lives in `src/` modules; notebooks import from `src/` for interactive
 
 ```
 Phase 0  ->  A.1-A.2 (load/clean)  ->  A.3 (corpus + date inference)  ->  A.4 (vectorize)
-         ->  B.2 pilot (200 texts)  ->  B.2 calibration (2K texts)  ->  B.4 fine-tune AlephBERT
-              B.3 keyword baseline (parallel)                         ->  B.4 classify full corpus
+         ->  B.2 pilot (200 texts)  ->  B.2 calibration (2K texts)  ->  B.4a model selection  ->  B.4 fine-tune
+              B.3 keyword baseline (parallel)                                                  ->  B.4 classify full corpus
          ->  C.1 (clustering)  ->  C.2 (thread detection)  ->  C.3 (visualization)
 ```

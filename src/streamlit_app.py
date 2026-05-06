@@ -79,6 +79,44 @@ def load_references():
 
 
 @st.cache_data(ttl=3600)
+def load_classifications_v2():
+    # Prefer the largest available dataset in order: calibration (2K) > pilot v2 > acceptance test
+    for fname in ("calibration_v2.parquet", "pilot_classifications_v2.parquet", "acceptance_test_v2.parquet"):
+        path = os.path.join(DATA_DIR, fname)
+        if os.path.exists(path):
+            return pd.read_parquet(path)
+    return None
+
+
+@st.cache_data(ttl=3600)
+def load_ra_gold():
+    path = os.path.join(DATA_DIR, "ra_gold_labels.parquet")
+    if os.path.exists(path):
+        return pd.read_parquet(path)
+    return None
+
+
+@st.cache_data(ttl=3600)
+def load_calibration_with_corpus():
+    cal_path = os.path.join(DATA_DIR, "calibration_v2.parquet")
+    if not os.path.exists(cal_path):
+        return None
+    cal = pd.read_parquet(cal_path)
+    if "_error" in cal.columns:
+        cal = cal[cal["polemic_label"].notna() & cal["_error"].isna()].copy()
+    else:
+        cal = cal[cal["polemic_label"].notna()].copy()
+    corpus_path = os.path.join(DATA_DIR, "..", "corpus.parquet")
+    if os.path.exists(corpus_path):
+        meta = pd.read_parquet(
+            corpus_path,
+            columns=["doc_id", "source", "year", "author", "title", "newspaper", "headline", "text"],
+        )
+        cal = cal.merge(meta, on="doc_id", how="left")
+    return cal
+
+
+@st.cache_data(ttl=3600)
 def load_vocab():
     path = os.path.join(DATA_DIR, "pilot_vocab.parquet")
     if os.path.exists(path):
@@ -102,10 +140,13 @@ st.title("Polemicon Annotation & Keyword Discovery")
 
 df = load_pilot_sample()
 clf_df = load_classifications()
+clf_v2 = load_classifications_v2()
 disagree_df = load_disagreements()
 refs_df = load_references()
 vocab_df = load_vocab()
 cluster_labels_df = load_cluster_labels()
+ra_gold_df = load_ra_gold()
+cal_corpus_df = load_calibration_with_corpus()
 
 # --- Session state ---
 
@@ -121,6 +162,8 @@ if "current_idx" not in st.session_state:
     st.session_state["current_idx"] = 0
 
 # --- Sidebar: filters and navigation ---
+
+view_mode = st.sidebar.radio("View", ["Annotation Tool", "Calibration Browser"], horizontal=True)
 
 st.sidebar.header("Filters")
 
@@ -202,12 +245,228 @@ if disagree_df is not None:
         f"⚪ All not: **{cats.get('all_agree_not_polemic', 0)}**"
     )
 
+# Calibration v2 stats
+if cal_corpus_df is not None:
+    st.sidebar.header("Calibration v2")
+    _total = len(cal_corpus_df)
+    _COLORS = {
+        "explicit polemic":           "#d62728",
+        "implicit polemic":           "#ff7f0e",
+        "meta-polemic (descriptive)": "#1f77b4",
+        "non-polemic":                "#2ca02c",
+    }
+    for _lbl, _col in _COLORS.items():
+        _n = (cal_corpus_df["polemic_label"] == _lbl).sum()
+        st.sidebar.markdown(
+            f'<span style="background:{_col};color:white;padding:1px 6px;border-radius:3px;font-size:11px;">{_lbl}</span>'
+            f' **{_n}** ({_n/_total:.1%})',
+            unsafe_allow_html=True,
+        )
+    if "broader_polemic_link" in cal_corpus_df.columns:
+        st.sidebar.markdown("**Broader debate link:**")
+        for _val in ["clear", "suspected", "none"]:
+            _n = (cal_corpus_df["broader_polemic_link"] == _val).sum()
+            st.sidebar.markdown(f"  `{_val}`: {_n} ({_n/_total:.1%})")
+
 # --- Navigation ---
 
 st.sidebar.header("Navigation")
 
 if len(filtered) == 0:
     st.info("No texts match the current filters.")
+    st.stop()
+
+# ── Calibration Browser ────────────────────────────────────────────────────────
+
+if view_mode == "Calibration Browser":
+    if cal_corpus_df is None or "text" not in cal_corpus_df.columns:
+        st.warning("Calibration data not available. Run classify_pilot.py --v2 --calibration first.")
+        st.stop()
+
+    _t = len(cal_corpus_df)
+    st.caption(
+        f"Claude Sonnet labeled {_t:,} stratified corpus texts into four polemic categories. "
+        "These labels serve as training data for the Hebrew classifier (B.4) that will process the full 33,000-text corpus."
+    )
+    _SOURCE_DISPLAY = {
+        "polemic_candidates": "Ben Yehuda Project",
+        "press":              "press",
+        "egeret":             "egeret",
+        "compact_memory":     "compact_memory",
+    }
+
+    with st.expander("Distribution breakdown"):
+        if "source" in cal_corpus_df.columns:
+            st.markdown("**Per-source polemic rate**")
+            _src_rows = []
+            for _src, _grp in cal_corpus_df.groupby("source"):
+                _n = len(_grp)
+                _pol = (_grp["polemic_label"] != "non-polemic").sum()
+                _src_rows.append({
+                    "source":      _SOURCE_DISPLAY.get(_src, _src),
+                    "texts":       _n,
+                    "polemic %":   f"{_pol/_n:.0%}",
+                    "explicit":    f"{(_grp['polemic_label']=='explicit polemic').sum()/_n:.0%}",
+                    "implicit":    f"{(_grp['polemic_label']=='implicit polemic').sum()/_n:.0%}",
+                    "meta":        f"{(_grp['polemic_label']=='meta-polemic (descriptive)').sum()/_n:.0%}",
+                    "non-polemic": f"{(_grp['polemic_label']=='non-polemic').sum()/_n:.0%}",
+                })
+            st.dataframe(pd.DataFrame(_src_rows).set_index("source"), use_container_width=True)
+
+        if "year" in cal_corpus_df.columns:
+            st.markdown("**Polemic rate by year (% of texts classified as polemic)**")
+            _yr = cal_corpus_df[cal_corpus_df["year"].notna()].copy()
+            _yr["source_display"] = _yr["source"].map(_SOURCE_DISPLAY).fillna(_yr["source"])
+            _yr["is_polemic"] = (_yr["polemic_label"] != "non-polemic").astype(float)
+            _yr["year_int"] = _yr["year"].astype(int)
+            _pivot = (
+                _yr.groupby(["year_int", "source_display"])["is_polemic"]
+                .mean()
+                .mul(100)
+                .round(1)
+                .unstack("source_display")
+            )
+            _pivot.index.name = "year"
+            st.line_chart(_pivot, use_container_width=True)
+
+    _strip_labels = [
+        ("explicit polemic",           "#d62728"),
+        ("implicit polemic",           "#ff7f0e"),
+        ("meta-polemic (descriptive)", "#1f77b4"),
+        ("non-polemic",                "#2ca02c"),
+    ]
+    _parts = []
+    for _lbl, _col in _strip_labels:
+        _n = (cal_corpus_df["polemic_label"] == _lbl).sum()
+        _parts.append(
+            f'<span style="background:{_col};color:white;padding:2px 10px;'
+            f'border-radius:3px;font-size:13px;margin-right:6px;">'
+            f'{_lbl} <b>{_n}</b> <span style="opacity:.85">({_n/_t:.0%})</span></span>'
+        )
+    _bpl_clear = (cal_corpus_df["broader_polemic_link"] == "clear").sum()
+    _bpl_susp  = (cal_corpus_df["broader_polemic_link"] == "suspected").sum()
+    _parts.append(
+        f'<span style="color:#555;font-size:13px;margin-left:10px;">'
+        f'broader debate link — 🔗 clear: <b>{_bpl_clear}</b> &nbsp; ❓ suspected: <b>{_bpl_susp}</b>'
+        f'</span>'
+    )
+    st.markdown(
+        '<div style="background:#f8f8f8;border:1px solid #e0e0e0;border-radius:5px;'
+        f'padding:7px 14px;margin-bottom:12px;">' + "".join(_parts) + "</div>",
+        unsafe_allow_html=True,
+    )
+
+    POLEMIC_LABELS = ["explicit polemic", "implicit polemic", "meta-polemic (descriptive)"]
+    LABEL_COLORS_CAL = {
+        "explicit polemic":           "#d62728",
+        "implicit polemic":           "#ff7f0e",
+        "meta-polemic (descriptive)": "#1f77b4",
+    }
+
+    col_filter, col_sort = st.columns([2, 2])
+    with col_filter:
+        selected_label = st.selectbox(
+            "Polemic category",
+            POLEMIC_LABELS,
+            format_func=lambda x: x,
+        )
+    with col_sort:
+        sort_by = st.selectbox("Sort by", ["confidence (high→low)", "year", "source"])
+
+    cal_view = cal_corpus_df[cal_corpus_df["polemic_label"] == selected_label].copy()
+
+    if sort_by == "confidence (high→low)":
+        cal_view = cal_view.sort_values("confidence", ascending=False)
+    elif sort_by == "year":
+        cal_view = cal_view.sort_values("year", na_position="last")
+    elif sort_by == "source":
+        cal_view = cal_view.sort_values("source")
+
+    cal_view = cal_view.reset_index(drop=True)
+
+    PAGE_SIZE = 8
+    total_pages = max(1, (len(cal_view) - 1) // PAGE_SIZE + 1)
+
+    if "cal_page" not in st.session_state:
+        st.session_state["cal_page"] = 0
+    # Reset page when label changes
+    if st.session_state.get("cal_last_label") != selected_label:
+        st.session_state["cal_page"] = 0
+        st.session_state["cal_last_label"] = selected_label
+
+    pg = st.session_state["cal_page"]
+    p_col1, p_col2, p_col3 = st.columns([1, 3, 1])
+    with p_col1:
+        if st.button("← Prev", key="cal_prev") and pg > 0:
+            st.session_state["cal_page"] -= 1
+            st.rerun()
+    with p_col2:
+        st.markdown(
+            f"<div style='text-align:center;'><b>{selected_label}</b> — "
+            f"{len(cal_view)} texts &nbsp;|&nbsp; page {pg+1} / {total_pages}</div>",
+            unsafe_allow_html=True,
+        )
+    with p_col3:
+        if st.button("Next →", key="cal_next") and pg < total_pages - 1:
+            st.session_state["cal_page"] += 1
+            st.rerun()
+
+    page_df = cal_view.iloc[pg * PAGE_SIZE : (pg + 1) * PAGE_SIZE]
+    color = LABEL_COLORS_CAL[selected_label]
+
+    for _, row_c in page_df.iterrows():
+        meta_parts = []
+        if pd.notna(row_c.get("source")):
+            meta_parts.append(str(row_c["source"]))
+        if pd.notna(row_c.get("year")):
+            meta_parts.append(str(int(row_c["year"])))
+        if pd.notna(row_c.get("newspaper")) and str(row_c.get("newspaper")) not in ("", "nan"):
+            meta_parts.append(restore_final_forms(str(row_c["newspaper"])))
+        if pd.notna(row_c.get("author")) and str(row_c.get("author")) not in ("", "nan"):
+            meta_parts.append(restore_final_forms(str(row_c["author"])))
+        conf = row_c.get("confidence")
+        conf_s = f"conf {conf:.0%}" if conf is not None else ""
+        meta_line = " · ".join(meta_parts) + (f" · {conf_s}" if conf_s else "")
+
+        with st.container(border=True):
+            head_cols = st.columns([4, 1])
+            with head_cols[0]:
+                st.markdown(f"<small style='color:#888;'>{meta_line}</small>", unsafe_allow_html=True)
+                title = row_c.get("headline") or row_c.get("title")
+                if pd.notna(title) and str(title) not in ("", "nan"):
+                    st.markdown(
+                        f'<div dir="rtl" style="text-align:right;font-weight:bold;">'
+                        f'{restore_final_forms(str(title))}</div>',
+                        unsafe_allow_html=True,
+                    )
+            with head_cols[1]:
+                blink = row_c.get("broader_polemic_link", "none") or "none"
+                blink_icon = {"clear": "🔗", "suspected": "❓", "none": ""}.get(blink, "")
+                st.markdown(
+                    f'<span style="background:{color};color:white;padding:2px 8px;'
+                    f'border-radius:3px;font-size:12px;">{blink_icon} {blink}</span>',
+                    unsafe_allow_html=True,
+                )
+
+            topic = row_c.get("topic", "")
+            if pd.notna(topic) and str(topic) not in ("", "nan"):
+                st.caption(str(topic))
+
+            text_val = str(row_c.get("text", ""))
+            preview = restore_final_forms(text_val[:500])
+            st.markdown(
+                f'<div dir="rtl" style="text-align:right;font-size:14px;line-height:1.7;">'
+                f'{preview}{"…" if len(text_val) > 500 else ""}</div>',
+                unsafe_allow_html=True,
+            )
+            if len(text_val) > 500:
+                with st.expander("Full text"):
+                    st.markdown(
+                        f'<div dir="rtl" style="text-align:right;font-size:14px;line-height:1.7;">'
+                        f'{restore_final_forms(text_val[:5000])}</div>',
+                        unsafe_allow_html=True,
+                    )
+
     st.stop()
 
 # Clamp index
@@ -341,6 +600,75 @@ if clf_df is not None:
                 evidence = clf_row.get("evidence", "")
                 if evidence:
                     st.markdown(f"**{clf_row.get('model_display', clf_row['model'])}:** {evidence}")
+
+# --- v2 Sonnet Classification (4-tier) ---
+
+if clf_v2 is not None:
+    doc_v2 = clf_v2[clf_v2["doc_id"] == doc_id]
+    if len(doc_v2) > 0:
+        v2row = doc_v2.iloc[0]
+        st.subheader("Sonnet v2 Classification")
+
+        LABEL_COLORS = {
+            "explicit polemic":          "#d62728",
+            "implicit polemic":          "#ff7f0e",
+            "meta-polemic (descriptive)":"#1f77b4",
+            "non-polemic":               "#2ca02c",
+            "uncertain":                 "#9467bd",
+            "unlabeled":                 "#7f7f7f",
+        }
+        plabel = v2row.get("polemic_label", "unlabeled") or "unlabeled"
+        color  = LABEL_COLORS.get(plabel, "#888")
+        conf   = v2row.get("confidence")
+        conf_s = f" ({conf:.0%})" if conf is not None else ""
+
+        st.markdown(
+            f'<span style="background:{color}; color:white; padding:4px 10px; '
+            f'border-radius:4px; font-weight:bold;">{plabel}</span>{conf_s}',
+            unsafe_allow_html=True,
+        )
+
+        ptype = v2row.get("polemic_type", "")
+        if ptype and ptype != "none":
+            st.markdown(f"**Type:** {ptype}")
+
+        topic = v2row.get("topic", "")
+        if topic:
+            st.markdown(f"**Topic:** _{topic}_")
+
+        blink = v2row.get("broader_polemic_link", "none") or "none"
+        if blink in ("suspected", "clear"):
+            bj = v2row.get("broader_polemic_justification", "")
+            icon = "🔗" if blink == "clear" else "❓"
+            st.markdown(
+                f"{icon} **Broader debate link:** `{blink}`"
+                + (f" — {bj}" if bj else "")
+            )
+
+        with st.expander("v2 evidence"):
+            ev = v2row.get("evidence", "")
+            if ev:
+                st.markdown(ev)
+
+# --- RA Gold Label (for reviewed cases) ---
+
+if ra_gold_df is not None:
+    doc_gold = ra_gold_df[ra_gold_df["doc_id"] == doc_id]
+    if len(doc_gold) > 0:
+        grow = doc_gold.iloc[0]
+        glabel = grow.get("ra_label_4tier", "")
+        gsrc   = grow.get("source", "")
+        gnotes = grow.get("ra_notes", "")
+        gref   = grow.get("ra_reference_in_text", "")
+        gcmt   = grow.get("ra_comment", "")
+
+        st.info(
+            f"**RA gold label:** {glabel}  \n"
+            f"*(source: {gsrc})*"
+            + (f"  \n📝 {gnotes}" if gnotes and str(gnotes) != "nan" else "")
+            + (f"  \n🔍 Reference: {gref}" if gref and str(gref) != "nan" else "")
+            + (f"  \n💬 {gcmt}" if gcmt and str(gcmt) != "nan" else "")
+        )
 
 # --- Intertextual References ---
 
