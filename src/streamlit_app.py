@@ -106,13 +106,15 @@ def load_calibration_with_corpus():
         cal = cal[cal["polemic_label"].notna() & cal["_error"].isna()].copy()
     else:
         cal = cal[cal["polemic_label"].notna()].copy()
-    corpus_path = os.path.join(DATA_DIR, "..", "corpus.parquet")
-    if os.path.exists(corpus_path):
-        meta = pd.read_parquet(
-            corpus_path,
-            columns=["doc_id", "source", "year", "author", "title", "newspaper", "headline", "text"],
-        )
-        cal = cal.merge(meta, on="doc_id", how="left")
+    # Join with corpus only if text not already embedded in the parquet
+    if "text" not in cal.columns:
+        corpus_path = os.path.join(DATA_DIR, "..", "corpus.parquet")
+        if os.path.exists(corpus_path):
+            meta = pd.read_parquet(
+                corpus_path,
+                columns=["doc_id", "source", "year", "author", "title", "newspaper", "headline", "text"],
+            )
+            cal = cal.merge(meta, on="doc_id", how="left")
     return cal
 
 
