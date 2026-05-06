@@ -111,7 +111,7 @@ else:
 fig = go.Figure()
 
 # Noise layer
-fig.add_trace(go.Scattergl(
+fig.add_trace(go.Scatter(
     x=plot_noise["umap_x"],
     y=plot_noise["umap_y"],
     mode="markers",
@@ -122,7 +122,7 @@ fig.add_trace(go.Scattergl(
 ))
 
 if color_by == "Cluster":
-    fig.add_trace(go.Scattergl(
+    fig.add_trace(go.Scatter(
         x=plot_clustered["umap_x"],
         y=plot_clustered["umap_y"],
         mode="markers",
@@ -138,7 +138,7 @@ elif color_by == "Source":
     source_colors = {"press": "#1f77b4", "egeret": "#ff7f0e", "polemic_candidates": "#2ca02c", "compact_memory": "#9467bd"}
     for src in sorted(plot_clustered["source"].dropna().unique()):
         sub = plot_clustered[plot_clustered["source"] == src]
-        fig.add_trace(go.Scattergl(
+        fig.add_trace(go.Scatter(
             x=sub["umap_x"],
             y=sub["umap_y"],
             mode="markers",
@@ -151,7 +151,7 @@ elif color_by == "Source":
         ))
 
 elif color_by == "Polemic score":
-    fig.add_trace(go.Scattergl(
+    fig.add_trace(go.Scatter(
         x=plot_clustered["umap_x"],
         y=plot_clustered["umap_y"],
         mode="markers",
@@ -174,7 +174,7 @@ else:  # Calibration labels
     # Unlabeled points in muted grey first
     labeled_ids = set(calib["doc_id"])
     unlabeled = plot_clustered[~plot_clustered["doc_id"].isin(labeled_ids)]
-    fig.add_trace(go.Scattergl(
+    fig.add_trace(go.Scatter(
         x=unlabeled["umap_x"],
         y=unlabeled["umap_y"],
         mode="markers",
@@ -195,7 +195,7 @@ else:  # Calibration labels
         sub = merged[merged["polemic_label"] == label]
         if len(sub) == 0:
             continue
-        fig.add_trace(go.Scattergl(
+        fig.add_trace(go.Scatter(
             x=sub["umap_x"],
             y=sub["umap_y"],
             mode="markers",
@@ -218,7 +218,7 @@ if selected_cid is not None:
     highlight = ca[ca["cluster_id"] == selected_cid]
     if selected_source != "all":
         highlight = highlight[highlight["source"] == selected_source]
-    fig.add_trace(go.Scattergl(
+    fig.add_trace(go.Scatter(
         x=highlight["umap_x"],
         y=highlight["umap_y"],
         mode="markers",
