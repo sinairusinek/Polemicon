@@ -1,0 +1,426 @@
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:vl="http://visuallibrary.net/vl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd"><responseDate>2026-03-29T14:12:15Z</responseDate><request verb="GetRecord" metadataPrefix="mets" identifier="oai:sammlungen.ub.uni-frankfurt.de/cm:4785731">https://sammlungen.ub.uni-frankfurt.de/cm/oai/</request><GetRecord><record><header><identifier>oai:sammlungen.ub.uni-frankfurt.de/cm:4785731</identifier><datestamp>2014-08-07T16:11:03Z</datestamp><setSpec>ubffmcm</setSpec><setSpec>journal</setSpec></header><metadata><mets:mets xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/version112/mets.xsd" OBJID="5" LABEL="Compact Memory">
+<mets:metsHdr CREATEDATE="2026-03-29T16:12:15"><mets:agent ROLE="OTHER" TYPE="OTHER" OTHERTYPE="SOFTWARE"><mets:name>vls/2412</mets:name></mets:agent><mets:agent ROLE="OTHER" TYPE="OTHER" OTHERTYPE="INSTANCE"><mets:name>ubffm-server</mets:name></mets:agent><mets:agent ROLE="OTHER" TYPE="OTHER" OTHERTYPE="REPOSITORY"><mets:name>sammlungen.ub.uni-frankfurt.de</mets:name></mets:agent><mets:agent ROLE="OTHER" TYPE="OTHER" OTHERTYPE="BUILDER"><mets:name>periodical</mets:name></mets:agent></mets:metsHdr><mets:dmdSec ID="md4788737"><mets:mdWrap MIMETYPE="text/xml" MDTYPE="MODS"><mets:xmlData><mods:mods version="3.8" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd"><mods:typeOfResource>text</mods:typeOfResource><mods:extension><vl:sourceinfo caption="1869" type="volume" id="4788737"/></mods:extension><mods:part><mods:date encoding="w3cdtf">1869</mods:date><mods:detail><mods:number>23</mods:number></mods:detail></mods:part><mods:recordInfo><mods:recordIdentifier source="local">ubffm-server:4788737</mods:recordIdentifier></mods:recordInfo></mods:mods></mets:xmlData></mets:mdWrap></mets:dmdSec><mets:dmdSec ID="md4787844"><mets:mdWrap MIMETYPE="text/xml" MDTYPE="MODS"><mets:xmlData><mods:mods version="3.8" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd"><mods:typeOfResource>text</mods:typeOfResource><mods:extension><vl:sourceinfo caption="1863" type="volume" id="4787844"/></mods:extension><mods:part><mods:date encoding="w3cdtf">1863</mods:date><mods:detail><mods:number>17</mods:number></mods:detail></mods:part><mods:recordInfo><mods:recordIdentifier source="local">ubffm-server:4787844</mods:recordIdentifier></mods:recordInfo></mods:mods></mets:xmlData></mets:mdWrap></mets:dmdSec><mets:dmdSec ID="md4786440"><mets:mdWrap MIMETYPE="text/xml" MDTYPE="MODS"><mets:xmlData><mods:mods version="3.8" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd"><mods:typeOfResource>text</mods:typeOfResource><mods:extension><vl:sourceinfo caption="1852" type="volume" id="4786440"/></mods:extension><mods:part><mods:date encoding="w3cdtf">1852</mods:date><mods:detail><mods:number>7</mods:number></mods:detail></mods:part><mods:recordInfo><mods:recordIdentifier source="local">ubffm-server:4786440</mods:recordIdentifier></mods:recordInfo></mods:mods></mets:xmlData></mets:mdWrap></mets:dmdSec><mets:dmdSec ID="md4787607"><mets:mdWrap MIMETYPE="text/xml" MDTYPE="MODS"><mets:xmlData><mods:mods version="3.8" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd"><mods:typeOfResource>text</mods:typeOfResource><mods:extension><vl:sourceinfo caption="1862" type="volume" id="4787607"/></mods:extension><mods:part><mods:date encoding="w3cdtf">1862</mods:date><mods:detail><mods:number>16</mods:number></mods:detail></mods:part><mods:recordInfo><mods:recordIdentifier source="local">ubffm-server:4787607</mods:recordIdentifier></mods:recordInfo></mods:mods></mets:xmlData></mets:mdWrap></mets:dmdSec><mets:dmdSec ID="md4788634"><mets:mdWrap MIMETYPE="text/xml" MDTYPE="MODS"><mets:xmlData><mods:mods version="3.8" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd"><mods:typeOfResource>text</mods:typeOfResource><mods:extension><vl:sourceinfo caption="1868" type="volume" id="4788634"/></mods:extension><mods:part><mods:date encoding="w3cdtf">1868</mods:date><mods:detail><mods:number>22</mods:number></mods:detail></mods:part><mods:recordInfo><mods:recordIdentifier source="local">ubffm-server:4788634</mods:recordIdentifier></mods:recordInfo></mods:mods></mets:xmlData></mets:mdWrap></mets:dmdSec><mets:dmdSec ID="md6731297"><mets:mdWrap MIMETYPE="text/xml" MDTYPE="MODS"><mets:xmlData><mods:mods version="3.8" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd"><mods:typeOfResource>text</mods:typeOfResource><mods:part><mods:date encoding="w3cdtf">1845</mods:date><mods:detail><mods:number>1</mods:number></mods:detail></mods:part><mods:recordInfo><mods:recordIdentifier source="local">ubffm-server:6731297</mods:recordIdentifier></mods:recordInfo></mods:mods></mets:xmlData></mets:mdWrap></mets:dmdSec><mets:dmdSec ID="md4787506"><mets:mdWrap MIMETYPE="text/xml" MDTYPE="MODS"><mets:xmlData><mods:mods version="3.8" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd"><mods:typeOfResource>text</mods:typeOfResource><mods:extension><vl:sourceinfo caption="1861" type="volume" id="4787506"/></mods:extension><mods:part><mods:date encoding="w3cdtf">1861</mods:date><mods:detail><mods:number>15</mods:number></mods:detail></mods:part><mods:recordInfo><mods:recordIdentifier source="local">ubffm-server:4787506</mods:recordIdentifier></mods:recordInfo></mods:mods></mets:xmlData></mets:mdWrap></mets:dmdSec><mets:dmdSec ID="md4788528"><mets:mdWrap MIMETYPE="text/xml" MDTYPE="MODS"><mets:xmlData><mods:mods version="3.8" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd"><mods:typeOfResource>text</mods:typeOfResource><mods:extension><vl:sourceinfo caption="1867" type="volume" id="4788528"/></mods:extension><mods:part><mods:date encoding="w3cdtf">1867</mods:date><mods:detail><mods:number>21</mods:number></mods:detail></mods:part><mods:recordInfo><mods:recordIdentifier source="local">ubffm-server:4788528</mods:recordIdentifier></mods:recordInfo></mods:mods></mets:xmlData></mets:mdWrap></mets:dmdSec><mets:dmdSec ID="md4787378"><mets:mdWrap MIMETYPE="text/xml" MDTYPE="MODS"><mets:xmlData><mods:mods version="3.8" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd"><mods:typeOfResource>text</mods:typeOfResource><mods:extension><vl:sourceinfo caption="1860" type="volume" id="4787378"/></mods:extension><mods:part><mods:date encoding="w3cdtf">1860</mods:date><mods:detail><mods:number>14</mods:number></mods:detail></mods:part><mods:recordInfo><mods:recordIdentifier source="local">ubffm-server:4787378</mods:recordIdentifier></mods:recordInfo></mods:mods></mets:xmlData></mets:mdWrap></mets:dmdSec><mets:dmdSec ID="md4786740"><mets:mdWrap MIMETYPE="text/xml" MDTYPE="MODS"><mets:xmlData><mods:mods version="3.8" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd"><mods:typeOfResource>text</mods:typeOfResource><mods:extension><vl:sourceinfo caption="1854" type="volume" id="4786740"/></mods:extension><mods:part><mods:date encoding="w3cdtf">1854</mods:date><mods:detail><mods:number>9</mods:number></mods:detail></mods:part><mods:recordInfo><mods:recordIdentifier source="local">ubffm-server:4786740</mods:recordIdentifier></mods:recordInfo></mods:mods></mets:xmlData></mets:mdWrap></mets:dmdSec><mets:dmdSec ID="md4785731"><mets:mdWrap MIMETYPE="text/xml" MDTYPE="MODS"><mets:xmlData><mods:mods version="3.8" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd"><mods:titleInfo script="Latn" altRepGroup="021A:01"><mods:title>Kokhve Yitsḥaḳ</mods:title><mods:subTitle>kolel peri meḥḳar ṿe-yalde melitsah me-ḥakhame ha-dor ...</mods:subTitle></mods:titleInfo><mods:titleInfo script="Hebr" altRepGroup="021A:01"><mods:title>כוכבי יצחק</mods:title></mods:titleInfo><mods:typeOfResource>text</mods:typeOfResource><mods:genre authority="marcgt">journal</mods:genre><mods:originInfo><mods:place><mods:placeTerm type="text">Wien</mods:placeTerm></mods:place><mods:place><mods:placeTerm type="text">וויען</mods:placeTerm></mods:place><mods:dateIssued keyDate="yes" encoding="w3cdtf">1845</mods:dateIssued><mods:dateIssued>1.1845 - 37.1873</mods:dateIssued><mods:issuance>continuing</mods:issuance></mods:originInfo><mods:originInfo><mods:place><mods:placeTerm type="text">Frankfurt, M.</mods:placeTerm></mods:place><mods:publisher>Univ.-Bibl.</mods:publisher><mods:dateIssued encoding="w3cdtf">2014</mods:dateIssued><mods:edition>[Electronic ed.]</mods:edition></mods:originInfo><mods:language><mods:languageTerm authority="iso639-2b" type="code">heb</mods:languageTerm></mods:language><mods:language><mods:languageTerm authority="iso639-2b" type="code">ger</mods:languageTerm></mods:language><mods:physicalDescription><mods:digitalOrigin>reformatted digital</mods:digitalOrigin></mods:physicalDescription><mods:note type="date/sequential designation">1.1845 - 37.1873</mods:note><mods:note>Kokbē jiṣhāq</mods:note><mods:note>Kokhevei yizha</mods:note><mods:note>Kochbe jizchak</mods:note><mods:note>Teils in hebr. Schr</mods:note><mods:identifier type="urn">urn:nbn:de:hebis:30:1-138275</mods:identifier><mods:relatedItem type="preceding"><mods:recordInfo><mods:recordIdentifier source="ubffmcm">344165345</mods:recordIdentifier></mods:recordInfo></mods:relatedItem><mods:extension><vlz:externalType xmlns:vlz="http://visuallibrary.net/vlz/1.0/" recordSyntax="pica" code="Ob"/><vlz:info xmlns:vlz="http://visuallibrary.net/vlz/1.0/" version="1"/></mods:extension><mods:recordInfo><mods:recordCreationDate encoding="marc">05-08-14</mods:recordCreationDate><mods:recordChangeDate encoding="marc">07-09-17</mods:recordChangeDate><mods:recordIdentifier source="ubffmcm">344168190</mods:recordIdentifier><mods:descriptionStandard>rak</mods:descriptionStandard></mods:recordInfo></mods:mods></mets:xmlData></mets:mdWrap></mets:dmdSec><mets:dmdSec ID="md4786244"><mets:mdWrap MIMETYPE="text/xml" MDTYPE="MODS"><mets:xmlData><mods:mods version="3.8" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd"><mods:typeOfResource>text</mods:typeOfResource><mods:extension><vl:sourceinfo caption="1851" type="volume" id="4786244"/></mods:extension><mods:part><mods:date encoding="w3cdtf">1851</mods:date><mods:detail><mods:number>6</mods:number></mods:detail></mods:part><mods:recordInfo><mods:recordIdentifier source="local">ubffm-server:4786244</mods:recordIdentifier></mods:recordInfo></mods:mods></mets:xmlData></mets:mdWrap></mets:dmdSec><mets:dmdSec ID="md4787016"><mets:mdWrap MIMETYPE="text/xml" MDTYPE="MODS"><mets:xmlData><mods:mods version="3.8" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd"><mods:typeOfResource>text</mods:typeOfResource><mods:extension><vl:sourceinfo caption="1856" type="volume" id="4787016"/></mods:extension><mods:part><mods:date encoding="w3cdtf">1856</mods:date><mods:detail><mods:number>11</mods:number></mods:detail></mods:part><mods:recordInfo><mods:recordIdentifier source="local">ubffm-server:4787016</mods:recordIdentifier></mods:recordInfo></mods:mods></mets:xmlData></mets:mdWrap></mets:dmdSec><mets:dmdSec ID="md4788429"><mets:mdWrap MIMETYPE="text/xml" MDTYPE="MODS"><mets:xmlData><mods:mods version="3.8" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd"><mods:typeOfResource>text</mods:typeOfResource><mods:extension><vl:sourceinfo caption="1866" type="volume" id="4788429"/></mods:extension><mods:part><mods:date encoding="w3cdtf">1866</mods:date><mods:detail><mods:number>20</mods:number></mods:detail></mods:part><mods:recordInfo><mods:recordIdentifier source="local">ubffm-server:4788429</mods:recordIdentifier></mods:recordInfo></mods:mods></mets:xmlData></mets:mdWrap></mets:dmdSec><mets:dmdSec ID="md4788047"><mets:mdWrap MIMETYPE="text/xml" MDTYPE="MODS"><mets:xmlData><mods:mods version="3.8" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd"><mods:typeOfResource>text</mods:typeOfResource><mods:extension><vl:sourceinfo caption="1864" type="volume" id="4788047"/></mods:extension><mods:part><mods:date encoding="w3cdtf">1864</mods:date><mods:detail><mods:number>18</mods:number></mods:detail></mods:part><mods:recordInfo><mods:recordIdentifier source="local">ubffm-server:4788047</mods:recordIdentifier></mods:recordInfo></mods:mods></mets:xmlData></mets:mdWrap></mets:dmdSec><mets:dmdSec ID="md4787280"><mets:mdWrap MIMETYPE="text/xml" MDTYPE="MODS"><mets:xmlData><mods:mods version="3.8" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd"><mods:typeOfResource>text</mods:typeOfResource><mods:extension><vl:sourceinfo caption="1858" type="volume" id="4787280"/></mods:extension><mods:part><mods:date encoding="w3cdtf">1858</mods:date><mods:detail><mods:number>13</mods:number></mods:detail></mods:part><mods:recordInfo><mods:recordIdentifier source="local">ubffm-server:4787280</mods:recordIdentifier></mods:recordInfo></mods:mods></mets:xmlData></mets:mdWrap></mets:dmdSec><mets:dmdSec ID="md4788177"><mets:mdWrap MIMETYPE="text/xml" MDTYPE="MODS"><mets:xmlData><mods:mods version="3.8" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd"><mods:typeOfResource>text</mods:typeOfResource><mods:extension><vl:sourceinfo caption="1865" type="volume" id="4788177"/></mods:extension><mods:part><mods:date encoding="w3cdtf">1865</mods:date><mods:detail><mods:number>19</mods:number></mods:detail></mods:part><mods:recordInfo><mods:recordIdentifier source="local">ubffm-server:4788177</mods:recordIdentifier></mods:recordInfo></mods:mods></mets:xmlData></mets:mdWrap></mets:dmdSec><mets:dmdSec ID="md4786642"><mets:mdWrap MIMETYPE="text/xml" MDTYPE="MODS"><mets:xmlData><mods:mods version="3.8" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd"><mods:typeOfResource>text</mods:typeOfResource><mods:extension><vl:sourceinfo caption="1853" type="volume" id="4786642"/></mods:extension><mods:part><mods:date encoding="w3cdtf">1853</mods:date><mods:detail><mods:number>8</mods:number></mods:detail></mods:part><mods:recordInfo><mods:recordIdentifier source="local">ubffm-server:4786642</mods:recordIdentifier></mods:recordInfo></mods:mods></mets:xmlData></mets:mdWrap></mets:dmdSec><mets:dmdSec ID="md4786146"><mets:mdWrap MIMETYPE="text/xml" MDTYPE="MODS"><mets:xmlData><mods:mods version="3.8" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd"><mods:typeOfResource>text</mods:typeOfResource><mods:extension><vl:sourceinfo caption="1850" type="volume" id="4786146"/></mods:extension><mods:part><mods:date encoding="w3cdtf">1850</mods:date><mods:detail><mods:number>5</mods:number></mods:detail></mods:part><mods:recordInfo><mods:recordIdentifier source="local">ubffm-server:4786146</mods:recordIdentifier></mods:recordInfo></mods:mods></mets:xmlData></mets:mdWrap></mets:dmdSec><mets:dmdSec ID="md4788839"><mets:mdWrap MIMETYPE="text/xml" MDTYPE="MODS"><mets:xmlData><mods:mods version="3.8" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd"><mods:typeOfResource>text</mods:typeOfResource><mods:extension><vl:sourceinfo caption="1873" type="volume" id="4788839"/></mods:extension><mods:part><mods:date encoding="w3cdtf">1873</mods:date><mods:detail><mods:number>24</mods:number></mods:detail></mods:part><mods:recordInfo><mods:recordIdentifier source="local">ubffm-server:4788839</mods:recordIdentifier></mods:recordInfo></mods:mods></mets:xmlData></mets:mdWrap></mets:dmdSec><mets:dmdSec ID="md6613229"><mets:mdWrap MIMETYPE="text/xml" MDTYPE="MODS"><mets:xmlData><mods:mods version="3.8" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd"><mods:typeOfResource>text</mods:typeOfResource><mods:extension><vl:sourceinfo caption="1846" type="volume" id="6613229"/></mods:extension><mods:part><mods:date encoding="w3cdtf">1846</mods:date><mods:detail><mods:number>2</mods:number></mods:detail></mods:part><mods:recordInfo><mods:recordIdentifier source="local">ubffm-server:6613229</mods:recordIdentifier></mods:recordInfo></mods:mods></mets:xmlData></mets:mdWrap></mets:dmdSec><mets:dmdSec ID="md6613232"><mets:mdWrap MIMETYPE="text/xml" MDTYPE="MODS"><mets:xmlData><mods:mods version="3.8" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd"><mods:typeOfResource>text</mods:typeOfResource><mods:extension><vl:sourceinfo caption="1847" type="volume" id="6613232"/></mods:extension><mods:part><mods:date encoding="w3cdtf">1847</mods:date><mods:detail><mods:number>3</mods:number></mods:detail></mods:part><mods:recordInfo><mods:recordIdentifier source="local">ubffm-server:6613232</mods:recordIdentifier></mods:recordInfo></mods:mods></mets:xmlData></mets:mdWrap></mets:dmdSec><mets:dmdSec ID="md4786934"><mets:mdWrap MIMETYPE="text/xml" MDTYPE="MODS"><mets:xmlData><mods:mods version="3.8" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd"><mods:typeOfResource>text</mods:typeOfResource><mods:extension><vl:sourceinfo caption="1855" type="volume" id="4786934"/></mods:extension><mods:part><mods:date encoding="w3cdtf">1855</mods:date><mods:detail><mods:number>10</mods:number></mods:detail></mods:part><mods:recordInfo><mods:recordIdentifier source="local">ubffm-server:4786934</mods:recordIdentifier></mods:recordInfo></mods:mods></mets:xmlData></mets:mdWrap></mets:dmdSec><mets:dmdSec ID="md6613241"><mets:mdWrap MIMETYPE="text/xml" MDTYPE="MODS"><mets:xmlData><mods:mods version="3.8" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd"><mods:typeOfResource>text</mods:typeOfResource><mods:extension><vl:sourceinfo caption="1848" type="volume" id="6613241"/></mods:extension><mods:part><mods:date encoding="w3cdtf">1848</mods:date><mods:detail><mods:number>4</mods:number></mods:detail></mods:part><mods:recordInfo><mods:recordIdentifier source="local">ubffm-server:6613241</mods:recordIdentifier></mods:recordInfo></mods:mods></mets:xmlData></mets:mdWrap></mets:dmdSec><mets:dmdSec ID="md4787198"><mets:mdWrap MIMETYPE="text/xml" MDTYPE="MODS"><mets:xmlData><mods:mods version="3.8" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-8.xsd"><mods:typeOfResource>text</mods:typeOfResource><mods:extension><vl:sourceinfo caption="1857" type="volume" id="4787198"/></mods:extension><mods:part><mods:date encoding="w3cdtf">1857</mods:date><mods:detail><mods:number>12</mods:number></mods:detail></mods:part><mods:recordInfo><mods:recordIdentifier source="local">ubffm-server:4787198</mods:recordIdentifier></mods:recordInfo></mods:mods></mets:xmlData></mets:mdWrap></mets:dmdSec><mets:amdSec ID="amd4785731"><mets:rightsMD ID="rights4785731">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVRIGHTS">
+<mets:xmlData>
+<dv:rights xmlns:dv="http://dfg-viewer.de/">
+<dv:ownerLogo>https://sammlungen.ub.uni-frankfurt.de//domainresource/static/graphics/connectors/viewerLogo.gif</dv:ownerLogo><dv:owner>Universitätsbibliothek Johann Christian Senckenberg</dv:owner><dv:ownerSiteURL>http://sammlungen.ub.uni-frankfurt.de</dv:ownerSiteURL><dv:ownerContact>mailto:information@ub.uni-frankfurt.de</dv:ownerContact></dv:rights>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:rightsMD><mets:digiprovMD ID="digiprov4785731">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVLINKS">
+<mets:xmlData>
+<dv:links xmlns:dv="http://dfg-viewer.de/">
+<dv:reference>https://ubffm.hds.hebis.de/Record/HEB344168190</dv:reference>
+<dv:presentation>https://sammlungen.ub.uni-frankfurt.de/id/4785731</dv:presentation>
+<dv:sru>https://sammlungen.ub.uni-frankfurt.de/proto_ftsearch/4785731</dv:sru></dv:links>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:digiprovMD></mets:amdSec><mets:amdSec ID="amd4786146"><mets:rightsMD ID="rights4786146">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVRIGHTS">
+<mets:xmlData>
+<dv:rights xmlns:dv="http://dfg-viewer.de/">
+<dv:ownerLogo>https://sammlungen.ub.uni-frankfurt.de//domainresource/static/graphics/connectors/viewerLogo.gif</dv:ownerLogo><dv:owner>Universitätsbibliothek Johann Christian Senckenberg</dv:owner><dv:ownerSiteURL>http://sammlungen.ub.uni-frankfurt.de</dv:ownerSiteURL><dv:ownerContact>mailto:information@ub.uni-frankfurt.de</dv:ownerContact></dv:rights>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:rightsMD><mets:digiprovMD ID="digiprov4786146">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVLINKS">
+<mets:xmlData>
+<dv:links xmlns:dv="http://dfg-viewer.de/">
+<dv:reference>https://ubffm.hds.hebis.de/Record/HEBubffm-server%3A4786146</dv:reference>
+<dv:presentation>https://sammlungen.ub.uni-frankfurt.de/id/4786146</dv:presentation>
+<dv:iiif>https://sammlungen.ub.uni-frankfurt.de/i3f/v20/4786146/manifest</dv:iiif>
+<dv:sru>https://sammlungen.ub.uni-frankfurt.de/proto_ftsearch/4786146</dv:sru></dv:links>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:digiprovMD></mets:amdSec><mets:amdSec ID="amd4786244"><mets:rightsMD ID="rights4786244">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVRIGHTS">
+<mets:xmlData>
+<dv:rights xmlns:dv="http://dfg-viewer.de/">
+<dv:ownerLogo>https://sammlungen.ub.uni-frankfurt.de//domainresource/static/graphics/connectors/viewerLogo.gif</dv:ownerLogo><dv:owner>Universitätsbibliothek Johann Christian Senckenberg</dv:owner><dv:ownerSiteURL>http://sammlungen.ub.uni-frankfurt.de</dv:ownerSiteURL><dv:ownerContact>mailto:information@ub.uni-frankfurt.de</dv:ownerContact></dv:rights>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:rightsMD><mets:digiprovMD ID="digiprov4786244">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVLINKS">
+<mets:xmlData>
+<dv:links xmlns:dv="http://dfg-viewer.de/">
+<dv:reference>https://ubffm.hds.hebis.de/Record/HEBubffm-server%3A4786244</dv:reference>
+<dv:presentation>https://sammlungen.ub.uni-frankfurt.de/id/4786244</dv:presentation>
+<dv:iiif>https://sammlungen.ub.uni-frankfurt.de/i3f/v20/4786244/manifest</dv:iiif>
+<dv:sru>https://sammlungen.ub.uni-frankfurt.de/proto_ftsearch/4786244</dv:sru></dv:links>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:digiprovMD></mets:amdSec><mets:amdSec ID="amd4786440"><mets:rightsMD ID="rights4786440">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVRIGHTS">
+<mets:xmlData>
+<dv:rights xmlns:dv="http://dfg-viewer.de/">
+<dv:ownerLogo>https://sammlungen.ub.uni-frankfurt.de//domainresource/static/graphics/connectors/viewerLogo.gif</dv:ownerLogo><dv:owner>Universitätsbibliothek Johann Christian Senckenberg</dv:owner><dv:ownerSiteURL>http://sammlungen.ub.uni-frankfurt.de</dv:ownerSiteURL><dv:ownerContact>mailto:information@ub.uni-frankfurt.de</dv:ownerContact></dv:rights>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:rightsMD><mets:digiprovMD ID="digiprov4786440">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVLINKS">
+<mets:xmlData>
+<dv:links xmlns:dv="http://dfg-viewer.de/">
+<dv:reference>https://ubffm.hds.hebis.de/Record/HEBubffm-server%3A4786440</dv:reference>
+<dv:presentation>https://sammlungen.ub.uni-frankfurt.de/id/4786440</dv:presentation>
+<dv:iiif>https://sammlungen.ub.uni-frankfurt.de/i3f/v20/4786440/manifest</dv:iiif>
+<dv:sru>https://sammlungen.ub.uni-frankfurt.de/proto_ftsearch/4786440</dv:sru></dv:links>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:digiprovMD></mets:amdSec><mets:amdSec ID="amd4786642"><mets:rightsMD ID="rights4786642">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVRIGHTS">
+<mets:xmlData>
+<dv:rights xmlns:dv="http://dfg-viewer.de/">
+<dv:ownerLogo>https://sammlungen.ub.uni-frankfurt.de//domainresource/static/graphics/connectors/viewerLogo.gif</dv:ownerLogo><dv:owner>Universitätsbibliothek Johann Christian Senckenberg</dv:owner><dv:ownerSiteURL>http://sammlungen.ub.uni-frankfurt.de</dv:ownerSiteURL><dv:ownerContact>mailto:information@ub.uni-frankfurt.de</dv:ownerContact></dv:rights>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:rightsMD><mets:digiprovMD ID="digiprov4786642">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVLINKS">
+<mets:xmlData>
+<dv:links xmlns:dv="http://dfg-viewer.de/">
+<dv:reference>https://ubffm.hds.hebis.de/Record/HEBubffm-server%3A4786642</dv:reference>
+<dv:presentation>https://sammlungen.ub.uni-frankfurt.de/id/4786642</dv:presentation>
+<dv:iiif>https://sammlungen.ub.uni-frankfurt.de/i3f/v20/4786642/manifest</dv:iiif>
+<dv:sru>https://sammlungen.ub.uni-frankfurt.de/proto_ftsearch/4786642</dv:sru></dv:links>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:digiprovMD></mets:amdSec><mets:amdSec ID="amd4786740"><mets:rightsMD ID="rights4786740">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVRIGHTS">
+<mets:xmlData>
+<dv:rights xmlns:dv="http://dfg-viewer.de/">
+<dv:ownerLogo>https://sammlungen.ub.uni-frankfurt.de//domainresource/static/graphics/connectors/viewerLogo.gif</dv:ownerLogo><dv:owner>Universitätsbibliothek Johann Christian Senckenberg</dv:owner><dv:ownerSiteURL>http://sammlungen.ub.uni-frankfurt.de</dv:ownerSiteURL><dv:ownerContact>mailto:information@ub.uni-frankfurt.de</dv:ownerContact></dv:rights>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:rightsMD><mets:digiprovMD ID="digiprov4786740">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVLINKS">
+<mets:xmlData>
+<dv:links xmlns:dv="http://dfg-viewer.de/">
+<dv:reference>https://ubffm.hds.hebis.de/Record/HEBubffm-server%3A4786740</dv:reference>
+<dv:presentation>https://sammlungen.ub.uni-frankfurt.de/id/4786740</dv:presentation>
+<dv:iiif>https://sammlungen.ub.uni-frankfurt.de/i3f/v20/4786740/manifest</dv:iiif>
+<dv:sru>https://sammlungen.ub.uni-frankfurt.de/proto_ftsearch/4786740</dv:sru></dv:links>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:digiprovMD></mets:amdSec><mets:amdSec ID="amd4786934"><mets:rightsMD ID="rights4786934">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVRIGHTS">
+<mets:xmlData>
+<dv:rights xmlns:dv="http://dfg-viewer.de/">
+<dv:ownerLogo>https://sammlungen.ub.uni-frankfurt.de//domainresource/static/graphics/connectors/viewerLogo.gif</dv:ownerLogo><dv:owner>Universitätsbibliothek Johann Christian Senckenberg</dv:owner><dv:ownerSiteURL>http://sammlungen.ub.uni-frankfurt.de</dv:ownerSiteURL><dv:ownerContact>mailto:information@ub.uni-frankfurt.de</dv:ownerContact></dv:rights>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:rightsMD><mets:digiprovMD ID="digiprov4786934">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVLINKS">
+<mets:xmlData>
+<dv:links xmlns:dv="http://dfg-viewer.de/">
+<dv:reference>https://ubffm.hds.hebis.de/Record/HEBubffm-server%3A4786934</dv:reference>
+<dv:presentation>https://sammlungen.ub.uni-frankfurt.de/id/4786934</dv:presentation>
+<dv:iiif>https://sammlungen.ub.uni-frankfurt.de/i3f/v20/4786934/manifest</dv:iiif>
+<dv:sru>https://sammlungen.ub.uni-frankfurt.de/proto_ftsearch/4786934</dv:sru></dv:links>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:digiprovMD></mets:amdSec><mets:amdSec ID="amd4787016"><mets:rightsMD ID="rights4787016">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVRIGHTS">
+<mets:xmlData>
+<dv:rights xmlns:dv="http://dfg-viewer.de/">
+<dv:ownerLogo>https://sammlungen.ub.uni-frankfurt.de//domainresource/static/graphics/connectors/viewerLogo.gif</dv:ownerLogo><dv:owner>Universitätsbibliothek Johann Christian Senckenberg</dv:owner><dv:ownerSiteURL>http://sammlungen.ub.uni-frankfurt.de</dv:ownerSiteURL><dv:ownerContact>mailto:information@ub.uni-frankfurt.de</dv:ownerContact></dv:rights>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:rightsMD><mets:digiprovMD ID="digiprov4787016">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVLINKS">
+<mets:xmlData>
+<dv:links xmlns:dv="http://dfg-viewer.de/">
+<dv:reference>https://ubffm.hds.hebis.de/Record/HEBubffm-server%3A4787016</dv:reference>
+<dv:presentation>https://sammlungen.ub.uni-frankfurt.de/id/4787016</dv:presentation>
+<dv:iiif>https://sammlungen.ub.uni-frankfurt.de/i3f/v20/4787016/manifest</dv:iiif>
+<dv:sru>https://sammlungen.ub.uni-frankfurt.de/proto_ftsearch/4787016</dv:sru></dv:links>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:digiprovMD></mets:amdSec><mets:amdSec ID="amd4787198"><mets:rightsMD ID="rights4787198">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVRIGHTS">
+<mets:xmlData>
+<dv:rights xmlns:dv="http://dfg-viewer.de/">
+<dv:ownerLogo>https://sammlungen.ub.uni-frankfurt.de//domainresource/static/graphics/connectors/viewerLogo.gif</dv:ownerLogo><dv:owner>Universitätsbibliothek Johann Christian Senckenberg</dv:owner><dv:ownerSiteURL>http://sammlungen.ub.uni-frankfurt.de</dv:ownerSiteURL><dv:ownerContact>mailto:information@ub.uni-frankfurt.de</dv:ownerContact></dv:rights>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:rightsMD><mets:digiprovMD ID="digiprov4787198">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVLINKS">
+<mets:xmlData>
+<dv:links xmlns:dv="http://dfg-viewer.de/">
+<dv:reference>https://ubffm.hds.hebis.de/Record/HEBubffm-server%3A4787198</dv:reference>
+<dv:presentation>https://sammlungen.ub.uni-frankfurt.de/id/4787198</dv:presentation>
+<dv:iiif>https://sammlungen.ub.uni-frankfurt.de/i3f/v20/4787198/manifest</dv:iiif>
+<dv:sru>https://sammlungen.ub.uni-frankfurt.de/proto_ftsearch/4787198</dv:sru></dv:links>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:digiprovMD></mets:amdSec><mets:amdSec ID="amd4787280"><mets:rightsMD ID="rights4787280">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVRIGHTS">
+<mets:xmlData>
+<dv:rights xmlns:dv="http://dfg-viewer.de/">
+<dv:ownerLogo>https://sammlungen.ub.uni-frankfurt.de//domainresource/static/graphics/connectors/viewerLogo.gif</dv:ownerLogo><dv:owner>Universitätsbibliothek Johann Christian Senckenberg</dv:owner><dv:ownerSiteURL>http://sammlungen.ub.uni-frankfurt.de</dv:ownerSiteURL><dv:ownerContact>mailto:information@ub.uni-frankfurt.de</dv:ownerContact></dv:rights>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:rightsMD><mets:digiprovMD ID="digiprov4787280">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVLINKS">
+<mets:xmlData>
+<dv:links xmlns:dv="http://dfg-viewer.de/">
+<dv:reference>https://ubffm.hds.hebis.de/Record/HEBubffm-server%3A4787280</dv:reference>
+<dv:presentation>https://sammlungen.ub.uni-frankfurt.de/id/4787280</dv:presentation>
+<dv:iiif>https://sammlungen.ub.uni-frankfurt.de/i3f/v20/4787280/manifest</dv:iiif>
+<dv:sru>https://sammlungen.ub.uni-frankfurt.de/proto_ftsearch/4787280</dv:sru></dv:links>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:digiprovMD></mets:amdSec><mets:amdSec ID="amd4787378"><mets:rightsMD ID="rights4787378">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVRIGHTS">
+<mets:xmlData>
+<dv:rights xmlns:dv="http://dfg-viewer.de/">
+<dv:ownerLogo>https://sammlungen.ub.uni-frankfurt.de//domainresource/static/graphics/connectors/viewerLogo.gif</dv:ownerLogo><dv:owner>Universitätsbibliothek Johann Christian Senckenberg</dv:owner><dv:ownerSiteURL>http://sammlungen.ub.uni-frankfurt.de</dv:ownerSiteURL><dv:ownerContact>mailto:information@ub.uni-frankfurt.de</dv:ownerContact></dv:rights>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:rightsMD><mets:digiprovMD ID="digiprov4787378">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVLINKS">
+<mets:xmlData>
+<dv:links xmlns:dv="http://dfg-viewer.de/">
+<dv:reference>https://ubffm.hds.hebis.de/Record/HEBubffm-server%3A4787378</dv:reference>
+<dv:presentation>https://sammlungen.ub.uni-frankfurt.de/id/4787378</dv:presentation>
+<dv:iiif>https://sammlungen.ub.uni-frankfurt.de/i3f/v20/4787378/manifest</dv:iiif>
+<dv:sru>https://sammlungen.ub.uni-frankfurt.de/proto_ftsearch/4787378</dv:sru></dv:links>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:digiprovMD></mets:amdSec><mets:amdSec ID="amd4787506"><mets:rightsMD ID="rights4787506">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVRIGHTS">
+<mets:xmlData>
+<dv:rights xmlns:dv="http://dfg-viewer.de/">
+<dv:ownerLogo>https://sammlungen.ub.uni-frankfurt.de//domainresource/static/graphics/connectors/viewerLogo.gif</dv:ownerLogo><dv:owner>Universitätsbibliothek Johann Christian Senckenberg</dv:owner><dv:ownerSiteURL>http://sammlungen.ub.uni-frankfurt.de</dv:ownerSiteURL><dv:ownerContact>mailto:information@ub.uni-frankfurt.de</dv:ownerContact></dv:rights>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:rightsMD><mets:digiprovMD ID="digiprov4787506">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVLINKS">
+<mets:xmlData>
+<dv:links xmlns:dv="http://dfg-viewer.de/">
+<dv:reference>https://ubffm.hds.hebis.de/Record/HEBubffm-server%3A4787506</dv:reference>
+<dv:presentation>https://sammlungen.ub.uni-frankfurt.de/id/4787506</dv:presentation>
+<dv:iiif>https://sammlungen.ub.uni-frankfurt.de/i3f/v20/4787506/manifest</dv:iiif>
+<dv:sru>https://sammlungen.ub.uni-frankfurt.de/proto_ftsearch/4787506</dv:sru></dv:links>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:digiprovMD></mets:amdSec><mets:amdSec ID="amd4787607"><mets:rightsMD ID="rights4787607">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVRIGHTS">
+<mets:xmlData>
+<dv:rights xmlns:dv="http://dfg-viewer.de/">
+<dv:ownerLogo>https://sammlungen.ub.uni-frankfurt.de//domainresource/static/graphics/connectors/viewerLogo.gif</dv:ownerLogo><dv:owner>Universitätsbibliothek Johann Christian Senckenberg</dv:owner><dv:ownerSiteURL>http://sammlungen.ub.uni-frankfurt.de</dv:ownerSiteURL><dv:ownerContact>mailto:information@ub.uni-frankfurt.de</dv:ownerContact></dv:rights>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:rightsMD><mets:digiprovMD ID="digiprov4787607">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVLINKS">
+<mets:xmlData>
+<dv:links xmlns:dv="http://dfg-viewer.de/">
+<dv:reference>https://ubffm.hds.hebis.de/Record/HEBubffm-server%3A4787607</dv:reference>
+<dv:presentation>https://sammlungen.ub.uni-frankfurt.de/id/4787607</dv:presentation>
+<dv:iiif>https://sammlungen.ub.uni-frankfurt.de/i3f/v20/4787607/manifest</dv:iiif>
+<dv:sru>https://sammlungen.ub.uni-frankfurt.de/proto_ftsearch/4787607</dv:sru></dv:links>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:digiprovMD></mets:amdSec><mets:amdSec ID="amd4787844"><mets:rightsMD ID="rights4787844">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVRIGHTS">
+<mets:xmlData>
+<dv:rights xmlns:dv="http://dfg-viewer.de/">
+<dv:ownerLogo>https://sammlungen.ub.uni-frankfurt.de//domainresource/static/graphics/connectors/viewerLogo.gif</dv:ownerLogo><dv:owner>Universitätsbibliothek Johann Christian Senckenberg</dv:owner><dv:ownerSiteURL>http://sammlungen.ub.uni-frankfurt.de</dv:ownerSiteURL><dv:ownerContact>mailto:information@ub.uni-frankfurt.de</dv:ownerContact></dv:rights>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:rightsMD><mets:digiprovMD ID="digiprov4787844">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVLINKS">
+<mets:xmlData>
+<dv:links xmlns:dv="http://dfg-viewer.de/">
+<dv:reference>https://ubffm.hds.hebis.de/Record/HEBubffm-server%3A4787844</dv:reference>
+<dv:presentation>https://sammlungen.ub.uni-frankfurt.de/id/4787844</dv:presentation>
+<dv:iiif>https://sammlungen.ub.uni-frankfurt.de/i3f/v20/4787844/manifest</dv:iiif>
+<dv:sru>https://sammlungen.ub.uni-frankfurt.de/proto_ftsearch/4787844</dv:sru></dv:links>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:digiprovMD></mets:amdSec><mets:amdSec ID="amd4788047"><mets:rightsMD ID="rights4788047">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVRIGHTS">
+<mets:xmlData>
+<dv:rights xmlns:dv="http://dfg-viewer.de/">
+<dv:ownerLogo>https://sammlungen.ub.uni-frankfurt.de//domainresource/static/graphics/connectors/viewerLogo.gif</dv:ownerLogo><dv:owner>Universitätsbibliothek Johann Christian Senckenberg</dv:owner><dv:ownerSiteURL>http://sammlungen.ub.uni-frankfurt.de</dv:ownerSiteURL><dv:ownerContact>mailto:information@ub.uni-frankfurt.de</dv:ownerContact></dv:rights>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:rightsMD><mets:digiprovMD ID="digiprov4788047">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVLINKS">
+<mets:xmlData>
+<dv:links xmlns:dv="http://dfg-viewer.de/">
+<dv:reference>https://ubffm.hds.hebis.de/Record/HEBubffm-server%3A4788047</dv:reference>
+<dv:presentation>https://sammlungen.ub.uni-frankfurt.de/id/4788047</dv:presentation>
+<dv:iiif>https://sammlungen.ub.uni-frankfurt.de/i3f/v20/4788047/manifest</dv:iiif>
+<dv:sru>https://sammlungen.ub.uni-frankfurt.de/proto_ftsearch/4788047</dv:sru></dv:links>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:digiprovMD></mets:amdSec><mets:amdSec ID="amd4788177"><mets:rightsMD ID="rights4788177">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVRIGHTS">
+<mets:xmlData>
+<dv:rights xmlns:dv="http://dfg-viewer.de/">
+<dv:ownerLogo>https://sammlungen.ub.uni-frankfurt.de//domainresource/static/graphics/connectors/viewerLogo.gif</dv:ownerLogo><dv:owner>Universitätsbibliothek Johann Christian Senckenberg</dv:owner><dv:ownerSiteURL>http://sammlungen.ub.uni-frankfurt.de</dv:ownerSiteURL><dv:ownerContact>mailto:information@ub.uni-frankfurt.de</dv:ownerContact></dv:rights>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:rightsMD><mets:digiprovMD ID="digiprov4788177">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVLINKS">
+<mets:xmlData>
+<dv:links xmlns:dv="http://dfg-viewer.de/">
+<dv:reference>https://ubffm.hds.hebis.de/Record/HEBubffm-server%3A4788177</dv:reference>
+<dv:presentation>https://sammlungen.ub.uni-frankfurt.de/id/4788177</dv:presentation>
+<dv:iiif>https://sammlungen.ub.uni-frankfurt.de/i3f/v20/4788177/manifest</dv:iiif>
+<dv:sru>https://sammlungen.ub.uni-frankfurt.de/proto_ftsearch/4788177</dv:sru></dv:links>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:digiprovMD></mets:amdSec><mets:amdSec ID="amd4788429"><mets:rightsMD ID="rights4788429">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVRIGHTS">
+<mets:xmlData>
+<dv:rights xmlns:dv="http://dfg-viewer.de/">
+<dv:ownerLogo>https://sammlungen.ub.uni-frankfurt.de//domainresource/static/graphics/connectors/viewerLogo.gif</dv:ownerLogo><dv:owner>Universitätsbibliothek Johann Christian Senckenberg</dv:owner><dv:ownerSiteURL>http://sammlungen.ub.uni-frankfurt.de</dv:ownerSiteURL><dv:ownerContact>mailto:information@ub.uni-frankfurt.de</dv:ownerContact></dv:rights>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:rightsMD><mets:digiprovMD ID="digiprov4788429">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVLINKS">
+<mets:xmlData>
+<dv:links xmlns:dv="http://dfg-viewer.de/">
+<dv:reference>https://ubffm.hds.hebis.de/Record/HEBubffm-server%3A4788429</dv:reference>
+<dv:presentation>https://sammlungen.ub.uni-frankfurt.de/id/4788429</dv:presentation>
+<dv:iiif>https://sammlungen.ub.uni-frankfurt.de/i3f/v20/4788429/manifest</dv:iiif>
+<dv:sru>https://sammlungen.ub.uni-frankfurt.de/proto_ftsearch/4788429</dv:sru></dv:links>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:digiprovMD></mets:amdSec><mets:amdSec ID="amd4788528"><mets:rightsMD ID="rights4788528">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVRIGHTS">
+<mets:xmlData>
+<dv:rights xmlns:dv="http://dfg-viewer.de/">
+<dv:ownerLogo>https://sammlungen.ub.uni-frankfurt.de//domainresource/static/graphics/connectors/viewerLogo.gif</dv:ownerLogo><dv:owner>Universitätsbibliothek Johann Christian Senckenberg</dv:owner><dv:ownerSiteURL>http://sammlungen.ub.uni-frankfurt.de</dv:ownerSiteURL><dv:ownerContact>mailto:information@ub.uni-frankfurt.de</dv:ownerContact></dv:rights>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:rightsMD><mets:digiprovMD ID="digiprov4788528">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVLINKS">
+<mets:xmlData>
+<dv:links xmlns:dv="http://dfg-viewer.de/">
+<dv:reference>https://ubffm.hds.hebis.de/Record/HEBubffm-server%3A4788528</dv:reference>
+<dv:presentation>https://sammlungen.ub.uni-frankfurt.de/id/4788528</dv:presentation>
+<dv:iiif>https://sammlungen.ub.uni-frankfurt.de/i3f/v20/4788528/manifest</dv:iiif>
+<dv:sru>https://sammlungen.ub.uni-frankfurt.de/proto_ftsearch/4788528</dv:sru></dv:links>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:digiprovMD></mets:amdSec><mets:amdSec ID="amd4788634"><mets:rightsMD ID="rights4788634">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVRIGHTS">
+<mets:xmlData>
+<dv:rights xmlns:dv="http://dfg-viewer.de/">
+<dv:ownerLogo>https://sammlungen.ub.uni-frankfurt.de//domainresource/static/graphics/connectors/viewerLogo.gif</dv:ownerLogo><dv:owner>Universitätsbibliothek Johann Christian Senckenberg</dv:owner><dv:ownerSiteURL>http://sammlungen.ub.uni-frankfurt.de</dv:ownerSiteURL><dv:ownerContact>mailto:information@ub.uni-frankfurt.de</dv:ownerContact></dv:rights>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:rightsMD><mets:digiprovMD ID="digiprov4788634">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVLINKS">
+<mets:xmlData>
+<dv:links xmlns:dv="http://dfg-viewer.de/">
+<dv:reference>https://ubffm.hds.hebis.de/Record/HEBubffm-server%3A4788634</dv:reference>
+<dv:presentation>https://sammlungen.ub.uni-frankfurt.de/id/4788634</dv:presentation>
+<dv:iiif>https://sammlungen.ub.uni-frankfurt.de/i3f/v20/4788634/manifest</dv:iiif>
+<dv:sru>https://sammlungen.ub.uni-frankfurt.de/proto_ftsearch/4788634</dv:sru></dv:links>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:digiprovMD></mets:amdSec><mets:amdSec ID="amd4788737"><mets:rightsMD ID="rights4788737">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVRIGHTS">
+<mets:xmlData>
+<dv:rights xmlns:dv="http://dfg-viewer.de/">
+<dv:ownerLogo>https://sammlungen.ub.uni-frankfurt.de//domainresource/static/graphics/connectors/viewerLogo.gif</dv:ownerLogo><dv:owner>Universitätsbibliothek Johann Christian Senckenberg</dv:owner><dv:ownerSiteURL>http://sammlungen.ub.uni-frankfurt.de</dv:ownerSiteURL><dv:ownerContact>mailto:information@ub.uni-frankfurt.de</dv:ownerContact></dv:rights>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:rightsMD><mets:digiprovMD ID="digiprov4788737">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVLINKS">
+<mets:xmlData>
+<dv:links xmlns:dv="http://dfg-viewer.de/">
+<dv:reference>https://ubffm.hds.hebis.de/Record/HEBubffm-server%3A4788737</dv:reference>
+<dv:presentation>https://sammlungen.ub.uni-frankfurt.de/id/4788737</dv:presentation>
+<dv:iiif>https://sammlungen.ub.uni-frankfurt.de/i3f/v20/4788737/manifest</dv:iiif>
+<dv:sru>https://sammlungen.ub.uni-frankfurt.de/proto_ftsearch/4788737</dv:sru></dv:links>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:digiprovMD></mets:amdSec><mets:amdSec ID="amd4788839"><mets:rightsMD ID="rights4788839">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVRIGHTS">
+<mets:xmlData>
+<dv:rights xmlns:dv="http://dfg-viewer.de/">
+<dv:ownerLogo>https://sammlungen.ub.uni-frankfurt.de//domainresource/static/graphics/connectors/viewerLogo.gif</dv:ownerLogo><dv:owner>Universitätsbibliothek Johann Christian Senckenberg</dv:owner><dv:ownerSiteURL>http://sammlungen.ub.uni-frankfurt.de</dv:ownerSiteURL><dv:ownerContact>mailto:information@ub.uni-frankfurt.de</dv:ownerContact></dv:rights>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:rightsMD><mets:digiprovMD ID="digiprov4788839">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVLINKS">
+<mets:xmlData>
+<dv:links xmlns:dv="http://dfg-viewer.de/">
+<dv:reference>https://ubffm.hds.hebis.de/Record/HEBubffm-server%3A4788839</dv:reference>
+<dv:presentation>https://sammlungen.ub.uni-frankfurt.de/id/4788839</dv:presentation>
+<dv:iiif>https://sammlungen.ub.uni-frankfurt.de/i3f/v20/4788839/manifest</dv:iiif>
+<dv:sru>https://sammlungen.ub.uni-frankfurt.de/proto_ftsearch/4788839</dv:sru></dv:links>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:digiprovMD></mets:amdSec><mets:amdSec ID="amd6613229"><mets:rightsMD ID="rights6613229">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVRIGHTS">
+<mets:xmlData>
+<dv:rights xmlns:dv="http://dfg-viewer.de/">
+<dv:ownerLogo>https://sammlungen.ub.uni-frankfurt.de//domainresource/static/graphics/connectors/viewerLogo.gif</dv:ownerLogo><dv:owner>Universitätsbibliothek Johann Christian Senckenberg</dv:owner><dv:ownerSiteURL>http://sammlungen.ub.uni-frankfurt.de</dv:ownerSiteURL><dv:ownerContact>mailto:information@ub.uni-frankfurt.de</dv:ownerContact></dv:rights>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:rightsMD><mets:digiprovMD ID="digiprov6613229">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVLINKS">
+<mets:xmlData>
+<dv:links xmlns:dv="http://dfg-viewer.de/">
+<dv:reference>https://ubffm.hds.hebis.de/Record/HEBubffm-server%3A6613229</dv:reference>
+<dv:presentation>https://sammlungen.ub.uni-frankfurt.de/id/6613229</dv:presentation>
+<dv:iiif>https://sammlungen.ub.uni-frankfurt.de/i3f/v20/6613229/manifest</dv:iiif>
+<dv:sru>https://sammlungen.ub.uni-frankfurt.de/proto_ftsearch/6613229</dv:sru></dv:links>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:digiprovMD></mets:amdSec><mets:amdSec ID="amd6613232"><mets:rightsMD ID="rights6613232">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVRIGHTS">
+<mets:xmlData>
+<dv:rights xmlns:dv="http://dfg-viewer.de/">
+<dv:ownerLogo>https://sammlungen.ub.uni-frankfurt.de//domainresource/static/graphics/connectors/viewerLogo.gif</dv:ownerLogo><dv:owner>Universitätsbibliothek Johann Christian Senckenberg</dv:owner><dv:ownerSiteURL>http://sammlungen.ub.uni-frankfurt.de</dv:ownerSiteURL><dv:ownerContact>mailto:information@ub.uni-frankfurt.de</dv:ownerContact></dv:rights>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:rightsMD><mets:digiprovMD ID="digiprov6613232">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVLINKS">
+<mets:xmlData>
+<dv:links xmlns:dv="http://dfg-viewer.de/">
+<dv:reference>https://ubffm.hds.hebis.de/Record/HEBubffm-server%3A6613232</dv:reference>
+<dv:presentation>https://sammlungen.ub.uni-frankfurt.de/id/6613232</dv:presentation>
+<dv:iiif>https://sammlungen.ub.uni-frankfurt.de/i3f/v20/6613232/manifest</dv:iiif>
+<dv:sru>https://sammlungen.ub.uni-frankfurt.de/proto_ftsearch/6613232</dv:sru></dv:links>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:digiprovMD></mets:amdSec><mets:amdSec ID="amd6613241"><mets:rightsMD ID="rights6613241">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVRIGHTS">
+<mets:xmlData>
+<dv:rights xmlns:dv="http://dfg-viewer.de/">
+<dv:ownerLogo>https://sammlungen.ub.uni-frankfurt.de//domainresource/static/graphics/connectors/viewerLogo.gif</dv:ownerLogo><dv:owner>Universitätsbibliothek Johann Christian Senckenberg</dv:owner><dv:ownerSiteURL>http://sammlungen.ub.uni-frankfurt.de</dv:ownerSiteURL><dv:ownerContact>mailto:information@ub.uni-frankfurt.de</dv:ownerContact></dv:rights>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:rightsMD><mets:digiprovMD ID="digiprov6613241">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVLINKS">
+<mets:xmlData>
+<dv:links xmlns:dv="http://dfg-viewer.de/">
+<dv:reference>https://ubffm.hds.hebis.de/Record/HEBubffm-server%3A6613241</dv:reference>
+<dv:presentation>https://sammlungen.ub.uni-frankfurt.de/id/6613241</dv:presentation>
+<dv:iiif>https://sammlungen.ub.uni-frankfurt.de/i3f/v20/6613241/manifest</dv:iiif>
+<dv:sru>https://sammlungen.ub.uni-frankfurt.de/proto_ftsearch/6613241</dv:sru></dv:links>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:digiprovMD></mets:amdSec><mets:amdSec ID="amd6731297"><mets:rightsMD ID="rights6731297">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVRIGHTS">
+<mets:xmlData>
+<dv:rights xmlns:dv="http://dfg-viewer.de/">
+<dv:ownerLogo>https://sammlungen.ub.uni-frankfurt.de//domainresource/static/graphics/connectors/viewerLogo.gif</dv:ownerLogo><dv:owner>Universitätsbibliothek Johann Christian Senckenberg</dv:owner><dv:ownerSiteURL>http://sammlungen.ub.uni-frankfurt.de</dv:ownerSiteURL><dv:ownerContact>mailto:information@ub.uni-frankfurt.de</dv:ownerContact></dv:rights>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:rightsMD><mets:digiprovMD ID="digiprov6731297">
+<mets:mdWrap MIMETYPE="text/xml" MDTYPE="OTHER" OTHERMDTYPE="DVLINKS">
+<mets:xmlData>
+<dv:links xmlns:dv="http://dfg-viewer.de/">
+<dv:reference>https://ubffm.hds.hebis.de/Record/HEBubffm-server%3A6731297</dv:reference>
+<dv:presentation>https://sammlungen.ub.uni-frankfurt.de/id/6731297</dv:presentation>
+<dv:iiif>https://sammlungen.ub.uni-frankfurt.de/i3f/v20/6731297/manifest</dv:iiif>
+<dv:sru>https://sammlungen.ub.uni-frankfurt.de/proto_ftsearch/6731297</dv:sru></dv:links>
+</mets:xmlData>
+</mets:mdWrap>
+</mets:digiprovMD></mets:amdSec><mets:fileSec><mets:fileGrp USE="TEASER"><mets:file MIMETYPE="image/jpeg" CREATED="2013-03-15T16:38:27.321300Z" ID="IMG_TEASER_4785735"><mets:FLocat xlink:href="https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4785735" LOCTYPE="URL"/></mets:file><mets:file MIMETYPE="image/jpeg" CREATED="2013-03-15T16:39:56.070800Z" ID="IMG_TEASER_4787955"><mets:FLocat xlink:href="https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4787955" LOCTYPE="URL"/></mets:file><mets:file MIMETYPE="image/jpeg" CREATED="2013-03-15T16:40:48.619700Z" ID="IMG_TEASER_4789297"><mets:FLocat xlink:href="https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4789297" LOCTYPE="URL"/></mets:file><mets:file MIMETYPE="image/jpeg" CREATED="2013-03-15T16:38:41.749600Z" ID="IMG_TEASER_4786038"><mets:FLocat xlink:href="https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4786038" LOCTYPE="URL"/></mets:file><mets:file MIMETYPE="image/jpeg" CREATED="2013-03-15T16:38:46.165700Z" ID="IMG_TEASER_4786148"><mets:FLocat xlink:href="https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4786148" LOCTYPE="URL"/></mets:file><mets:file MIMETYPE="image/jpeg" CREATED="2013-03-15T16:38:49.341700Z" ID="IMG_TEASER_4786246"><mets:FLocat xlink:href="https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4786246" LOCTYPE="URL"/></mets:file><mets:file MIMETYPE="image/jpeg" CREATED="2013-03-15T16:38:57.337800Z" ID="IMG_TEASER_4786442"><mets:FLocat xlink:href="https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4786442" LOCTYPE="URL"/></mets:file><mets:file MIMETYPE="image/jpeg" CREATED="2013-03-15T16:39:05.666000Z" ID="IMG_TEASER_4786644"><mets:FLocat xlink:href="https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4786644" LOCTYPE="URL"/></mets:file><mets:file MIMETYPE="image/jpeg" CREATED="2013-03-15T16:39:09.134000Z" ID="IMG_TEASER_4786742"><mets:FLocat xlink:href="https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4786742" LOCTYPE="URL"/></mets:file><mets:file MIMETYPE="image/jpeg" CREATED="2013-03-15T16:39:17.462200Z" ID="IMG_TEASER_4786936"><mets:FLocat xlink:href="https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4786936" LOCTYPE="URL"/></mets:file><mets:file MIMETYPE="image/jpeg" CREATED="2013-03-15T16:39:20.182200Z" ID="IMG_TEASER_4787018"><mets:FLocat xlink:href="https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4787018" LOCTYPE="URL"/></mets:file><mets:file MIMETYPE="image/jpeg" CREATED="2013-03-15T16:39:26.990300Z" ID="IMG_TEASER_4787200"><mets:FLocat xlink:href="https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4787200" LOCTYPE="URL"/></mets:file><mets:file MIMETYPE="image/jpeg" CREATED="2013-03-15T16:39:29.838400Z" ID="IMG_TEASER_4787282"><mets:FLocat xlink:href="https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4787282" LOCTYPE="URL"/></mets:file><mets:file MIMETYPE="image/jpeg" CREATED="2013-03-15T16:39:33.102400Z" ID="IMG_TEASER_4787380"><mets:FLocat xlink:href="https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4787380" LOCTYPE="URL"/></mets:file><mets:file MIMETYPE="image/jpeg" CREATED="2013-03-15T16:39:37.750500Z" ID="IMG_TEASER_4787510"><mets:FLocat xlink:href="https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4787510" LOCTYPE="URL"/></mets:file><mets:file MIMETYPE="image/jpeg" CREATED="2013-03-15T16:39:41.642600Z" ID="IMG_TEASER_4787609"><mets:FLocat xlink:href="https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4787609" LOCTYPE="URL"/></mets:file><mets:file MIMETYPE="image/jpeg" CREATED="2013-03-15T16:39:52.202800Z" ID="IMG_TEASER_4787846"><mets:FLocat xlink:href="https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4787846" LOCTYPE="URL"/></mets:file><mets:file MIMETYPE="image/jpeg" CREATED="2013-03-15T16:39:59.986900Z" ID="IMG_TEASER_4788049"><mets:FLocat xlink:href="https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4788049" LOCTYPE="URL"/></mets:file><mets:file MIMETYPE="image/jpeg" CREATED="2013-03-15T16:40:04.895000Z" ID="IMG_TEASER_4788179"><mets:FLocat xlink:href="https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4788179" LOCTYPE="URL"/></mets:file><mets:file MIMETYPE="image/jpeg" CREATED="2013-03-15T16:40:14.803200Z" ID="IMG_TEASER_4788431"><mets:FLocat xlink:href="https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4788431" LOCTYPE="URL"/></mets:file><mets:file MIMETYPE="image/jpeg" CREATED="2013-03-15T16:40:18.911200Z" ID="IMG_TEASER_4788530"><mets:FLocat xlink:href="https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4788530" LOCTYPE="URL"/></mets:file><mets:file MIMETYPE="image/jpeg" CREATED="2013-03-15T16:40:23.063300Z" ID="IMG_TEASER_4788636"><mets:FLocat xlink:href="https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4788636" LOCTYPE="URL"/></mets:file><mets:file MIMETYPE="image/jpeg" CREATED="2013-03-15T16:40:26.631400Z" ID="IMG_TEASER_4788739"><mets:FLocat xlink:href="https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4788739" LOCTYPE="URL"/></mets:file><mets:file MIMETYPE="image/jpeg" CREATED="2013-03-15T16:40:30.207400Z" ID="IMG_TEASER_4788841"><mets:FLocat xlink:href="https://sammlungen.ub.uni-frankfurt.de/download/webcache/304/4788841" LOCTYPE="URL"/></mets:file></mets:fileGrp></mets:fileSec><mets:structMap TYPE="LOGICAL"><mets:div ID="log4785731" DMDID="md4785731" ADMID="amd4785731" LABEL="Kokhve Yitsḥaḳ" TYPE="newspaper" ORDER="194302" CONTENTIDS="urn:nbn:de:hebis:30:1-138275"><mets:fptr FILEID="IMG_TEASER_4785735"/><mets:div ID="log6731297" DMDID="md6731297" ADMID="amd6731297" LABEL="1 (1845)" TYPE="volume" ORDER="2"><mets:mptr LOCTYPE="URL" xlink:href="https://sammlungen.ub.uni-frankfurt.de/oai/?verb=GetRecord&amp;metadataPrefix=mets&amp;identifier=6731297"/><mets:fptr FILEID="IMG_TEASER_4785735"/></mets:div><mets:div ID="log6613229" DMDID="md6613229" ADMID="amd6613229" LABEL="2 (1846)" TYPE="volume" ORDER="5"><mets:mptr LOCTYPE="URL" xlink:href="https://sammlungen.ub.uni-frankfurt.de/oai/?verb=GetRecord&amp;metadataPrefix=mets&amp;identifier=6613229"/><mets:fptr FILEID="IMG_TEASER_4787955"/></mets:div><mets:div ID="log6613232" DMDID="md6613232" ADMID="amd6613232" LABEL="3 (1847)" TYPE="volume" ORDER="12"><mets:mptr LOCTYPE="URL" xlink:href="https://sammlungen.ub.uni-frankfurt.de/oai/?verb=GetRecord&amp;metadataPrefix=mets&amp;identifier=6613232"/><mets:fptr FILEID="IMG_TEASER_4789297"/></mets:div><mets:div ID="log6613241" DMDID="md6613241" ADMID="amd6613241" LABEL="4 (1848)" TYPE="volume" ORDER="17"><mets:mptr LOCTYPE="URL" xlink:href="https://sammlungen.ub.uni-frankfurt.de/oai/?verb=GetRecord&amp;metadataPrefix=mets&amp;identifier=6613241"/><mets:fptr FILEID="IMG_TEASER_4786038"/></mets:div><mets:div ID="log4786146" DMDID="md4786146" ADMID="amd4786146" LABEL="5 (1850)" TYPE="volume" ORDER="19"><mets:mptr LOCTYPE="URL" xlink:href="https://sammlungen.ub.uni-frankfurt.de/oai/?verb=GetRecord&amp;metadataPrefix=mets&amp;identifier=4786146"/><mets:fptr FILEID="IMG_TEASER_4786148"/></mets:div><mets:div ID="log4786244" DMDID="md4786244" ADMID="amd4786244" LABEL="6 (1851)" TYPE="volume" ORDER="20"><mets:mptr LOCTYPE="URL" xlink:href="https://sammlungen.ub.uni-frankfurt.de/oai/?verb=GetRecord&amp;metadataPrefix=mets&amp;identifier=4786244"/><mets:fptr FILEID="IMG_TEASER_4786246"/></mets:div><mets:div ID="log4786440" DMDID="md4786440" ADMID="amd4786440" LABEL="7 (1852)" TYPE="volume" ORDER="22"><mets:mptr LOCTYPE="URL" xlink:href="https://sammlungen.ub.uni-frankfurt.de/oai/?verb=GetRecord&amp;metadataPrefix=mets&amp;identifier=4786440"/><mets:fptr FILEID="IMG_TEASER_4786442"/></mets:div><mets:div ID="log4786642" DMDID="md4786642" ADMID="amd4786642" LABEL="8 (1853)" TYPE="volume" ORDER="24"><mets:mptr LOCTYPE="URL" xlink:href="https://sammlungen.ub.uni-frankfurt.de/oai/?verb=GetRecord&amp;metadataPrefix=mets&amp;identifier=4786642"/><mets:fptr FILEID="IMG_TEASER_4786644"/></mets:div><mets:div ID="log4786740" DMDID="md4786740" ADMID="amd4786740" LABEL="9 (1854)" TYPE="volume" ORDER="25"><mets:mptr LOCTYPE="URL" xlink:href="https://sammlungen.ub.uni-frankfurt.de/oai/?verb=GetRecord&amp;metadataPrefix=mets&amp;identifier=4786740"/><mets:fptr FILEID="IMG_TEASER_4786742"/></mets:div><mets:div ID="log4786934" DMDID="md4786934" ADMID="amd4786934" LABEL="10 (1855)" TYPE="volume" ORDER="27"><mets:mptr LOCTYPE="URL" xlink:href="https://sammlungen.ub.uni-frankfurt.de/oai/?verb=GetRecord&amp;metadataPrefix=mets&amp;identifier=4786934"/><mets:fptr FILEID="IMG_TEASER_4786936"/></mets:div><mets:div ID="log4787016" DMDID="md4787016" ADMID="amd4787016" LABEL="11 (1856)" TYPE="volume" ORDER="28"><mets:mptr LOCTYPE="URL" xlink:href="https://sammlungen.ub.uni-frankfurt.de/oai/?verb=GetRecord&amp;metadataPrefix=mets&amp;identifier=4787016"/><mets:fptr FILEID="IMG_TEASER_4787018"/></mets:div><mets:div ID="log4787198" DMDID="md4787198" ADMID="amd4787198" LABEL="12 (1857)" TYPE="volume" ORDER="30"><mets:mptr LOCTYPE="URL" xlink:href="https://sammlungen.ub.uni-frankfurt.de/oai/?verb=GetRecord&amp;metadataPrefix=mets&amp;identifier=4787198"/><mets:fptr FILEID="IMG_TEASER_4787200"/></mets:div><mets:div ID="log4787280" DMDID="md4787280" ADMID="amd4787280" LABEL="13 (1858)" TYPE="volume" ORDER="31"><mets:mptr LOCTYPE="URL" xlink:href="https://sammlungen.ub.uni-frankfurt.de/oai/?verb=GetRecord&amp;metadataPrefix=mets&amp;identifier=4787280"/><mets:fptr FILEID="IMG_TEASER_4787282"/></mets:div><mets:div ID="log4787378" DMDID="md4787378" ADMID="amd4787378" LABEL="14 (1860)" TYPE="volume" ORDER="32"><mets:mptr LOCTYPE="URL" xlink:href="https://sammlungen.ub.uni-frankfurt.de/oai/?verb=GetRecord&amp;metadataPrefix=mets&amp;identifier=4787378"/><mets:fptr FILEID="IMG_TEASER_4787380"/></mets:div><mets:div ID="log4787506" DMDID="md4787506" ADMID="amd4787506" LABEL="15 (1861)" TYPE="volume" ORDER="33"><mets:mptr LOCTYPE="URL" xlink:href="https://sammlungen.ub.uni-frankfurt.de/oai/?verb=GetRecord&amp;metadataPrefix=mets&amp;identifier=4787506"/><mets:fptr FILEID="IMG_TEASER_4787510"/></mets:div><mets:div ID="log4787607" DMDID="md4787607" ADMID="amd4787607" LABEL="16 (1862)" TYPE="volume" ORDER="34"><mets:mptr LOCTYPE="URL" xlink:href="https://sammlungen.ub.uni-frankfurt.de/oai/?verb=GetRecord&amp;metadataPrefix=mets&amp;identifier=4787607"/><mets:fptr FILEID="IMG_TEASER_4787609"/></mets:div><mets:div ID="log4787844" DMDID="md4787844" ADMID="amd4787844" LABEL="17 (1863)" TYPE="volume" ORDER="36"><mets:mptr LOCTYPE="URL" xlink:href="https://sammlungen.ub.uni-frankfurt.de/oai/?verb=GetRecord&amp;metadataPrefix=mets&amp;identifier=4787844"/><mets:fptr FILEID="IMG_TEASER_4787846"/></mets:div><mets:div ID="log4788047" DMDID="md4788047" ADMID="amd4788047" LABEL="18 (1864)" TYPE="volume" ORDER="44"><mets:mptr LOCTYPE="URL" xlink:href="https://sammlungen.ub.uni-frankfurt.de/oai/?verb=GetRecord&amp;metadataPrefix=mets&amp;identifier=4788047"/><mets:fptr FILEID="IMG_TEASER_4788049"/></mets:div><mets:div ID="log4788177" DMDID="md4788177" ADMID="amd4788177" LABEL="19 (1865)" TYPE="volume" ORDER="45"><mets:mptr LOCTYPE="URL" xlink:href="https://sammlungen.ub.uni-frankfurt.de/oai/?verb=GetRecord&amp;metadataPrefix=mets&amp;identifier=4788177"/><mets:fptr FILEID="IMG_TEASER_4788179"/></mets:div><mets:div ID="log4788429" DMDID="md4788429" ADMID="amd4788429" LABEL="20 (1866)" TYPE="volume" ORDER="47"><mets:mptr LOCTYPE="URL" xlink:href="https://sammlungen.ub.uni-frankfurt.de/oai/?verb=GetRecord&amp;metadataPrefix=mets&amp;identifier=4788429"/><mets:fptr FILEID="IMG_TEASER_4788431"/></mets:div><mets:div ID="log4788528" DMDID="md4788528" ADMID="amd4788528" LABEL="21 (1867)" TYPE="volume" ORDER="48"><mets:mptr LOCTYPE="URL" xlink:href="https://sammlungen.ub.uni-frankfurt.de/oai/?verb=GetRecord&amp;metadataPrefix=mets&amp;identifier=4788528"/><mets:fptr FILEID="IMG_TEASER_4788530"/></mets:div><mets:div ID="log4788634" DMDID="md4788634" ADMID="amd4788634" LABEL="22 (1868)" TYPE="volume" ORDER="49"><mets:mptr LOCTYPE="URL" xlink:href="https://sammlungen.ub.uni-frankfurt.de/oai/?verb=GetRecord&amp;metadataPrefix=mets&amp;identifier=4788634"/><mets:fptr FILEID="IMG_TEASER_4788636"/></mets:div><mets:div ID="log4788737" DMDID="md4788737" ADMID="amd4788737" LABEL="23 (1869)" TYPE="volume" ORDER="50"><mets:mptr LOCTYPE="URL" xlink:href="https://sammlungen.ub.uni-frankfurt.de/oai/?verb=GetRecord&amp;metadataPrefix=mets&amp;identifier=4788737"/><mets:fptr FILEID="IMG_TEASER_4788739"/></mets:div><mets:div ID="log4788839" DMDID="md4788839" ADMID="amd4788839" LABEL="24 (1873)" TYPE="volume" ORDER="51"><mets:mptr LOCTYPE="URL" xlink:href="https://sammlungen.ub.uni-frankfurt.de/oai/?verb=GetRecord&amp;metadataPrefix=mets&amp;identifier=4788839"/><mets:fptr FILEID="IMG_TEASER_4788841"/></mets:div></mets:div></mets:structMap></mets:mets></metadata></record></GetRecord></OAI-PMH>

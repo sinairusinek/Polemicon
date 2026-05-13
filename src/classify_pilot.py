@@ -1,18 +1,24 @@
 """
-classify_pilot.py - Phase B.2: Dual-model LLM classification pilot
+classify_pilot.py - Phase B.2 / B.2-v2: LLM classification
 
-Runs 4 models (Claude Opus, Claude Sonnet, Gemini Pro, Gemini Flash) on the
-200-text pilot sample. Each model classifies each text for polemic characteristics.
+v1  Ran 4 models (Claude Opus, Sonnet, Gemini Pro, Flash) on 200-text pilot.
+    Output: data/pilot_classifications.parquet
 
-Output: data/pilot_classifications.parquet (one row per text per model)
-        data/agreement_report.txt (inter-model agreement analysis)
+v2  Sonnet-only, 4-tier label scheme, metadata-aware, continuation detection.
+    Output: data/pilot_classifications_v2.parquet  (--v2 flag)
+    Acceptance test on RA gold labels:              (--acceptance-test flag)
+    2K calibration:                                 (--calibration flag)
 
 Usage:
-    python src/classify_pilot.py                  # run all 4 models
-    python src/classify_pilot.py --models opus sonnet  # run specific models
-    python src/classify_pilot.py --report-only    # just regenerate the report
+    python src/classify_pilot.py                             # v1: all 4 models on pilot
+    python src/classify_pilot.py --models sonnet             # v1: sonnet only
+    python src/classify_pilot.py --report-only               # regenerate agreement report
+    python src/classify_pilot.py --acceptance-test           # v2: run on 23 RA gold cases
+    python src/classify_pilot.py --v2 --models sonnet        # v2: run on pilot sample
+    python src/classify_pilot.py --calibration               # v2: run on 2K calibration set
 """
 import os
+import re
 import sys
 import json
 import asyncio
@@ -62,7 +68,7 @@ MODEL_CONFIGS = {
 }
 
 MAX_TEXT_WORDS = 4000  # truncate long texts to control cost
-BATCH_DELAY_SECONDS = 1.0  # delay between API calls to avoid rate limits
+BATCH_DELAY_SECONDS = 0.4  # delay between API calls to avoid rate limits
 
 CLASSIFICATION_PROMPT = """You are an expert in 19th-century Hebrew literature (Haskalah era, 1862-1888).
 Analyze the following Hebrew text and classify whether it is polemic.
@@ -83,6 +89,119 @@ TEXT:
 {text}
 
 JSON:"""
+
+# ── v2 prompt ─────────────────────────────────────────────────────────────────
+
+CLASSIFICATION_PROMPT_V2 = """You are an expert in 19th-century Hebrew literature (Haskalah era, 1862–1888).
+Analyze the following Hebrew text and assign it one of four polemic labels.
+
+LABEL DEFINITIONS
+-----------------
+Assign exactly one of the four labels below based on what the TEXT itself does, not just its topic.
+
+"non-polemic"               — No debate function: the text has no argumentative dispute, does not defend
+                              a position against an adversary, and does not report on a controversy.
+                              IMPORTANT: Critical tone, expressions of sorrow or disappointment, minor
+                              qualifications in a celebratory piece, and laments do NOT make a text polemic.
+                              Use this label for: neutral news reports, biographical sketches, scientific/
+                              historical reviews, travel writing, calls to action without a named adversary,
+                              personal letters discussing plans or feelings.
+
+"implicit polemic"          — The text takes a side in an ongoing public debate WITHOUT naming a specific
+                              opponent. The polemic stance must be SUBSTANTIVE and CENTRAL, not incidental.
+                              Signals: the author devotes significant space to defending a contested position
+                              (e.g., on Halukka reform, Hebrew education, aliya, Haskalah, Zionism) against
+                              implied opposition; OR explicitly frames the text as a response to critics
+                              ("those who say…", "some claim…") without identifying them by name.
+                              Do NOT use this label when criticism is marginal (one sentence in a long report),
+                              when the text merely mentions a controversy in passing, or when a positive
+                              stance is taken without any implied opposition.
+
+"explicit polemic"          — The text directly attacks, refutes, or responds to a NAMED or clearly
+                              identifiable opponent, publication, or article. The dispute is the primary
+                              purpose of the text, and the adversary is explicitly present.
+
+"meta-polemic (descriptive)"— The text DESCRIBES, SUMMARIZES, or REPORTS ON a controversy or polemic that
+                              is taking place among others — the author is a journalist, chronicler, or
+                              analyst, not a combatant. The controversy must be the PRIMARY FOCUS of at
+                              least a significant portion of the text (not a passing mention).
+                              Key signal: the text recounts "there was a dispute about X," summarizes what
+                              different parties argued, or analyzes the rhetoric of a debate without taking
+                              a side.
+                              Examples: a report on a Rabbinical Committee controversy; a diary entry whose
+                              main subject is describing disputes at meetings; a biographical account where
+                              the author's polemical activities are a central theme.
+                              Do NOT use this label when the text merely states in passing that someone
+                              "attacked" or "criticized" something — such a passing mention is non-polemic.
+
+WHEN IN DOUBT between "non-polemic" and "implicit polemic": ask whether the text is actively
+arguing for or against a contested position. If yes → implicit polemic. If it merely reports,
+describes, or expresses feeling without arguing → non-polemic.
+
+WHEN IN DOUBT between "non-polemic" and "meta-polemic (descriptive)": ask whether the text's
+primary purpose is to describe a controversy. If yes → meta-polemic (descriptive).
+
+NOTE ON HEBREW IDIOMS: The phrase "לא כתבו ידם" (lit. "their hand did not write") means they
+did not sign/endorse something — it is NOT a criticism implying they "did not contribute."
+Do not treat this as a polemic marker.
+
+BROADER DEBATE LINK
+-------------------
+Separately, note whether this text appears to be connected to a known broader public debate
+(even if the text itself is non-polemic). Signals: reference to a controversy publicly debated
+in the period, a known polemicist or newspaper, or contested subjects (Halukka reform, Hebrew
+education, Haskalah vs. Orthodoxy, Hibbat Zion / Zionism, emigration, Hebrew language revival).
+Confidence should reflect certainty of this connection.
+
+METADATA (use for context, not as a substitute for reading the text)
+--------
+{metadata_block}
+
+TEXT
+----
+{text}
+
+Respond with a JSON object (no markdown, no explanation outside the JSON):
+- "polemic_label":            one of the four labels above (string)
+- "confidence":               float 0.0–1.0 — confidence in polemic_label
+- "polemic_type":             one of "attack", "defense", "debate", "satire", "critique", "none"
+- "target":                   who/what is opposed; empty string if non-polemic
+- "evidence":                 brief quote or description of key markers (Hebrew ok for quotes)
+- "topic":                    main subject in English
+- "broader_polemic_link":     one of "none", "suspected", "clear"
+- "broader_polemic_justification": one sentence explaining the link (empty if "none")
+
+JSON:"""
+
+# ── continuation detection ────────────────────────────────────────────────────
+
+_CONTINUATION_PATTERNS = re.compile(
+    r"(המשך|סוף|חלק\s+[א-ת]|part\s+[IVXivx]+|\(continued\)|\(continuation\)|"
+    r"\bII\b|\bIII\b|\bIV\b|\(\d+\)$)",
+    re.IGNORECASE | re.UNICODE,
+)
+
+def detect_continuation(title: str = "", headline: str = "") -> bool:
+    """Return True if title or headline signals a multi-part continuation."""
+    combined = f"{title or ''} {headline or ''}".strip()
+    return bool(_CONTINUATION_PATTERNS.search(combined))
+
+
+def build_metadata_block(row: pd.Series) -> str:
+    """Format available metadata fields for prompt injection."""
+    fields = [
+        ("Source",     row.get("source")),
+        ("Year",       row.get("year")),
+        ("Author",     row.get("author")),
+        ("Recipient",  row.get("recipient")),
+        ("Newspaper",  row.get("newspaper")),
+        ("Headline",   row.get("headline")),
+        ("Title",      row.get("title")),
+        ("Is continuation of a multi-part series",
+         "yes" if detect_continuation(str(row.get("title","")), str(row.get("headline",""))) else "no"),
+    ]
+    lines = [f"  {k}: {v}" for k, v in fields if v and str(v).strip() not in ("", "nan", "None")]
+    return "\n".join(lines) if lines else "  (no metadata available)"
 
 
 def truncate_text(text: str, max_words: int = MAX_TEXT_WORDS) -> str:
@@ -118,6 +237,14 @@ def parse_json_response(raw: str) -> dict:
 
 EXPECTED_FIELDS = {"is_polemic", "confidence", "polemic_type", "target", "evidence", "topic"}
 VALID_TYPES = {"attack", "defense", "debate", "satire", "critique", "none"}
+
+# v2 schema
+VALID_LABELS_V2      = {"non-polemic", "implicit polemic", "explicit polemic",
+                         "meta-polemic (descriptive)", "uncertain", "unlabeled"}
+VALID_BROADER_LINK   = {"none", "suspected", "clear"}
+EXPECTED_FIELDS_V2   = {"polemic_label", "confidence", "polemic_type", "target",
+                         "evidence", "topic", "broader_polemic_link",
+                         "broader_polemic_justification"}
 
 
 def validate_classification(result: dict) -> dict:
@@ -157,10 +284,62 @@ def validate_classification(result: dict) -> dict:
     return {k: result.get(k) for k in EXPECTED_FIELDS}
 
 
+def validate_classification_v2(result: dict) -> dict:
+    """Normalize and validate a v2 classification result."""
+    if "_parse_error" in result:
+        return {
+            "polemic_label": None, "confidence": None, "polemic_type": None,
+            "target": "", "evidence": "", "topic": "",
+            "broader_polemic_link": None, "broader_polemic_justification": "",
+            "_parse_error": result["_parse_error"],
+        }
+    # polemic_label
+    label = str(result.get("polemic_label", "")).strip().lower()
+    # Normalize common variants
+    if label in ("non polemic", "non-polemic"):
+        label = "non-polemic"
+    elif label in ("implicit", "implicit polemic"):
+        label = "implicit polemic"
+    elif label in ("explicit", "explicit polemic"):
+        label = "explicit polemic"
+    elif "meta" in label or "descriptive" in label:
+        label = "meta-polemic (descriptive)"
+    if label not in VALID_LABELS_V2:
+        label = "unlabeled"
+    result["polemic_label"] = label
+
+    # confidence
+    conf = result.get("confidence")
+    try:
+        conf = float(conf)
+        conf = max(0.0, min(1.0, conf))
+    except (ValueError, TypeError):
+        conf = None
+    result["confidence"] = conf
+
+    # polemic_type
+    ptype = str(result.get("polemic_type", "none")).lower().strip()
+    if ptype not in VALID_TYPES:
+        ptype = "none"
+    result["polemic_type"] = ptype
+
+    # broader_polemic_link
+    blink = str(result.get("broader_polemic_link", "none")).lower().strip()
+    if blink not in VALID_BROADER_LINK:
+        blink = "none"
+    result["broader_polemic_link"] = blink
+
+    # string fields
+    for field in ("target", "evidence", "topic", "broader_polemic_justification"):
+        result[field] = str(result.get(field, ""))
+
+    return {k: result.get(k) for k in EXPECTED_FIELDS_V2}
+
+
 # --- API Callers ---
 
 async def classify_anthropic(text: str, model_id: str, client) -> dict:
-    """Classify a single text using the Anthropic API."""
+    """Classify a single text using the Anthropic API (v1 schema)."""
     prompt = CLASSIFICATION_PROMPT.format(text=truncate_text(text))
     message = await client.messages.create(
         model=model_id,
@@ -169,6 +348,42 @@ async def classify_anthropic(text: str, model_id: str, client) -> dict:
     )
     raw = message.content[0].text
     return validate_classification(parse_json_response(raw))
+
+
+async def classify_anthropic_v2(row: pd.Series, model_id: str, client) -> dict:
+    """Classify a single text using the Anthropic API (v2 schema with metadata)."""
+    metadata_block = build_metadata_block(row)
+    prompt = CLASSIFICATION_PROMPT_V2.format(
+        metadata_block=metadata_block,
+        text=truncate_text(str(row.get("text", ""))),
+    )
+    message = await client.messages.create(
+        model=model_id,
+        max_tokens=1024,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    raw = message.content[0].text
+    result = validate_classification_v2(parse_json_response(raw))
+    result["_input_tokens"]  = message.usage.input_tokens
+    result["_output_tokens"] = message.usage.output_tokens
+    return result
+
+
+def classify_cli_v2(row: pd.Series) -> dict:
+    """Classify a single text via `claude -p` (uses Max plan, no API credits)."""
+    import subprocess
+    metadata_block = build_metadata_block(row)
+    prompt = CLASSIFICATION_PROMPT_V2.format(
+        metadata_block=metadata_block,
+        text=truncate_text(str(row.get("text", ""))),
+    )
+    proc = subprocess.run(
+        ["claude", "-p", prompt],
+        capture_output=True, text=True, timeout=120,
+    )
+    if proc.returncode != 0:
+        raise RuntimeError(proc.stderr.strip()[:200] or f"exit code {proc.returncode}")
+    return validate_classification_v2(parse_json_response(proc.stdout))
 
 
 async def classify_google(text: str, model_id: str, client) -> dict:
@@ -423,21 +638,210 @@ def generate_agreement_report(clf_df: pd.DataFrame, output_path: Path):
     return disagreement_df
 
 
+# --- v2 pipeline ---
+
+async def run_sonnet_v2(texts_df: pd.DataFrame, output_path: Path,
+                         model_id: str = None, label: str = "v2 run",
+                         use_cli: bool = False) -> pd.DataFrame:
+    """Run Sonnet v2 on texts_df. Resumes from output_path if it exists.
+
+    use_cli=True routes through `claude -p` (Max plan, no API credits).
+    use_cli=False uses the Anthropic API directly.
+    """
+    if not use_cli:
+        import anthropic
+        client = anthropic.AsyncAnthropic()
+    else:
+        client = None
+    if model_id is None:
+        model_id = os.getenv("CLAUDE_SONNET_MODEL", "claude-sonnet-4-6")
+
+    # Resume support
+    existing_ids = set()
+    all_results = []
+    if output_path.exists():
+        prev = pd.read_parquet(output_path)
+        # Only keep successfully classified rows; error rows will be retried and re-appended
+        done = prev[prev["polemic_label"].notna() & prev["_error"].isna()] if "_error" in prev.columns else prev[prev["polemic_label"].notna()]
+        existing_ids = set(done["doc_id"].tolist())
+        all_results = done.to_dict("records")
+        print(f"  Resuming: {len(existing_ids)} successfully classified, {len(prev) - len(existing_ids)} errors will be retried.")
+
+    pending = texts_df[~texts_df["doc_id"].isin(existing_ids)]
+    route = "claude CLI (Max plan)" if use_cli else model_id
+    print(f"  {label}: {len(pending)} texts remaining ({route})")
+
+    # Sonnet 4.6 pricing ($/million tokens) — only meaningful for API path
+    INPUT_COST_PER_M  = 3.00
+    OUTPUT_COST_PER_M = 15.00
+
+    errors = 0
+    total_input_tokens  = 0
+    total_output_tokens = 0
+    for i, (_, row) in enumerate(pending.iterrows()):
+        try:
+            if use_cli:
+                result = classify_cli_v2(row)
+            else:
+                result = await classify_anthropic_v2(row, model_id, client)
+                total_input_tokens  += result.pop("_input_tokens",  0)
+                total_output_tokens += result.pop("_output_tokens", 0)
+            result["doc_id"]        = row["doc_id"]
+            result["model"]         = "sonnet"
+            result["model_display"] = "Claude Sonnet"
+            result["tier"]          = "cheap"
+            all_results.append(result)
+        except Exception as e:
+            errors += 1
+            all_results.append({
+                "doc_id": row["doc_id"], "model": "sonnet",
+                "model_display": "Claude Sonnet", "tier": "cheap",
+                "polemic_label": None, "confidence": None, "polemic_type": None,
+                "target": "", "evidence": "", "topic": "",
+                "broader_polemic_link": None, "broader_polemic_justification": "",
+                "_error": str(e)[:200],
+            })
+            print(f"  ERROR on {row['doc_id']}: {str(e)[:100]}")
+
+        if (i + 1) % 20 == 0 or (i + 1) == len(pending):
+            if use_cli:
+                print(f"  {i + 1}/{len(pending)} done...")
+            else:
+                cost = (total_input_tokens * INPUT_COST_PER_M
+                        + total_output_tokens * OUTPUT_COST_PER_M) / 1_000_000
+                print(f"  {i + 1}/{len(pending)} done... "
+                      f"(tokens: {total_input_tokens:,} in / {total_output_tokens:,} out, "
+                      f"cost so far: ${cost:.2f})")
+            df_out = pd.DataFrame(all_results)
+            output_path.parent.mkdir(exist_ok=True)
+            df_out.to_parquet(output_path, index=False)
+
+        await asyncio.sleep(BATCH_DELAY_SECONDS)
+
+    total_cost = (total_input_tokens * INPUT_COST_PER_M
+                  + total_output_tokens * OUTPUT_COST_PER_M) / 1_000_000
+    print(f"  Done. {len(all_results)} total, {errors} errors.")
+    print(f"  Tokens: {total_input_tokens:,} input / {total_output_tokens:,} output")
+    print(f"  Estimated cost: ${total_cost:.2f}")
+    return pd.DataFrame(all_results)
+
+
+def run_acceptance_test(output_path: Path):
+    """Run v2 Sonnet on the 23 RA-reviewed annotation-CSV cases, then report agreement."""
+    gold_path = ROOT / "data" / "ra_gold_labels.parquet"
+    if not gold_path.exists():
+        print("ERROR: ra_gold_labels.parquet not found. Run ingest_ra_gold.py first.")
+        return
+
+    gold = pd.read_parquet(gold_path)
+    # Use only the 23 cases from the annotation CSVs (reviewed pilot cases)
+    csv_gold = gold[gold["source"].isin(["cheap_diverge_csv", "disagree_csv"])].copy()
+    print(f"Acceptance test: {len(csv_gold)} RA-reviewed cases")
+
+    # Load their texts from corpus
+    corpus = pd.read_parquet(ROOT / "corpus.parquet", columns=["doc_id", "text",
+                "source", "year", "author", "recipient", "newspaper", "headline", "title"])
+    texts = corpus[corpus["doc_id"].isin(csv_gold["doc_id"])].copy()
+    missing = set(csv_gold["doc_id"]) - set(texts["doc_id"])
+    if missing:
+        print(f"  Warning: {len(missing)} gold doc_ids not found in corpus: {missing}")
+
+    if len(texts) == 0:
+        print("ERROR: no texts found for gold cases.")
+        return
+
+    clf = asyncio.run(run_sonnet_v2(texts, output_path, label="acceptance test"))
+
+    # Compare with gold
+    merged = clf.merge(csv_gold[["doc_id", "ra_label_4tier"]], on="doc_id", how="inner")
+    match = (merged["polemic_label"] == merged["ra_label_4tier"]).sum()
+    total = len(merged)
+    pct   = match / total if total > 0 else 0
+
+    print(f"\n=== ACCEPTANCE TEST RESULTS ===")
+    print(f"Agreement: {match}/{total} ({pct:.1%})")
+    print(f"Threshold: 78% (18/23)")
+    print(f"{'✓ PASSED' if pct >= 0.78 else '✗ FAILED — revise prompt before scaling'}")
+    print()
+    # Per-label breakdown
+    print("Label distribution (model vs RA gold):")
+    for label in sorted(VALID_LABELS_V2):
+        gold_n  = (merged["ra_label_4tier"] == label).sum()
+        model_n = (merged["polemic_label"]  == label).sum()
+        if gold_n > 0 or model_n > 0:
+            print(f"  {label:35s}  gold={gold_n}  model={model_n}")
+    print()
+
+    # Show mismatches
+    mismatches = merged[merged["polemic_label"] != merged["ra_label_4tier"]]
+    if len(mismatches) > 0:
+        print("Mismatches:")
+        for _, row in mismatches.iterrows():
+            print(f"  {row['doc_id']}: model={row['polemic_label']}  gold={row['ra_label_4tier']}")
+    print(f"\nFull results saved to {output_path}")
+
+
 # --- Entry point ---
 
 def main():
-    parser = argparse.ArgumentParser(description="Phase B.2: LLM classification pilot")
+    parser = argparse.ArgumentParser(description="Phase B.2: LLM classification")
     parser.add_argument("--models", nargs="+", default=list(MODEL_CONFIGS.keys()),
                         help="Models to run (opus, sonnet, gemini_pro, gemini_flash)")
     parser.add_argument("--report-only", action="store_true",
                         help="Skip classification, just regenerate the agreement report")
     parser.add_argument("--sample-path", default="data/pilot_sample.parquet",
                         help="Path to pilot sample")
+    # v2 flags
+    parser.add_argument("--v2", action="store_true",
+                        help="Use v2 schema (4-tier label, metadata, broader-link)")
+    parser.add_argument("--acceptance-test", action="store_true",
+                        help="v2: run Sonnet on 23 RA-reviewed gold cases and report agreement")
+    parser.add_argument("--calibration", action="store_true",
+                        help="v2: run Sonnet on a 2K calibration sample")
+    parser.add_argument("--calibration-n", type=int, default=2000,
+                        help="Number of texts for calibration run (default 2000)")
+    parser.add_argument("--claude-cli", action="store_true",
+                        help="Route v2 calls through `claude -p` (Max plan) instead of Anthropic API")
     args = parser.parse_args()
 
-    output_path = ROOT / "data" / "pilot_classifications.parquet"
-    report_path = ROOT / "data" / "agreement_report.txt"
+    output_path       = ROOT / "data" / "pilot_classifications.parquet"
+    output_path_v2    = ROOT / "data" / "pilot_classifications_v2.parquet"
+    acceptance_path   = ROOT / "data" / "acceptance_test_v2.parquet"
+    calibration_path  = ROOT / "data" / "calibration_v2.parquet"
+    report_path       = ROOT / "data" / "agreement_report.txt"
     disagreement_path = ROOT / "data" / "pilot_disagreements.parquet"
+
+    # ── v2 modes ──────────────────────────────────────────────────────────────
+    if args.acceptance_test:
+        run_acceptance_test(acceptance_path)
+        return
+
+    if args.calibration or args.v2:
+        texts_df = pd.read_parquet(ROOT / args.sample_path)
+        if args.calibration:
+            # Use a stratified 2K sample drawn from full corpus
+            corpus = pd.read_parquet(ROOT / "corpus.parquet",
+                                     columns=["doc_id","text","source","year","author",
+                                              "recipient","newspaper","headline","title"])
+            kws = pd.read_parquet(ROOT / "keyword_scores.parquet")
+            corpus = corpus.merge(kws[["doc_id","polemic_score"]], on="doc_id", how="left")
+            # Keep only overlap window: known in-range OR undated (can't confirm out-of-range)
+            # Exclude texts with a confirmed year outside 1862-1888
+            corpus = corpus[corpus["year"].isna() | corpus["year"].between(1862, 1888)]
+            print(f"Corpus after date filter: {len(corpus)} texts")
+            # Stratify by source (proportional) and take up to args.calibration_n
+            n = args.calibration_n
+            sampled = (corpus.groupby("source", group_keys=False)
+                       .apply(lambda g: g.sample(
+                           min(len(g), max(1, int(n * len(g) / len(corpus)))),
+                           random_state=42)))
+            sampled = sampled.sample(min(n, len(sampled)), random_state=42)
+            print(f"Calibration sample: {len(sampled)} texts")
+            asyncio.run(run_sonnet_v2(sampled, calibration_path, label="calibration", use_cli=args.claude_cli))
+        else:
+            # --v2 on pilot sample
+            asyncio.run(run_sonnet_v2(texts_df, output_path_v2, label="v2 pilot", use_cli=args.claude_cli))
+        return
 
     # Load pilot sample
     print("Loading pilot sample...")
