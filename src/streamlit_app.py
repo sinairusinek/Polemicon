@@ -436,6 +436,9 @@ if view_mode == "Thread Browser":
         f"{int(trow['span_days'])} days · edges: {trow['edge_types']}"
     )
 
+    # Initialize before the LLM panel so the per-doc loop below can rely on it
+    outliers_map = {}
+
     # --- LLM verdict panel (if available) ---
     if llm_threads is not None:
         llm_rows = llm_threads[llm_threads["thread_id"] == int(thread_id_sel)]
@@ -508,6 +511,26 @@ if view_mode == "Thread Browser":
                             st.markdown("**Actors:** " + ", ".join(str(a) for a in actors_list))
                     except Exception:
                         pass
+
+                # Parse outlier_docs to grey out off-topic articles below
+                outliers_map = {}
+                outliers_raw = lr.get("outlier_docs") if "outlier_docs" in lr.index else None
+                if outliers_raw:
+                    try:
+                        import json as _json
+                        outliers = _json.loads(outliers_raw) if isinstance(outliers_raw, str) else list(outliers_raw)
+                        for o in outliers:
+                            if isinstance(o, dict) and o.get("doc_id"):
+                                outliers_map[str(o["doc_id"])] = str(o.get("reason") or "")
+                    except Exception:
+                        outliers_map = {}
+                if outliers_map:
+                    purity = (len(doc_ids) - len(outliers_map)) / max(1, len(doc_ids))
+                    st.markdown(
+                        f"**Outliers flagged ({len(outliers_map)} of {len(doc_ids)}, "
+                        f"purity {purity:.0%}):** the model judges these docs to be "
+                        f"algorithmically clustered but not part of the polemic. Greyed out below."
+                    )
 
                 edges_raw = lr.get("rebuttal_edges") if "rebuttal_edges" in lr.index else None
                 if edges_raw:
@@ -590,9 +613,24 @@ if view_mode == "Thread Browser":
                             pass
 
     text_limit = st.slider("Text preview length", 200, 3000, 800, 100)
+    hide_outliers = st.checkbox(
+        "Hide outlier docs (LLM-flagged as off-topic)", value=False,
+        help="When checked, docs the LLM marked as algorithmically clustered but not actually part of the polemic are hidden entirely.",
+    ) if outliers_map else False
+
+    # Sort: in-thread docs first (preserve date order), outliers at the bottom
+    if outliers_map:
+        docs = docs.assign(_is_outlier=docs["doc_id"].isin(outliers_map).astype(int))
+        sort_cols = ["_is_outlier"] + (["date"] if "date" in docs.columns else [])
+        docs = docs.sort_values(sort_cols)
 
     for _, drow in docs.iterrows():
         did = drow["doc_id"]
+        is_outlier = did in outliers_map
+        if is_outlier and hide_outliers:
+            continue
+        outlier_reason = outliers_map.get(did, "")
+
         meta_parts = []
         date_v = drow.get("date")
         if pd.notna(date_v):
@@ -616,17 +654,32 @@ if view_mode == "Thread Browser":
                 f'border-radius:3px;font-size:12px;">{lbl} · {conf:.0%}</span>'
             )
 
+        outlier_badge = ""
+        if is_outlier:
+            outlier_badge = (
+                f'<span style="background:#bbb;color:white;padding:2px 8px;'
+                f'border-radius:3px;font-size:11px;margin-right:6px;" '
+                f'title="{outlier_reason}">⊘ outlier</span>'
+            )
+
         with st.container(border=True):
             head_cols = st.columns([4, 1])
             with head_cols[0]:
                 st.markdown(
-                    f"<small style='color:#888;'>{' · '.join(meta_parts)}</small>",
+                    f"{outlier_badge}<small style='color:#888;'>{' · '.join(meta_parts)}</small>",
                     unsafe_allow_html=True,
                 )
+                if is_outlier and outlier_reason:
+                    st.markdown(
+                        f"<small style='color:#a00;font-style:italic;'>"
+                        f"LLM outlier reason: {outlier_reason}</small>",
+                        unsafe_allow_html=True,
+                    )
                 title = drow.get("headline") or drow.get("title")
                 if pd.notna(title) and str(title) not in ("", "nan"):
+                    dim_style = "opacity:0.45;" if is_outlier else ""
                     st.markdown(
-                        f'<div dir="rtl" style="text-align:right;font-weight:bold;">'
+                        f'<div dir="rtl" style="text-align:right;font-weight:bold;{dim_style}">'
                         f'{restore_final_forms(str(title))}</div>',
                         unsafe_allow_html=True,
                     )
@@ -652,8 +705,9 @@ if view_mode == "Thread Browser":
 
             text_val = str(drow.get("text", "") or "")
             preview = restore_final_forms(text_val[:text_limit])
+            dim_style = "opacity:0.5;" if is_outlier else ""
             st.markdown(
-                f'<div dir="rtl" style="text-align:right;font-size:14px;line-height:1.7;">'
+                f'<div dir="rtl" style="text-align:right;font-size:14px;line-height:1.7;{dim_style}">'
                 f'{preview}{"…" if len(text_val) > text_limit else ""}</div>',
                 unsafe_allow_html=True,
             )

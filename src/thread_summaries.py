@@ -87,6 +87,45 @@ Produce a JSON object (no markdown fences, no prose outside JSON) with EXACTLY t
 Respond with ONLY the JSON object.
 """
 
+STAGE_B_PROMPT_LETTERS = """You are evaluating whether a cluster of 18th–20th-century Hebrew letters (Egeret corpus), grouped algorithmically by topical similarity + author-pair co-occurrence within a narrow time window, represents an actual POLEMICAL EXCHANGE between letter-writers — or merely TOPICAL CO-OCCURRENCE.
+
+A POLEMICAL EXCHANGE in the letters corpus comes in TWO valid kinds, BOTH of which count as polemic (is_polemic_thread=true):
+  (a) INTERNAL DISPUTE — multi-author disagreement, debate, or controversy among Jewish letter-writers (e.g. Haskalah vs Orthodoxy, intellectual debate between maskilim, rabbi-vs-rabbi, ideological rivals).
+  (b) EXTERNAL DEFENSIVE POLEMIC — letter-writers collectively responding to or refuting external accusers (antisemitic press, blood libels, missionary attacks, hostile non-Jewish polemicists). Even if the writers agree with each other, the *exchange with the outside attacker* IS a polemical exchange, not topical co-occurrence.
+
+TOPICAL CO-OCCURRENCE = same subject discussed without any polemical engagement (neither internal disagreement nor external rebuttal); e.g. parallel news, shared eulogies, common scholarly references, congratulatory exchanges. NOTE: letters often address each other by recipient name without disputing — that alone is NOT polemic.
+
+Cluster metadata:
+- {n_docs} letters across {n_papers} authors
+- Span: {span_days} days
+- Authors: {newspapers}
+- Edge types detected: {edge_types}
+- Heuristic threading score: {heuristic_score:.1f}
+
+Per-letter mini-summaries (Hebrew, one line each). Format: [date · ? · author? · doc_id] "headline" summary_he.
+Use dates to detect temporal exchange patterns; use author attribution to judge whether this is a real cross-author dispute or one author dominating; identify recurring polemical positions.
+
+{summaries_block}
+
+Representative excerpts (most polemic-likely letters):
+{excerpts_block}
+
+Produce a JSON object (no markdown fences, no prose outside JSON) with EXACTLY these keys:
+- "topic_label": 5-10 word English topic label
+- "topic_label_he": short Hebrew topic label (≤ 8 words)
+- "narrative": 2-3 sentence English description of WHO is arguing WHAT, between which letter-writers
+- "actors": JSON list of the principal persons/groups in the dispute. CRITICAL: each name MUST be given in its original Hebrew form exactly as it appears in the source text. You may append an English transliteration in parentheses (e.g. "פינס (Pines)"), but the Hebrew form must come first.
+- "is_polemic_thread": true if this is a genuine polemical exchange, false if it is topical-only / correspondence / non-polemic
+- "polemic_score": float 0.0-1.0 expressing how strongly this is a real polemical exchange
+- "polemic_type": one of "explicit" | "implicit" | "meta-polemic" | "topical-only" | "none"
+- "polemic_direction": one of "internal" | "external_defense" | "mixed" | "n/a"
+- "evidence": 1-2 sentence English justification, citing concrete signals from the summaries
+- "rebuttal_edges": JSON list of [doc_a, doc_b, relation] triples where doc_a explicitly responds to / attacks / defends-against doc_b. `relation` ∈ "responds-to" | "attacks" | "defends-against" | "cites". Empty list if none identifiable.
+- "outlier_docs": JSON list of {{"doc_id": "...", "reason": "..."}} objects identifying letters that were algorithmically clustered with this thread but are NOT actually part of the polemical exchange. Be honest and specific.
+
+Respond with ONLY the JSON object.
+"""
+
 STAGE_B_PROMPT = """You are evaluating whether a cluster of 19th-century Hebrew press articles, grouped algorithmically by reference + co-occurrence + semantic similarity, represents an actual POLEMICAL EXCHANGE — or merely TOPICAL CO-OCCURRENCE.
 
 A POLEMICAL EXCHANGE comes in TWO valid kinds, BOTH of which count as polemic (is_polemic_thread=true):
@@ -125,6 +164,7 @@ Produce a JSON object (no markdown fences, no prose outside JSON) with EXACTLY t
     * "n/a"              = thread is not polemical (use whenever is_polemic_thread is false).
 - "evidence": 1-2 sentence English justification, citing concrete signals from the summaries
 - "rebuttal_edges": JSON list of [doc_a, doc_b, relation] triples where doc_a explicitly responds to / attacks / defends-against doc_b (or where summaries strongly indicate this). `relation` is one of "responds-to", "attacks", "defends-against", "cites". Empty list if no specific cross-doc edges are identifiable from the summaries. Use the doc_id strings exactly as they appear in the summary lines.
+- "outlier_docs": JSON list of {{"doc_id": "...", "reason": "..."}} objects identifying articles that were ALGORITHMICALLY CLUSTERED with this thread but are NOT actually part of the polemical exchange — e.g. obituaries, syndicated announcements, unrelated news, fire-relief appeals, parallel literary pieces sharing only temporal/lexical co-occurrence with the polemic. The verdict above (is_polemic_thread, polemic_score, polemic_type, polemic_direction) should describe the CORE of the thread excluding these outliers — i.e. if 11 of 14 docs are off-topic and only 3 form a coherent polemic, still score the 3-doc polemic on its own merits and list the 11 in outlier_docs. Empty list if all docs are on-topic. Be honest and specific; do not return an empty list just to keep the verdict simple.
 
 Respond with ONLY the JSON object.
 """
@@ -253,7 +293,7 @@ def pick_excerpt_docs(doc_ids: list[str], preds: pd.DataFrame, corpus: pd.DataFr
     return have.sort_values("polemic_prob", ascending=False).head(N_EXCERPTS).index.tolist()
 
 
-def build_stage_b_prompt(thread_row, doc_summaries: pd.DataFrame, corpus: pd.DataFrame, preds: pd.DataFrame) -> str:
+def build_stage_b_prompt(thread_row, doc_summaries: pd.DataFrame, corpus: pd.DataFrame, preds: pd.DataFrame, letters_mode: bool = False) -> str:
     doc_ids = [d.strip() for d in str(thread_row["doc_ids"]).split(",") if d.strip()]
     summaries_block_lines = []
     for did in doc_ids:
@@ -292,7 +332,8 @@ def build_stage_b_prompt(thread_row, doc_summaries: pd.DataFrame, corpus: pd.Dat
         )
     excerpts_block = "\n\n".join(excerpts) or "(no excerpts)"
 
-    return STAGE_B_PROMPT.format(
+    template = STAGE_B_PROMPT_LETTERS if letters_mode else STAGE_B_PROMPT
+    return template.format(
         n_docs=int(thread_row["n_docs"]),
         n_papers=int(thread_row["n_newspapers"]),
         span_days=int(thread_row["span_days"]),
@@ -322,6 +363,7 @@ async def stage_b_gemini(prompts: list[tuple[int, str]], model_id: str) -> list[
                                               "polemic_type", "polemic_direction", "evidence")},
                 "actors": json.dumps(parsed.get("actors", []), ensure_ascii=False),
                 "rebuttal_edges": json.dumps(parsed.get("rebuttal_edges", []), ensure_ascii=False),
+                "outlier_docs": json.dumps(parsed.get("outlier_docs", []), ensure_ascii=False),
                 "_input_tokens": getattr(usage, "prompt_token_count", 0) if usage else 0,
                 "_output_tokens": getattr(usage, "candidates_token_count", 0) if usage else 0,
                 "_wall_seconds": time.time() - t0,
@@ -354,6 +396,7 @@ def stage_b_cli(prompts: list[tuple[int, str]], model_id: str) -> list[dict]:
                                               "polemic_type", "polemic_direction", "evidence")},
                 "actors": json.dumps(parsed.get("actors", []), ensure_ascii=False),
                 "rebuttal_edges": json.dumps(parsed.get("rebuttal_edges", []), ensure_ascii=False),
+                "outlier_docs": json.dumps(parsed.get("outlier_docs", []), ensure_ascii=False),
                 "_input_tokens": 0, "_output_tokens": 0,
                 "_wall_seconds": time.time() - t0, "_error": None,
             })
@@ -412,9 +455,13 @@ def main():
     ap.add_argument("--engaged-only", action="store_true", default=True)
     ap.add_argument("--skip-stage-a", action="store_true",
                     help="Reuse cached Stage A summaries; only re-run Stage B")
+    ap.add_argument("--threads-path", type=str, default=str(DATA / "threads.parquet"),
+                    help="Path to threads parquet (default: data/threads.parquet)")
+    ap.add_argument("--letters-mode", action="store_true",
+                    help="Use letter-corpus Stage B prompt (Egeret threads)")
     args = ap.parse_args()
 
-    threads = pd.read_parquet(DATA / "threads.parquet")
+    threads = pd.read_parquet(args.threads_path)
     if args.engaged_only:
         threads = threads[threads["thread_type"] == "engaged"]
     if args.thread_ids:
@@ -475,7 +522,7 @@ def main():
             if already:
                 continue
             prompts.append((int(tr["thread_id"]),
-                            build_stage_b_prompt(tr, doc_summ_mk, corpus, preds)))
+                            build_stage_b_prompt(tr, doc_summ_mk, corpus, preds, letters_mode=args.letters_mode)))
         print(f"\n=== Stage B · {mk} · {len(prompts)} thread prompts ===")
         if not prompts:
             continue
