@@ -112,6 +112,11 @@ Produce a JSON object (no markdown fences, no prose outside JSON) with EXACTLY t
 - "is_polemic_thread": true if this is a genuine polemical exchange, false if it is topical-only / news / non-polemic
 - "polemic_score": float 0.0-1.0 expressing how strongly this is a real polemical exchange (0 = pure co-occurrence, 1 = clear sustained polemic)
 - "polemic_type": one of "explicit" | "implicit" | "meta-polemic" | "topical-only" | "none"
+- "polemic_direction": one of "internal" | "external_defense" | "mixed" | "n/a".
+    * "internal"         = intra-Jewish dispute (e.g. Hasidim vs Mitnagdim, Haskalah vs Orthodoxy, Reform vs traditionalists, paper-vs-paper, rabbi-vs-rabbi).
+    * "external_defense" = cross-paper apologetics responding to external antisemitism / blood libel (Tiszaeszlár, Damascus affair) / missionary attacks / hostile non-Jewish press, where Jewish writers across papers close ranks against an outside accuser.
+    * "mixed"            = both registers genuinely active in the same thread.
+    * "n/a"              = thread is not polemical (use whenever is_polemic_thread is false).
 - "evidence": 1-2 sentence English justification, citing concrete signals from the summaries
 - "rebuttal_edges": JSON list of [doc_a, doc_b, relation] triples where doc_a explicitly responds to / attacks / defends-against doc_b (or where summaries strongly indicate this). `relation` is one of "responds-to", "attacks", "defends-against", "cites". Empty list if no specific cross-doc edges are identifiable from the summaries. Use the doc_id strings exactly as they appear in the summary lines.
 
@@ -308,7 +313,7 @@ async def stage_b_gemini(prompts: list[tuple[int, str]], model_id: str) -> list[
                 "thread_id": thread_id,
                 **{k: parsed.get(k) for k in ("topic_label", "topic_label_he", "narrative",
                                               "is_polemic_thread", "polemic_score",
-                                              "polemic_type", "evidence")},
+                                              "polemic_type", "polemic_direction", "evidence")},
                 "actors": json.dumps(parsed.get("actors", []), ensure_ascii=False),
                 "rebuttal_edges": json.dumps(parsed.get("rebuttal_edges", []), ensure_ascii=False),
                 "_input_tokens": getattr(usage, "prompt_token_count", 0) if usage else 0,
@@ -340,7 +345,7 @@ def stage_b_cli(prompts: list[tuple[int, str]], model_id: str) -> list[dict]:
                 "thread_id": thread_id,
                 **{k: parsed.get(k) for k in ("topic_label", "topic_label_he", "narrative",
                                               "is_polemic_thread", "polemic_score",
-                                              "polemic_type", "evidence")},
+                                              "polemic_type", "polemic_direction", "evidence")},
                 "actors": json.dumps(parsed.get("actors", []), ensure_ascii=False),
                 "rebuttal_edges": json.dumps(parsed.get("rebuttal_edges", []), ensure_ascii=False),
                 "_input_tokens": 0, "_output_tokens": 0,
