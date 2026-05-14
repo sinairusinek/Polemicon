@@ -87,7 +87,13 @@ Produce a JSON object (no markdown fences, no prose outside JSON) with EXACTLY t
 Respond with ONLY the JSON object.
 """
 
-STAGE_B_PROMPT = """You are evaluating whether a cluster of 19th-century Hebrew press articles, grouped algorithmically by reference + co-occurrence + semantic similarity, represents an actual POLEMICAL EXCHANGE (multi-author dispute, debate, controversy) — or merely TOPICAL CO-OCCURRENCE (same subject discussed without dispute).
+STAGE_B_PROMPT = """You are evaluating whether a cluster of 19th-century Hebrew press articles, grouped algorithmically by reference + co-occurrence + semantic similarity, represents an actual POLEMICAL EXCHANGE — or merely TOPICAL CO-OCCURRENCE.
+
+A POLEMICAL EXCHANGE comes in TWO valid kinds, BOTH of which count as polemic (is_polemic_thread=true):
+  (a) INTERNAL DISPUTE — multi-author disagreement, debate, or controversy among Jewish writers / papers / movements (e.g. Haskalah vs Orthodoxy, paper-vs-paper, rabbi-vs-rabbi).
+  (b) EXTERNAL DEFENSIVE POLEMIC — cross-paper apologetic engagement where Hebrew writers across multiple papers collectively rebut, refute, or counter-argue against external accusers: antisemitic press, blood libels (Tiszaeszlár, Damascus), missionary attacks, hostile non-Jewish polemicists. Even if the Hebrew papers agree with each other, the *exchange with the outside attacker* — explicit refutations (מפריך, דוחה), named opponents (Rohling, Istóczy, missionaries), citation of defenders (Strack, Renan), sustained cross-paper engagement — IS a polemical exchange, not topical co-occurrence.
+
+TOPICAL CO-OCCURRENCE = same subject discussed without any polemical engagement (neither internal disagreement nor external rebuttal); e.g. parallel news coverage, syndicated announcements, shared eulogies.
 
 Cluster metadata:
 - {n_docs} articles across {n_papers} newspapers
