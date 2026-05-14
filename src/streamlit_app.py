@@ -446,6 +446,14 @@ if view_mode == "Thread Browser":
             verdict = lr.get("is_polemic_thread")
             score = lr.get("polemic_score")
             ptype = lr.get("polemic_type", "")
+            pdir = lr.get("polemic_direction", "") or ""
+            dir_colors = {
+                "internal": "#1f77b4",
+                "external_defense": "#d62728",
+                "mixed": "#9467bd",
+                "n/a": "#888",
+            }
+            dir_color = dir_colors.get(str(pdir), "#888")
             verdict_color = "#d62728" if verdict else "#888"
             try:
                 score_f = float(score) if score is not None else None
@@ -463,7 +471,12 @@ if view_mode == "Thread Browser":
                         f'padding:3px 10px;border-radius:4px;font-weight:bold;">{verdict_txt}</span> '
                         f'&nbsp;<b>LLM score:</b> {score_s} '
                         f'&nbsp;<b>heuristic:</b> {heur:.1f} '
-                        f'&nbsp;<b>type:</b> <code>{ptype}</code>',
+                        f'&nbsp;<b>type:</b> <code>{ptype}</code>'
+                        + (f' &nbsp;<span style="background:{dir_color};color:white;'
+                           f'padding:2px 8px;border-radius:4px;font-size:0.85em;" '
+                           f'title="internal = intra-Jewish dispute · external_defense = '
+                           f'apologetics against external antisemitism · mixed = both">'
+                           f'{pdir}</span>' if pdir else ''),
                         unsafe_allow_html=True,
                     )
                 with top_cols[1]:

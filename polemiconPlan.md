@@ -12,6 +12,13 @@
 - Collapsing the 4-class predictions to binary (polemic vs. non-polemic) gives extrapolated macro F1 ≈ **0.82** — usable as a triage layer.
 - Pilot work (Phase C.2 threading) will use the binary signal only. Subtype labels remain in the parquet for inspection but are not load-bearing.
 
+### Polemic direction (internal vs. external_defense) (2026-05-14)
+- New `polemic_direction` field on `data/thread_llm_summaries.parquet` distinguishes intra-Jewish disputes (`internal`) from cross-paper apologetics against external antisemitism / blood libel / missionaries / hostile non-Jewish press (`external_defense`); also `mixed` and `n/a`. Motivation: thread 406 (Tiszaeszlár-type) — Opus rates it `external_defense`/meta-polemic while Gemini-Flash3 and Sonnet rate it as topical-only. The field makes that disagreement structured rather than buried in narrative text.
+- Pipeline: `src/thread_summaries.py` Stage B prompt now requests the field; new threads get it natively.
+- Backfill: `scripts/backfill_polemic_direction.py` re-prompts each (thread, model) row with a lightweight narrative-only prompt (no excerpts), preserving per-model verdicts so cross-model disagreement remains visible. Non-polemic rows are set to `n/a` without an LLM call. All 64 existing rows backfilled (1 retry needed for a CLI JSON parse error).
+- Distribution on top-32 pilot threads: 43 `internal`, 9 `mixed`, 1 `external_defense` (thread 406, Opus only), 11 `n/a` — consistent with a Haskalah-era corpus where most fights are intra-Jewish.
+- UI: thread inspector in `src/streamlit_app.py` shows the field as a colored badge (blue=internal, red=external_defense, purple=mixed, grey=n/a) next to `polemic_type`.
+
 ### Egeret date backfill sidecar (2026-05-14)
 - `data/egeret_dates.parquet` — composition dates for all 2,613 egeret rows in `polemic_pool`. `polemic_pool.parquet` not mutated.
 - Built by `scripts/extract_egeret_dates.py`. No LLM calls — reuses the `DateISO` field from the prior NER pass on `e-geret-batch-export.tsv` (mapping: `egeret_N` = TSV row N, verified by title).
