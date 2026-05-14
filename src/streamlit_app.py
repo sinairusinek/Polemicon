@@ -128,11 +128,16 @@ def load_threads():
 
 @st.cache_data(ttl=3600)
 def load_corpus_for_threads():
-    corpus_path = os.path.join(DATA_DIR, "..", "corpus.parquet")
-    if not os.path.exists(corpus_path):
-        return None
     cols = ["doc_id", "date", "year", "newspaper", "headline", "title", "author", "source", "text"]
-    return pd.read_parquet(corpus_path, columns=cols).set_index("doc_id")
+    # Prefer slim thread-scoped corpus (committed, ~18 MB) so Streamlit Cloud works.
+    slim_path = os.path.join(DATA_DIR, "thread_browser_corpus.parquet")
+    if os.path.exists(slim_path):
+        return pd.read_parquet(slim_path, columns=cols).set_index("doc_id")
+    # Fall back to full corpus.parquet at project root if running locally.
+    full_path = os.path.join(DATA_DIR, "..", "corpus.parquet")
+    if os.path.exists(full_path):
+        return pd.read_parquet(full_path, columns=cols).set_index("doc_id")
+    return None
 
 
 @st.cache_data(ttl=3600)
