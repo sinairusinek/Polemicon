@@ -1,5 +1,85 @@
 # Polemicon: Hebrew Polemic Corpus Analysis Pipeline
 
+## Status Update (2026-05-14)
+
+### B.4a fine-tune results
+- DictaBERT 6 epochs: macro F1 **0.526** (3 epochs: 0.518). Per-class F1: non 0.88 / implicit 0.49 / explicit 0.45 / meta 0.26.
+- heBERT 6 epochs: macro F1 **0.466**. Winner: **dicta-il/dictabert**.
+- Save-pass retrain hit 0.467 — fine-tuning variance on 1,599 train examples is ±0.05; saved checkpoint is the 0.467 version. Could be reproduced with a deterministic seed if needed.
+- 4-class is at the ceiling: Sonnet teacher labels matched RA gold at only 65%, so a student model can't exceed that noise floor regardless of base model or epochs.
+
+### Pilot-stage decision: use binary `is_polemic`
+- Collapsing the 4-class predictions to binary (polemic vs. non-polemic) gives extrapolated macro F1 ≈ **0.82** — usable as a triage layer.
+- Pilot work (Phase C.2 threading) will use the binary signal only. Subtype labels remain in the parquet for inspection but are not load-bearing.
+
+### Egeret date backfill sidecar (2026-05-14)
+- `data/egeret_dates.parquet` — composition dates for all 2,613 egeret rows in `polemic_pool`. `polemic_pool.parquet` not mutated.
+- Built by `scripts/extract_egeret_dates.py`. No LLM calls — reuses the `DateISO` field from the prior NER pass on `e-geret-batch-export.tsv` (mapping: `egeret_N` = TSV row N, verified by title).
+- Tiered provenance per-row in `source_of_date` (+ `confidence`, `partial_policy`):
+  - `tsv_dateiso_day` 1894 / `_month` 179 / `_year` 100 / `_partial` 33 — direct parse of normalized field.
+  - `tsv_date_hebrew` 10 — pyluach parse of raw Hebrew `Date` text (Tier B fallback).
+  - `volume_metadata` 273 — `origPublicationDate` as `year_max` upper bound.
+  - `author_lifespan` 124 — last-resort birth+15..death window. 30 authors hand-coded in `LIFESPANS` dict.
+- Coverage: 73% exact day, 80% day-or-month, 100% has some bound. 2,073 high / 143 medium / 397 low confidence.
+- **Why this exists:** cross-source threading needs month-level contemporaneity to distinguish a March-1880 letter reacting to a January-1880 article from a year-apart coincidence. Year-only bounds (the `polemic_pool.year` column was 0% populated for egeret) are too coarse.
+- **Use:** join on `doc_id`. The `partial_policy` column documents how each derived bound was produced; raw fields preserved for audit.
+
+### B.5 verification results (2026-05-14)
+- ✓ Press polemic prevalence: 25.2% (target 10–30%).
+- ⚠ Cross-reference lift: manual (n=33) flags 36% polemic vs 28.7% baseline (1.27×). Mechanical (n=1,622) 45.4% (1.58×). Weaker than plan implied but real.
+- ✗ Kappa vs RA gold: aggregate 0.091 (target >0.6). **But concentrated in one source**: kappa is 0.31–0.46 on press-derived hard cases, **-0.20 on BenYehuda**, +0.22 on egeret (n=7). Press threading remains defensible; BenYehuda threading is not.
+
+### BenYehuda diagnostic (chunking-validation, n=22)
+- Length-truncation hypothesis tested: paragraph-aware chunking + `max(prob_polemic)` aggregation.
+- Polemic recall **30% → 70%** — length artifact is real for recall.
+- Non-polemic precision unchanged — model over-predicts polemic on BenYehuda regardless of chunking. Best kappa across all aggregation rules ≈ -0.05.
+- Conclusion: chunking helps but is not sufficient. The real problem is that the model learned to associate BenYehuda surface features (literary Hebrew register, biblical allusion density, argumentative style) with polemic. **Press-only threading is the correct pilot scope.**
+
+### Pilot limitations & post-pilot decisions to revisit
+*(material for the pilot report — every entry here is a pilot-stage choice that should be reopened later, with the reason it was made and how to revisit it)*
+
+#### Scope decisions (what the pilot deliberately excluded)
+- **Press-only threading.** BenYehuda (`polemic_candidates`) and egeret (letters) were excluded from C.1/C.2 because (a) BenYehuda labels had kappa −0.20 vs RA gold, (b) egeret had too few polemic texts (n=565) and only 7 RA gold cases. **Revisit when:** RA gold expansion delivers ≥100 BenYehuda non-polemic and ≥50 egeret cases; threading can then extend to all sources.
+- **Binary `is_polemic` only.** Pilot uses `prob_non_polemic < 0.5` collapsed from the 4-class predictions (extrapolated binary macro F1 ≈ 0.82). Subtype labels (implicit / explicit / meta) stay in the parquet but are not load-bearing because 4-class kappa was 0.09. **Revisit when:** A retrained model on expanded RA gold pushes 4-class kappa above 0.5.
+
+#### Label-quality decisions (what we accepted as good-enough)
+- **Sonnet-distilled labels accepted at ~65% RA agreement.** This is the noise floor; the fine-tuned model can't exceed it. Pilot accepted this rather than blocking on Sonnet prompt re-engineering. **Revisit when:** Either Sonnet prompts are revised against the documented failure patterns (rhetorical denial, historical-vs-current opposition, truncated texts) or Sonnet is replaced by direct RA labels.
+- **Saved B.4a model is the save-retrain version (macro F1 0.467), not the best observed (0.526).** Differs by ~0.06 F1 due to fine-tuning variance on 1,599 train examples. **Revisit when:** B.4a is re-run with a deterministic seed + held-out validation split + early stopping.
+- **B.5 verification failed kappa target** (0.091 aggregate, target >0.6). Pilot proceeded with documented per-source breakdown rather than blocking. **Revisit when:** Per-source kappa is re-measured after gold expansion.
+
+#### Methodological substitutions (changes from the original plan)
+- **Newspaper-pair edges substituted for author-pair edges.** Press has zero filled-in authors; the plan's "different-author" filter was unbuildable. Substituted "different-newspaper" — historically defensible since 19th-c Hebrew papers were themselves polemic actors with distinct ideological lines. **Revisit when:** Author extraction from press text (bylines, pseudonym signatures) makes per-author analysis feasible; can then run author-pair edges alongside newspaper-pair edges.
+- **Same-newspaper edges retained** (not filtered out) — enables identifying topics a single paper runs internally. Threads are tagged `internal` / `engaged` / `co-occurrence` so the consumer can filter. **Revisit when:** A specific research question requires only cross-paper engagement; the current data already supports both views.
+- **Greedy date-cut split for over-span threads.** When a thread's span exceeds 730 days, the largest internal temporal gap is identified and edges across that cut are removed. **Limitation:** densely cross-connected threads (e.g., thread 374, MGD-dominated, 1114-day span) aren't fragmented because no single cut disconnects them. **Revisit with:** Graph-theoretic splitting (edge betweenness, modularity) instead of a temporal cut.
+
+#### Tuning decisions (thresholds picked from data, not from historical validation)
+- **Edge windows: 90d for interleave/semantic, 180d for explicit references.** Asymmetric tuning informed by the post-v3 sensitivity table (median edge gap was 39d, 90d captures ~59% of original-window edges, 180d preserves explicit-ref resolution at 40%). **Revisit by:** Sampling top engaged threads (especially #412, #408, #406) and comparing their span/edge structure to documented historical polemics. If the windows are systematically too tight or too wide, retune.
+- **Cosine threshold 0.85 for semantic edges.** Plan default, not tuned. **Revisit by:** Calibrating against thread examples where historians have already identified explicit text-to-text correspondence.
+- **HDBSCAN min_cluster_size=10** and UMAP n_neighbors=15. Plan defaults. **Revisit by:** Running a coarser clustering (min_cluster_size=20–30) to see whether the 98 clusters consolidate into a smaller set of meaningful topic families.
+- **730-day span cap.** Chosen as "≥2 years feels too long for one debate." Not validated against history. **Revisit by:** Looking at thread 374 (1114-day MGD thread on Jewish peoplehood) — is it really one running discourse or two distinct phases?
+
+#### Diagnosed-but-unfixed issues
+- **BenYehuda over-prediction is genre/register-driven, not just length.** Chunking validation (n=22) lifted polemic recall 30%→70% but precision stayed bad: the model flags literary Hebrew with biblical allusion density as polemic regardless of actual rhetorical function. **Fix path:** Expand RA gold with explicit non-polemic BenYehuda examples (target ≥100); train chunk-level rather than document-level on long works.
+- **compact_memory source (n=142): 0% polemic.** Not investigated. May be a length/register artifact or a genuine signal that this small periodical subset isn't polemic. **Revisit by:** Sampling 10 compact_memory texts and reading them.
+- **Cross-reference probe is weaker than plan implied.** Manual cross-refs (n=33) lift polemic rate to 36% (1.27× baseline) — plan expected "high rates." Mechanical refs do better (1.58×) but most are simple newspaper mentions. **Revisit when:** Better gold labels exist; re-test on a curated polemic-mention vs non-polemic-mention split.
+- **Explicit-reference resolution 40%.** Of 406 references in clustered docs, only 162 found a same-cluster target from the named newspaper within 180d. Unresolved cases may include cross-cluster references, references to non-pilot newspapers, or noise. **Revisit by:** Inspecting a sample of unresolved cases to characterize the failure modes.
+- **Actor-name vocabulary baseline (Q.B) under-recalls because of spelling variance, not prompt bugs (2026-05-14).** After fixing the Stage B prompt to emit actors in original Hebrew (`פינס (Pines)` rather than transliterated only), actor-name retrieval recall@N on top-30 threads rose only from ~0.6% (substring) to 6.7% (TF-IDF cosine) — well below the 30–50% target. Root cause: the LLM emits normalized modern Hebrew (`פינס`, `סמולנסקין`), but the OCR'd 19th-c corpus uses period spellings, abbreviations, and Yiddish-influenced variants (`פינעס`, `סמאלענסקין`, `יל"ג`). Compounding factors: newspaper-name actors (`המגיד`, `המליץ`) saturate cosine similarity, and recall@N truncates the candidate pool too tightly. **Why this matters for the post-pilot project:** entity linking is not just a retrieval optimization — it is the missing infrastructural layer between named-entity mentions and threading. The pilot's TF-IDF-cosine baseline (38% recall on topic words) outperforms actor-name retrieval (6.7%) precisely because topic-word matching is bag-of-vocab and forgives spelling, while name matching demands string identity that the OCR corpus cannot provide. **Revisit by:** Treating NER + entity linking as a Phase-D infrastructural goal in its own right. Hebrew Haskalah-era authority files (e.g. National Library of Israel name authority, Wikidata entries for `סמולנסקין`, `פינס`, `ליליענבלום`, etc.) cover the major polemic actors though not lesser-known correspondents. An enriched corpus with linked-data person/place/organization mentions would (a) raise the actor-name baseline to a level where it can fairly be compared to the C.2+LLM pipeline, (b) let threading edges include co-mention-of-same-entity as a first-class signal alongside reference/interleave/semantic, and (c) be a corpus-level deliverable independent of polemic threading. The pilot is not the place to build this, but the limitation justifies the investment.
+
+#### Verification gaps (what we didn't check)
+- **No historical validation.** Threads have not been cross-checked against documented 19th-c Hebrew press polemics in the secondary literature. The pilot's threading is a *candidate generator*, not a confirmed inventory.
+- **No researcher review of cluster topics.** Cluster top-terms are interpretable but haven't been confirmed by a Haskalah-press historian.
+- **No held-out test set for the classifier.** B.4a used 80/20 stratified split but the same split was used for model selection and final report; technically the F1 numbers are over-optimistic by a small margin.
+- **No silhouette calibration against alternative cluster counts.** Silhouette 0.615 looks good but wasn't compared to other clustering parameter choices.
+
+### Post-pilot backlog (deferred until press threading is exercised)
+- **Expand RA gold to ~500–1000 cases**, including **100+ BenYehuda non-polemic** examples specifically to teach the model that argumentative literary Hebrew ≠ polemic. Highest-leverage path.
+- **Chunk-level labeling, not document-level**, for long works during gold expansion.
+- Dedicated binary classifier head (small expected gain over post-hoc collapse, ~+0.02–0.05 F1).
+- Sonnet-at-scale as the classifier (no student) — accept cost, gain ~0.65+ F1 against RA gold.
+- Re-run B.4a with deterministic seeds and a held-out val split for early stopping.
+- Full BenYehuda chunking only after the gold expansion; pre-gold chunking lifts recall but tanks precision.
+- **NER + entity linking as Phase-D infrastructure.** Build a corpus-wide person/place/organization layer linked to authority files (NLI name authority, Wikidata) for the major Haskalah-era actors. Justification carried by the actor-baseline finding above. Deliverable is corpus-level (enriched linked-data layer) and benefits threading as a downstream consumer: co-mention-of-same-entity becomes a first-class edge type alongside reference/interleave/semantic, and actor-name retrieval becomes a fair comparison baseline.
+
 ## Status Update (2026-05-06)
 
 ### Completed
