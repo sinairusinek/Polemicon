@@ -88,6 +88,13 @@ point_size = st.sidebar.slider("Point size", 1, 8, 2)
 color_by_options = ["Cluster", "Source", "Initial vocab score"]
 if calib is not None:
     color_by_options.append("Calibration labels")
+
+egeret_labels_path = os.path.join(DATA_DIR, "egeret_polemic_cluster_labels.parquet")
+egeret_cluster_ids = set()
+if os.path.exists(egeret_labels_path):
+    egeret_cluster_ids = set(pd.read_parquet(egeret_labels_path, columns=["cluster_id"])["cluster_id"].astype(int))
+    color_by_options.append("Egeret-containing")
+
 color_by = st.sidebar.radio("Color by", color_by_options)
 
 # --- Calibration sidebar summary ---
@@ -168,6 +175,46 @@ elif color_by == "Initial vocab score":
         ),
         hoverinfo="text",
         name=f"Clustered ({len(plot_clustered):,})",
+    ))
+
+elif color_by == "Egeret-containing":
+    in_egeret = plot_clustered[plot_clustered["cluster_id"].astype(int).isin(egeret_cluster_ids)]
+    out_egeret = plot_clustered[~plot_clustered["cluster_id"].astype(int).isin(egeret_cluster_ids)]
+    fig.add_trace(go.Scatter(
+        x=out_egeret["umap_x"],
+        y=out_egeret["umap_y"],
+        mode="markers",
+        marker=dict(size=point_size, color="#cccccc", opacity=0.25),
+        text=out_egeret.apply(
+            lambda r: f"{r['doc_id']}<br>cluster {int(r['cluster_id'])}<br>(no Egeret)", axis=1
+        ),
+        hoverinfo="text",
+        name=f"No-Egeret clusters ({len(out_egeret):,})",
+    ))
+    eg_docs = in_egeret[in_egeret["source"] == "egeret"]
+    other_docs = in_egeret[in_egeret["source"] != "egeret"]
+    fig.add_trace(go.Scatter(
+        x=other_docs["umap_x"],
+        y=other_docs["umap_y"],
+        mode="markers",
+        marker=dict(size=point_size + 1, color="#1f77b4", opacity=0.5),
+        text=other_docs.apply(
+            lambda r: f"{r['doc_id']}<br>cluster {int(r['cluster_id'])}<br>{r['source']} (Egeret-bearing cluster)",
+            axis=1,
+        ),
+        hoverinfo="text",
+        name=f"Other-source in Egeret cluster ({len(other_docs):,})",
+    ))
+    fig.add_trace(go.Scatter(
+        x=eg_docs["umap_x"],
+        y=eg_docs["umap_y"],
+        mode="markers",
+        marker=dict(size=point_size + 2, color="#ff7f0e", opacity=0.9, line=dict(width=0.5, color="white")),
+        text=eg_docs.apply(
+            lambda r: f"{r['doc_id']}<br>cluster {int(r['cluster_id'])}<br>egeret", axis=1
+        ),
+        hoverinfo="text",
+        name=f"Egeret docs ({len(eg_docs):,})",
     ))
 
 else:  # Calibration labels — polemic types highlighted, everything else grey
