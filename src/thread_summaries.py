@@ -121,7 +121,10 @@ Produce a JSON object (no markdown fences, no prose outside JSON) with EXACTLY t
 - "polemic_direction": one of "internal" | "external_defense" | "mixed" | "n/a"
 - "evidence": 1-2 sentence English justification, citing concrete signals from the summaries
 - "rebuttal_edges": JSON list of [doc_a, doc_b, relation] triples where doc_a explicitly responds to / attacks / defends-against doc_b. `relation` ∈ "responds-to" | "attacks" | "defends-against" | "cites". Empty list if none identifiable.
-- "outlier_docs": JSON list of {{"doc_id": "...", "reason": "..."}} objects identifying letters that were algorithmically clustered with this thread but are NOT actually part of the polemical exchange. Be honest and specific.
+- "outlier_docs": JSON list of {{"doc_id": "...", "reason": "..."}} objects identifying letters that were algorithmically clustered with this thread but are NOT actually part of the polemical exchange. Be honest and specific; default to flagging when uncertain.
+- "sub_thread_signal": true if the cluster contains 2 OR MORE DISTINCT disputes that cannot be summarized as a single polemic; false otherwise.
+
+COUNTERWEIGHT: Polemical register alone is NOT a polemical exchange. A polemical exchange REQUIRES a shared dispute referent. Prefer is_polemic_thread=false / polemic_type=topical-only when individually-polemical letters lack a shared adversary, target, or proposition.
 
 Respond with ONLY the JSON object.
 """
@@ -164,7 +167,10 @@ Produce a JSON object (no markdown fences, no prose outside JSON) with EXACTLY t
     * "n/a"              = thread is not polemical (use whenever is_polemic_thread is false).
 - "evidence": 1-2 sentence English justification, citing concrete signals from the summaries
 - "rebuttal_edges": JSON list of [doc_a, doc_b, relation] triples where doc_a explicitly responds to / attacks / defends-against doc_b (or where summaries strongly indicate this). `relation` is one of "responds-to", "attacks", "defends-against", "cites". Empty list if no specific cross-doc edges are identifiable from the summaries. Use the doc_id strings exactly as they appear in the summary lines.
-- "outlier_docs": JSON list of {{"doc_id": "...", "reason": "..."}} objects identifying articles that were ALGORITHMICALLY CLUSTERED with this thread but are NOT actually part of the polemical exchange — e.g. obituaries, syndicated announcements, unrelated news, fire-relief appeals, parallel literary pieces sharing only temporal/lexical co-occurrence with the polemic. The verdict above (is_polemic_thread, polemic_score, polemic_type, polemic_direction) should describe the CORE of the thread excluding these outliers — i.e. if 11 of 14 docs are off-topic and only 3 form a coherent polemic, still score the 3-doc polemic on its own merits and list the 11 in outlier_docs. Empty list if all docs are on-topic. Be honest and specific; do not return an empty list just to keep the verdict simple.
+- "outlier_docs": JSON list of {{"doc_id": "...", "reason": "..."}} objects identifying articles that were ALGORITHMICALLY CLUSTERED with this thread but are NOT actually part of the polemical exchange — e.g. obituaries, syndicated announcements, unrelated news, fire-relief appeals, parallel literary pieces sharing only temporal/lexical co-occurrence with the polemic. The verdict above (is_polemic_thread, polemic_score, polemic_type, polemic_direction) should describe the CORE of the thread excluding these outliers — i.e. if 11 of 14 docs are off-topic and only 3 form a coherent polemic, still score the 3-doc polemic on its own merits and list the 11 in outlier_docs. Empty list if all docs are on-topic. Be honest and specific; flag a doc whenever you cannot describe in one sentence how it advances or responds within the polemic — default to flagging when uncertain.
+- "sub_thread_signal": true if the cluster contains 2 OR MORE DISTINCT disputes that cannot be summarized as a single polemic (different adversaries, different propositions, no shared referent — even if they share polemical register/vocabulary). If true, briefly enumerate each sub-dispute in the narrative. False otherwise.
+
+COUNTERWEIGHT — read carefully: Polemical register alone (תועבה, חרפה, רהיטות, sharp rhetoric) is NOT a polemical exchange. A "polemical exchange" REQUIRES a shared dispute referent: a common adversary, a common proposition being attacked/defended, or a chain of articles responding to each other. If the cluster contains polemical articles that do not share an adversary, target, or proposition, prefer is_polemic_thread=false with polemic_type=topical-only — even when the articles are individually polemical in tone. Syndicated public shaming of a single named individual across papers (no defender, no rejoinder) is one-sided denunciation, NOT a polemical exchange. Apply this counterweight especially when n_docs is large and span_days is wide.
 
 Respond with ONLY the JSON object.
 """
@@ -244,6 +250,34 @@ async def stage_a_gemini(doc_rows: pd.DataFrame, model_id: str) -> list[dict]:
     return results
 
 
+def _run_claude_cli(prompt: str, model_id: str, timeout: int) -> dict:
+    """Run `claude -p` via stdin (avoids argv length limits on large prompts).
+    Retries once on parse error. Returns {parsed, in_tok, out_tok}."""
+    last_err = None
+    for attempt in range(2):
+        proc = subprocess.run(
+            ["claude", "-p", "--model", model_id, "--output-format", "json"],
+            input=prompt, capture_output=True, text=True, timeout=timeout,
+        )
+        if proc.returncode != 0:
+            last_err = RuntimeError(proc.stderr.strip()[:200] or f"exit {proc.returncode}")
+            continue
+        try:
+            envelope = json.loads(proc.stdout)
+            result_text = envelope.get("result", proc.stdout)
+            usage = envelope.get("usage", {}) or {}
+            in_tok = int(usage.get("input_tokens", 0) or 0)
+            out_tok = int(usage.get("output_tokens", 0) or 0)
+        except Exception:
+            result_text, in_tok, out_tok = proc.stdout, 0, 0
+        try:
+            return {"parsed": parse_json(result_text), "in_tok": in_tok, "out_tok": out_tok}
+        except Exception as e:
+            last_err = e
+            continue
+    raise last_err if last_err else RuntimeError("unknown CLI failure")
+
+
 def stage_a_cli(doc_rows: pd.DataFrame, model_id: str) -> list[dict]:
     results = []
     for i, (_, row) in enumerate(doc_rows.iterrows()):
@@ -253,20 +287,15 @@ def stage_a_cli(doc_rows: pd.DataFrame, model_id: str) -> list[dict]:
         )
         t0 = time.time()
         try:
-            proc = subprocess.run(
-                ["claude", "-p", "--model", model_id, prompt],
-                capture_output=True, text=True, timeout=180,
-            )
-            if proc.returncode != 0:
-                raise RuntimeError(proc.stderr.strip()[:200] or f"exit {proc.returncode}")
-            parsed = parse_json(proc.stdout)
+            r = _run_claude_cli(prompt, model_id, timeout=180)
+            parsed = r["parsed"]
             results.append({
                 "doc_id": row["doc_id"],
                 "summary_he": parsed.get("summary_he", ""),
                 "is_polemical": bool(parsed.get("is_polemical", False)),
                 "key_actors": json.dumps(parsed.get("key_actors", []), ensure_ascii=False),
                 "stance_marker": parsed.get("stance_marker", ""),
-                "_input_tokens": 0, "_output_tokens": 0,
+                "_input_tokens": r["in_tok"], "_output_tokens": r["out_tok"],
                 "_wall_seconds": time.time() - t0, "_error": None,
             })
         except Exception as e:
@@ -353,14 +382,24 @@ async def stage_b_gemini(prompts: list[tuple[int, str]], model_id: str) -> list[
     for thread_id, prompt in prompts:
         t0 = time.time()
         try:
-            resp = await client.generate_content_async(prompt)
-            parsed = parse_json(resp.text)
+            resp = None
+            parsed = None
+            for attempt in range(2):
+                resp = await client.generate_content_async(prompt)
+                try:
+                    parsed = parse_json(resp.text)
+                    break
+                except Exception:
+                    if attempt == 1:
+                        raise
+                    await asyncio.sleep(1.0)
             usage = getattr(resp, "usage_metadata", None)
             out.append({
                 "thread_id": thread_id,
                 **{k: parsed.get(k) for k in ("topic_label", "topic_label_he", "narrative",
                                               "is_polemic_thread", "polemic_score",
                                               "polemic_type", "polemic_direction", "evidence")},
+                "sub_thread_signal": bool(parsed.get("sub_thread_signal", False)),
                 "actors": json.dumps(parsed.get("actors", []), ensure_ascii=False),
                 "rebuttal_edges": json.dumps(parsed.get("rebuttal_edges", []), ensure_ascii=False),
                 "outlier_docs": json.dumps(parsed.get("outlier_docs", []), ensure_ascii=False),
@@ -382,22 +421,18 @@ def stage_b_cli(prompts: list[tuple[int, str]], model_id: str) -> list[dict]:
     for thread_id, prompt in prompts:
         t0 = time.time()
         try:
-            proc = subprocess.run(
-                ["claude", "-p", "--model", model_id, prompt],
-                capture_output=True, text=True, timeout=300,
-            )
-            if proc.returncode != 0:
-                raise RuntimeError(proc.stderr.strip()[:200] or f"exit {proc.returncode}")
-            parsed = parse_json(proc.stdout)
+            r = _run_claude_cli(prompt, model_id, timeout=300)
+            parsed = r["parsed"]
             out.append({
                 "thread_id": thread_id,
                 **{k: parsed.get(k) for k in ("topic_label", "topic_label_he", "narrative",
                                               "is_polemic_thread", "polemic_score",
                                               "polemic_type", "polemic_direction", "evidence")},
+                "sub_thread_signal": bool(parsed.get("sub_thread_signal", False)),
                 "actors": json.dumps(parsed.get("actors", []), ensure_ascii=False),
                 "rebuttal_edges": json.dumps(parsed.get("rebuttal_edges", []), ensure_ascii=False),
                 "outlier_docs": json.dumps(parsed.get("outlier_docs", []), ensure_ascii=False),
-                "_input_tokens": 0, "_output_tokens": 0,
+                "_input_tokens": r["in_tok"], "_output_tokens": r["out_tok"],
                 "_wall_seconds": time.time() - t0, "_error": None,
             })
         except Exception as e:
@@ -475,7 +510,11 @@ def main():
     corpus_cols = ["doc_id", "date", "year", "newspaper", "headline", "author", "text"]
     corpus = pd.read_parquet(ROOT / "corpus.parquet", columns=corpus_cols).set_index("doc_id")
     preds_path = DATA / "full_corpus_predictions.parquet"
-    preds = pd.read_parquet(preds_path).set_index("doc_id") if preds_path.exists() else None
+    if preds_path.exists():
+        preds = pd.read_parquet(preds_path).set_index("doc_id")
+    else:
+        preds = None
+        print(f"WARNING: {preds_path} missing — Stage B excerpts will be the FIRST N docs, not the most-polemic.")
 
     # Union of all doc_ids in selected threads
     all_doc_ids: set = set()
