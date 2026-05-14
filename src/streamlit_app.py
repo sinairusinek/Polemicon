@@ -119,6 +119,55 @@ def load_calibration_with_corpus():
 
 
 @st.cache_data(ttl=3600)
+def load_threads():
+    path = os.path.join(DATA_DIR, "threads.parquet")
+    if os.path.exists(path):
+        return pd.read_parquet(path)
+    return None
+
+
+@st.cache_data(ttl=3600)
+def load_corpus_for_threads():
+    corpus_path = os.path.join(DATA_DIR, "..", "corpus.parquet")
+    if not os.path.exists(corpus_path):
+        return None
+    cols = ["doc_id", "date", "year", "newspaper", "headline", "title", "author", "source", "text"]
+    return pd.read_parquet(corpus_path, columns=cols).set_index("doc_id")
+
+
+@st.cache_data(ttl=3600)
+def load_full_predictions():
+    path = os.path.join(DATA_DIR, "full_corpus_predictions.parquet")
+    if os.path.exists(path):
+        return pd.read_parquet(path).set_index("doc_id")
+    return None
+
+
+@st.cache_data(ttl=600)
+def load_thread_llm_summaries():
+    path = os.path.join(DATA_DIR, "thread_llm_summaries.parquet")
+    if os.path.exists(path):
+        return pd.read_parquet(path)
+    return None
+
+
+@st.cache_data(ttl=600)
+def load_thread_doc_summaries():
+    path = os.path.join(DATA_DIR, "thread_doc_summaries.parquet")
+    if os.path.exists(path):
+        return pd.read_parquet(path)
+    return None
+
+
+@st.cache_data(ttl=600)
+def load_thread_literature_review():
+    path = os.path.join(DATA_DIR, "thread_literature_review.parquet")
+    if os.path.exists(path):
+        return pd.read_parquet(path)
+    return None
+
+
+@st.cache_data(ttl=3600)
 def load_vocab():
     path = os.path.join(DATA_DIR, "pilot_vocab.parquet")
     if os.path.exists(path):
@@ -165,7 +214,7 @@ if "current_idx" not in st.session_state:
 
 # --- Sidebar: filters and navigation ---
 
-view_mode = st.sidebar.radio("View", ["Annotation Tool", "Calibration Browser"], horizontal=True)
+view_mode = st.sidebar.radio("View", ["Annotation Tool", "Calibration Browser", "Thread Browser"], horizontal=True)
 
 st.sidebar.header("Filters")
 
@@ -277,6 +326,334 @@ st.sidebar.header("Navigation")
 if len(filtered) == 0:
     st.info("No texts match the current filters.")
     st.stop()
+
+# ── Thread Browser ─────────────────────────────────────────────────────────────
+
+if view_mode == "Thread Browser":
+    threads_df = load_threads()
+    if threads_df is None:
+        st.warning("threads.parquet not found. Run C.2 threading pipeline first.")
+        st.stop()
+
+    corpus_idx = load_corpus_for_threads()
+    if corpus_idx is None:
+        st.warning("corpus.parquet not found at project root.")
+        st.stop()
+    preds_idx = load_full_predictions()
+    llm_threads = load_thread_llm_summaries()
+    llm_docs = load_thread_doc_summaries()
+    lit_review = load_thread_literature_review()
+
+    st.subheader("Thread Browser")
+    st.caption(
+        f"{len(threads_df)} threads — engaged threads span multiple newspapers; "
+        "internal threads are within-paper sequences."
+    )
+
+    tcol1, tcol2, tcol3 = st.columns([2, 2, 2])
+    with tcol1:
+        type_choice = st.selectbox("Type", ["engaged", "internal", "all"], index=0)
+    with tcol2:
+        min_papers = st.number_input("Min newspapers", min_value=1, max_value=10, value=2, step=1)
+    with tcol3:
+        sort_choice = st.selectbox(
+            "Sort by",
+            ["score", "n_docs", "n_edges", "cross_paper_edges", "span_days"],
+        )
+
+    tview = threads_df.copy()
+    if type_choice != "all":
+        tview = tview[tview["thread_type"] == type_choice]
+    tview = tview[tview["n_newspapers"] >= int(min_papers)]
+    tview = tview.sort_values(sort_choice, ascending=False).reset_index(drop=True)
+
+    if len(tview) == 0:
+        st.info("No threads match these filters.")
+        st.stop()
+
+    summary_cols = ["thread_id", "cluster_id", "n_docs", "n_newspapers", "span_days",
+                    "n_edges", "cross_paper_edges", "same_paper_edges", "edge_types",
+                    "thread_type", "score", "newspapers"]
+    top_table = tview[summary_cols].head(50).copy()
+    if llm_threads is not None and not llm_threads.empty:
+        # Pick first model per thread for the summary column
+        llm_first = (llm_threads.sort_values("model")
+                     .drop_duplicates("thread_id", keep="first")
+                     .set_index("thread_id"))
+        top_table["llm_verdict"] = top_table["thread_id"].map(
+            lambda t: ("✓" if llm_first.loc[t]["is_polemic_thread"] else "✗")
+            if t in llm_first.index else "—"
+        )
+        top_table["llm_score"] = top_table["thread_id"].map(
+            lambda t: round(float(llm_first.loc[t]["polemic_score"]), 2)
+            if t in llm_first.index and pd.notna(llm_first.loc[t].get("polemic_score")) else None
+        )
+        top_table["llm_type"] = top_table["thread_id"].map(
+            lambda t: llm_first.loc[t]["polemic_type"] if t in llm_first.index else None
+        )
+    if lit_review is not None and not lit_review.empty:
+        lit_idx = lit_review.set_index("thread_id")
+        top_table["lit_status"] = top_table["thread_id"].map(
+            lambda t: str(lit_idx.loc[t].get("is_documented") or "—")
+            if t in lit_idx.index else "—"
+        )
+        top_table["lit_canonical"] = top_table["thread_id"].map(
+            lambda t: "✓" if (t in lit_idx.index and bool(lit_idx.loc[t].get("is_canonical_event")))
+            else "" if t in lit_idx.index else "—"
+        )
+    st.markdown("**Top threads**")
+    st.dataframe(top_table, use_container_width=True, height=280)
+
+    def _thread_label(tid):
+        r = tview[tview["thread_id"] == tid].iloc[0]
+        return (f"#{int(tid)} — {int(r['n_docs'])} docs · {int(r['n_newspapers'])} papers "
+                f"· {int(r['span_days'])}d · score {r['score']:.1f} · {r['newspapers']}")
+
+    thread_id_sel = st.selectbox(
+        "Select a thread to inspect",
+        tview["thread_id"].head(50).tolist(),
+        format_func=_thread_label,
+    )
+
+    trow = tview[tview["thread_id"] == thread_id_sel].iloc[0]
+    doc_ids = [d.strip() for d in str(trow["doc_ids"]).split(",") if d.strip()]
+    avail = [d for d in doc_ids if d in corpus_idx.index]
+    docs = corpus_idx.loc[avail].copy()
+    docs["doc_id"] = docs.index
+    if "date" in docs.columns:
+        docs = docs.sort_values("date")
+
+    LABEL_COLORS = {
+        "non-polemic": "#2ca02c",
+        "implicit": "#ff7f0e",
+        "explicit": "#d62728",
+        "meta-polemic": "#1f77b4",
+    }
+
+    st.markdown(
+        f"### Thread #{int(thread_id_sel)} — cluster {int(trow['cluster_id'])} · "
+        f"{int(trow['n_docs'])} docs · {int(trow['n_newspapers'])} papers · "
+        f"{int(trow['span_days'])} days · edges: {trow['edge_types']}"
+    )
+
+    # --- LLM verdict panel (if available) ---
+    if llm_threads is not None:
+        llm_rows = llm_threads[llm_threads["thread_id"] == int(thread_id_sel)]
+        if not llm_rows.empty:
+            model_choices = llm_rows["model"].unique().tolist()
+            sel_model = st.selectbox("LLM model", model_choices, key="llm_model_select")
+            lr = llm_rows[llm_rows["model"] == sel_model].iloc[0]
+            verdict = lr.get("is_polemic_thread")
+            score = lr.get("polemic_score")
+            ptype = lr.get("polemic_type", "")
+            verdict_color = "#d62728" if verdict else "#888"
+            try:
+                score_f = float(score) if score is not None else None
+            except Exception:
+                score_f = None
+            score_s = f"{score_f:.2f}" if score_f is not None else "—"
+            heur = float(trow["score"])
+            verdict_txt = "POLEMIC THREAD" if verdict else ("not polemic" if verdict is False else "?")
+
+            with st.container(border=True):
+                top_cols = st.columns([3, 2, 2])
+                with top_cols[0]:
+                    st.markdown(
+                        f'<span style="background:{verdict_color};color:white;'
+                        f'padding:3px 10px;border-radius:4px;font-weight:bold;">{verdict_txt}</span> '
+                        f'&nbsp;<b>LLM score:</b> {score_s} '
+                        f'&nbsp;<b>heuristic:</b> {heur:.1f} '
+                        f'&nbsp;<b>type:</b> <code>{ptype}</code>',
+                        unsafe_allow_html=True,
+                    )
+                with top_cols[1]:
+                    label_en = lr.get("topic_label") or ""
+                    if label_en:
+                        st.markdown(f"**Topic (EN):** {label_en}")
+                with top_cols[2]:
+                    label_he = lr.get("topic_label_he") or ""
+                    if label_he:
+                        st.markdown(
+                            f'<div dir="rtl" style="text-align:right;"><b>נושא:</b> {label_he}</div>',
+                            unsafe_allow_html=True,
+                        )
+
+                narrative = lr.get("narrative") or ""
+                if narrative:
+                    st.markdown(f"**Narrative:** {narrative}")
+
+                evidence = lr.get("evidence") or ""
+                if evidence:
+                    st.caption(f"Evidence: {evidence}")
+
+                actors_raw = lr.get("actors")
+                if actors_raw:
+                    try:
+                        import json as _json
+                        actors_list = _json.loads(actors_raw) if isinstance(actors_raw, str) else list(actors_raw)
+                        if actors_list:
+                            st.markdown("**Actors:** " + ", ".join(str(a) for a in actors_list))
+                    except Exception:
+                        pass
+
+                edges_raw = lr.get("rebuttal_edges") if "rebuttal_edges" in lr.index else None
+                if edges_raw:
+                    try:
+                        import json as _json
+                        edges = _json.loads(edges_raw) if isinstance(edges_raw, str) else list(edges_raw)
+                        if edges:
+                            st.markdown("**Rebuttal edges (LLM-identified):**")
+                            for e in edges:
+                                if isinstance(e, (list, tuple)) and len(e) >= 2:
+                                    a, b = e[0], e[1]
+                                    rel = e[2] if len(e) > 2 else "responds-to"
+                                    st.markdown(f"&nbsp;&nbsp;`{a}` → *{rel}* → `{b}`")
+                    except Exception:
+                        pass
+
+    # --- Secondary literature panel ---
+    if lit_review is not None:
+        lit_rows = lit_review[lit_review["thread_id"] == int(thread_id_sel)]
+        if not lit_rows.empty:
+            lit = lit_rows.iloc[0]
+            doc_status = lit.get("is_documented")
+            if pd.notna(doc_status) and doc_status:
+                status_colors = {
+                    "well-documented": "#2ca02c",
+                    "mentioned-in-passing": "#ff7f0e",
+                    "not-found": "#888",
+                }
+                color = status_colors.get(doc_status, "#666")
+                canonical = bool(lit.get("is_canonical_event", False))
+                with st.container(border=True):
+                    head = st.columns([3, 2])
+                    with head[0]:
+                        st.markdown(
+                            f'**Secondary literature** &nbsp; '
+                            f'<span style="background:{color};color:white;'
+                            f'padding:3px 10px;border-radius:4px;font-weight:bold;">'
+                            f'{doc_status}</span>'
+                            f' &nbsp; underlying event canonical: '
+                            f'**{"yes" if canonical else "no"}**',
+                            unsafe_allow_html=True,
+                        )
+                    notes = lit.get("notes") or ""
+                    if notes:
+                        st.caption(notes)
+                    sources_raw = lit.get("key_sources")
+                    if sources_raw:
+                        try:
+                            import json as _json
+                            sources = _json.loads(sources_raw) if isinstance(sources_raw, str) else list(sources_raw)
+                            if sources:
+                                st.markdown("**Sources:**")
+                                for s in sources:
+                                    author = str(s.get("author") or "").strip()
+                                    title = str(s.get("title") or "").strip()
+                                    year = s.get("year") or ""
+                                    stype = s.get("type") or ""
+                                    url = str(s.get("url") or "").strip()
+                                    where = str(s.get("where_discussed") or "").strip()
+                                    head_str = ""
+                                    if author:
+                                        head_str += author
+                                    if year and year != 0:
+                                        head_str += f" ({year})" if head_str else f"({year})"
+                                    if title:
+                                        head_str += f" — *{title}*" if head_str else f"*{title}*"
+                                    if url:
+                                        line = f"- [{head_str}]({url})"
+                                    else:
+                                        line = f"- {head_str}"
+                                    if stype:
+                                        line += f" `{stype}`"
+                                    st.markdown(line)
+                                    if where:
+                                        st.markdown(
+                                            f"&nbsp;&nbsp;&nbsp;&nbsp;<small style='color:#888;'>{where}</small>",
+                                            unsafe_allow_html=True,
+                                        )
+                        except Exception:
+                            pass
+
+    text_limit = st.slider("Text preview length", 200, 3000, 800, 100)
+
+    for _, drow in docs.iterrows():
+        did = drow["doc_id"]
+        meta_parts = []
+        date_v = drow.get("date")
+        if pd.notna(date_v):
+            meta_parts.append(str(date_v)[:10])
+        np_v = drow.get("newspaper")
+        if pd.notna(np_v) and str(np_v) not in ("", "nan"):
+            meta_parts.append(restore_final_forms(str(np_v)))
+        au_v = drow.get("author")
+        if pd.notna(au_v) and str(au_v) not in ("", "nan"):
+            meta_parts.append(restore_final_forms(str(au_v)))
+        meta_parts.append(did)
+
+        pred_badge = ""
+        if preds_idx is not None and did in preds_idx.index:
+            pr = preds_idx.loc[did]
+            lbl = str(pr["predicted_label"])
+            conf = float(pr["confidence"])
+            col = LABEL_COLORS.get(lbl, "#666")
+            pred_badge = (
+                f'<span style="background:{col};color:white;padding:2px 8px;'
+                f'border-radius:3px;font-size:12px;">{lbl} · {conf:.0%}</span>'
+            )
+
+        with st.container(border=True):
+            head_cols = st.columns([4, 1])
+            with head_cols[0]:
+                st.markdown(
+                    f"<small style='color:#888;'>{' · '.join(meta_parts)}</small>",
+                    unsafe_allow_html=True,
+                )
+                title = drow.get("headline") or drow.get("title")
+                if pd.notna(title) and str(title) not in ("", "nan"):
+                    st.markdown(
+                        f'<div dir="rtl" style="text-align:right;font-weight:bold;">'
+                        f'{restore_final_forms(str(title))}</div>',
+                        unsafe_allow_html=True,
+                    )
+            with head_cols[1]:
+                if pred_badge:
+                    st.markdown(pred_badge, unsafe_allow_html=True)
+
+            if llm_docs is not None:
+                doc_sum_rows = llm_docs[llm_docs["doc_id"] == did]
+                if not doc_sum_rows.empty:
+                    ds = doc_sum_rows.iloc[0]
+                    pol_icon = "🔴" if bool(ds.get("is_polemical")) else "⚪"
+                    sm = str(ds.get("summary_he") or "")
+                    if sm:
+                        st.markdown(
+                            f'<div style="background:#f5f3ef;border-left:3px solid #999;'
+                            f'padding:5px 10px;margin:4px 0;font-size:13px;">'
+                            f'<small style="color:#888;">{pol_icon} LLM ({ds.get("model","?")}):</small> '
+                            f'<span dir="rtl" style="text-align:right;">{restore_final_forms(sm)}</span>'
+                            f'</div>',
+                            unsafe_allow_html=True,
+                        )
+
+            text_val = str(drow.get("text", "") or "")
+            preview = restore_final_forms(text_val[:text_limit])
+            st.markdown(
+                f'<div dir="rtl" style="text-align:right;font-size:14px;line-height:1.7;">'
+                f'{preview}{"…" if len(text_val) > text_limit else ""}</div>',
+                unsafe_allow_html=True,
+            )
+            if len(text_val) > text_limit:
+                with st.expander("Full text"):
+                    st.markdown(
+                        f'<div dir="rtl" style="text-align:right;font-size:14px;line-height:1.7;">'
+                        f'{restore_final_forms(text_val[:8000])}</div>',
+                        unsafe_allow_html=True,
+                    )
+
+    st.stop()
+
 
 # ── Calibration Browser ────────────────────────────────────────────────────────
 

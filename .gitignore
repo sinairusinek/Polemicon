@@ -49,3 +49,10 @@ ENV/
 .vscode/
 # Ignore logs
 *.log
+logs/
+# Ignore Claude Code project-local settings
+.claude/
+# Ignore trained-model checkpoints (large; keep in external storage)
+data/models/
+# Ignore stale parquet writer locks
+*.parquet.lock

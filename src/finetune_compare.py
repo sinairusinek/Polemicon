@@ -137,7 +137,13 @@ def train_and_eval(
         ignore_mismatched_sizes=True,  # replaces any existing classification head
     )
 
-    device = torch.device("cpu")
+    if torch.backends.mps.is_available():
+        device = torch.device("mps")
+    elif torch.cuda.is_available():
+        device = torch.device("cuda")
+    else:
+        device = torch.device("cpu")
+    print(f"  Device: {device}")
     model = model.to(device)
 
     # Class weights to handle label imbalance
@@ -146,7 +152,7 @@ def train_and_eval(
         classes=np.array(range(len(LABEL_ORDER))),
         y=train_df["label_id"].values,
     )
-    weights_tensor = torch.tensor(class_weights, dtype=torch.float)
+    weights_tensor = torch.tensor(class_weights, dtype=torch.float).to(device)
 
     print("  Tokenizing...")
     train_dataset = PoemicDataset(train_df["text"], train_df["label_id"], tokenizer)
@@ -245,6 +251,8 @@ def main():
 
     for model_key in models_to_run:
         save_path = None
+        if args.save and len(models_to_run) == 1:
+            save_path = ROOT / "data" / "models" / "best_polemic_classifier"
         result = train_and_eval(
             model_key, train_df, test_df,
             epochs=args.epochs,
