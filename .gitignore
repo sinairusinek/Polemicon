@@ -56,3 +56,5 @@ logs/
 data/models/
 # Ignore stale parquet writer locks
 *.parquet.lock
+# Ignore dated backup parquets (e.g. thread_llm_summaries.backup_2026-05-15.parquet)
+*.backup_*.parquet
