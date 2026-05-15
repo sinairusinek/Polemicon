@@ -243,118 +243,96 @@ if "current_idx" not in st.session_state:
 
 # --- Sidebar: filters and navigation ---
 
-view_mode = st.sidebar.radio("View", ["Annotation Tool", "Calibration Browser", "Thread Browser"], horizontal=True)
-
-st.sidebar.header("Filters")
-
-sources = ["all"] + sorted(df["source"].unique().tolist())
-selected_source = st.sidebar.selectbox("Source", sources)
-
-if "cluster_id" in df.columns:
-    cluster_ids = sorted(df["cluster_id"].dropna().unique().tolist())
-    cluster_options = ["all"] + [str(int(c)) for c in cluster_ids]
-    selected_cluster = st.sidebar.selectbox("Cluster", cluster_options)
-else:
-    selected_cluster = "all"
-
-score_min, score_max = float(df["polemic_score"].min()), float(df["polemic_score"].max())
-score_range = st.sidebar.slider(
-    "Keyword score range",
-    min_value=score_min, max_value=score_max,
-    value=(score_min, score_max), step=0.01,
+view_mode = st.sidebar.radio(
+    "View",
+    ["Thread Browser", "Annotation Tool", "Calibration Browser"],
+    horizontal=True,
+    help="Threads = grouped polemic exchanges. Annotation = doc-by-doc labelling. Calibration = LLM-labelled corpus sample.",
 )
 
-# Review priority filter (from LLM disagreements)
-PRIORITY_OPTIONS = {
-    "all": "All texts",
-    "1": "🔴 Expensive models disagree (priority)",
-    "2": "🟡 Expensive agree, cheap diverge",
-    "3_polemic": "🟢 All agree polemic",
-    "3_not": "⚪ All agree not polemic",
-}
-if disagree_df is not None:
-    selected_priority = st.sidebar.selectbox("Review priority", list(PRIORITY_OPTIONS.keys()),
-                                              format_func=lambda x: PRIORITY_OPTIONS[x])
-else:
-    selected_priority = "all"
+# Annotation-only sidebar widgets. Other views render their own sidebar controls
+# inside their respective branches below.
+filtered = None
+selected_priority = "all"
+if view_mode == "Annotation Tool":
+    st.sidebar.header("Filters")
 
-# Show only unannotated
-show_unannotated_only = st.sidebar.checkbox("Show unannotated only", value=False)
+    sources = ["all"] + sorted(df["source"].unique().tolist())
+    selected_source = st.sidebar.selectbox("Source", sources)
 
-# Apply filters
-filtered = df.copy()
-if selected_source != "all":
-    filtered = filtered[filtered["source"] == selected_source]
-if selected_cluster != "all":
-    filtered = filtered[filtered["cluster_id"] == int(selected_cluster)]
-filtered = filtered[
-    (filtered["polemic_score"] >= score_range[0]) &
-    (filtered["polemic_score"] <= score_range[1])
-]
-if show_unannotated_only:
-    annotated_ids = set(st.session_state["annotations"].keys())
-    filtered = filtered[~filtered["doc_id"].isin(annotated_ids)]
-
-# Apply review priority filter
-if disagree_df is not None and selected_priority != "all":
-    if selected_priority == "3_polemic":
-        priority_ids = disagree_df[disagree_df["agreement_category"] == "all_agree_polemic"]["doc_id"]
-    elif selected_priority == "3_not":
-        priority_ids = disagree_df[disagree_df["agreement_category"] == "all_agree_not_polemic"]["doc_id"]
-    elif selected_priority == "1":
-        priority_ids = disagree_df[disagree_df["agreement_category"] == "expensive_disagree"]["doc_id"]
-    elif selected_priority == "2":
-        priority_ids = disagree_df[disagree_df["agreement_category"] == "expensive_agree_cheap_diverge"]["doc_id"]
+    if "cluster_id" in df.columns:
+        cluster_ids = sorted(df["cluster_id"].dropna().unique().tolist())
+        cluster_options = ["all"] + [str(int(c)) for c in cluster_ids]
+        selected_cluster = st.sidebar.selectbox("Cluster", cluster_options)
     else:
-        priority_ids = disagree_df["doc_id"]
-    filtered = filtered[filtered["doc_id"].isin(priority_ids)]
+        selected_cluster = "all"
 
-filtered = filtered.reset_index(drop=True)
-
-st.sidebar.markdown(f"**{len(filtered)}** texts match filters")
-st.sidebar.markdown(f"**{len(st.session_state['annotations'])}** / {len(df)} annotated")
-
-# LLM classification summary
-if disagree_df is not None:
-    st.sidebar.header("LLM Agreement")
-    cats = disagree_df["agreement_category"].value_counts()
-    st.sidebar.markdown(
-        f"🔴 Disagree: **{cats.get('expensive_disagree', 0)}**  \n"
-        f"🟡 Cheap diverge: **{cats.get('expensive_agree_cheap_diverge', 0)}**  \n"
-        f"🟢 All polemic: **{cats.get('all_agree_polemic', 0)}**  \n"
-        f"⚪ All not: **{cats.get('all_agree_not_polemic', 0)}**"
+    score_min, score_max = float(df["polemic_score"].min()), float(df["polemic_score"].max())
+    score_range = st.sidebar.slider(
+        "Keyword score range",
+        min_value=score_min, max_value=score_max,
+        value=(score_min, score_max), step=0.01,
     )
 
-# Calibration v2 stats
-if cal_corpus_df is not None:
-    st.sidebar.header("Calibration v2")
-    _total = len(cal_corpus_df)
-    _COLORS = {
-        "explicit polemic":           "#d62728",
-        "implicit polemic":           "#ff7f0e",
-        "meta-polemic (descriptive)": "#1f77b4",
-        "non-polemic":                "#2ca02c",
+    PRIORITY_OPTIONS = {
+        "all": "All texts",
+        "1": "🔴 Expensive models disagree (priority)",
+        "2": "🟡 Expensive agree, cheap diverge",
+        "3_polemic": "🟢 All agree polemic",
+        "3_not": "⚪ All agree not polemic",
     }
-    for _lbl, _col in _COLORS.items():
-        _n = (cal_corpus_df["polemic_label"] == _lbl).sum()
+    if disagree_df is not None:
+        selected_priority = st.sidebar.selectbox("Review priority", list(PRIORITY_OPTIONS.keys()),
+                                                  format_func=lambda x: PRIORITY_OPTIONS[x])
+
+    show_unannotated_only = st.sidebar.checkbox("Show unannotated only", value=False)
+
+    filtered = df.copy()
+    if selected_source != "all":
+        filtered = filtered[filtered["source"] == selected_source]
+    if selected_cluster != "all":
+        filtered = filtered[filtered["cluster_id"] == int(selected_cluster)]
+    filtered = filtered[
+        (filtered["polemic_score"] >= score_range[0]) &
+        (filtered["polemic_score"] <= score_range[1])
+    ]
+    if show_unannotated_only:
+        annotated_ids = set(st.session_state["annotations"].keys())
+        filtered = filtered[~filtered["doc_id"].isin(annotated_ids)]
+
+    if disagree_df is not None and selected_priority != "all":
+        if selected_priority == "3_polemic":
+            priority_ids = disagree_df[disagree_df["agreement_category"] == "all_agree_polemic"]["doc_id"]
+        elif selected_priority == "3_not":
+            priority_ids = disagree_df[disagree_df["agreement_category"] == "all_agree_not_polemic"]["doc_id"]
+        elif selected_priority == "1":
+            priority_ids = disagree_df[disagree_df["agreement_category"] == "expensive_disagree"]["doc_id"]
+        elif selected_priority == "2":
+            priority_ids = disagree_df[disagree_df["agreement_category"] == "expensive_agree_cheap_diverge"]["doc_id"]
+        else:
+            priority_ids = disagree_df["doc_id"]
+        filtered = filtered[filtered["doc_id"].isin(priority_ids)]
+
+    filtered = filtered.reset_index(drop=True)
+
+    st.sidebar.markdown(f"**{len(filtered)}** texts match filters")
+    st.sidebar.markdown(f"**{len(st.session_state['annotations'])}** / {len(df)} annotated")
+
+    if disagree_df is not None:
+        st.sidebar.header("LLM Agreement")
+        cats = disagree_df["agreement_category"].value_counts()
         st.sidebar.markdown(
-            f'<span style="background:{_col};color:white;padding:1px 6px;border-radius:3px;font-size:11px;">{_lbl}</span>'
-            f' **{_n}** ({_n/_total:.1%})',
-            unsafe_allow_html=True,
+            f"🔴 Disagree: **{cats.get('expensive_disagree', 0)}**  \n"
+            f"🟡 Cheap diverge: **{cats.get('expensive_agree_cheap_diverge', 0)}**  \n"
+            f"🟢 All polemic: **{cats.get('all_agree_polemic', 0)}**  \n"
+            f"⚪ All not: **{cats.get('all_agree_not_polemic', 0)}**"
         )
-    if "broader_polemic_link" in cal_corpus_df.columns:
-        st.sidebar.markdown("**Broader debate link:**")
-        for _val in ["clear", "suspected", "none"]:
-            _n = (cal_corpus_df["broader_polemic_link"] == _val).sum()
-            st.sidebar.markdown(f"  `{_val}`: {_n} ({_n/_total:.1%})")
 
-# --- Navigation ---
+    st.sidebar.header("Navigation")
 
-st.sidebar.header("Navigation")
-
-if len(filtered) == 0:
-    st.info("No texts match the current filters.")
-    st.stop()
+    if len(filtered) == 0:
+        st.info("No texts match the current filters.")
+        st.stop()
 
 # ── Thread Browser ─────────────────────────────────────────────────────────────
 
@@ -376,123 +354,281 @@ if view_mode == "Thread Browser":
     citations_verified = load_citation_verification()
     arbitration_targets = load_arbitration_targets()
 
-    st.subheader("Thread Browser")
-    st.caption(
-        f"{len(threads_df)} threads — engaged threads span multiple newspapers; "
-        "internal threads are within-paper sequences."
+    # ---- Sidebar: thread-scoped filters ----
+    st.sidebar.header("Filter threads")
+    type_choice = st.sidebar.selectbox(
+        "Type", ["all", "engaged", "internal"], index=0,
+        help="Engaged = an exchange across multiple papers. Internal = sequence within a single paper.",
+    )
+    min_papers = st.sidebar.number_input(
+        "Min number of newspapers", min_value=1, max_value=10, value=1, step=1,
+        help="Set to 2+ to hide single-paper threads.",
+    )
+    dir_options = ["any", "internal", "external_defense", "mixed", "n/a"]
+    direction_choice = st.sidebar.selectbox(
+        "Polemic direction", dir_options, index=0,
+        help="Internal = dispute among Jewish writers. External defense = response to outside attacks. Mixed = both.",
+    )
+    sort_choice = st.sidebar.selectbox(
+        "Sort by",
+        ["effective_polemic_strength", "score", "n_docs", "n_edges", "cross_paper_edges", "span_days"],
+        help="Effective strength weighs the LLM score by how many docs survived as 'on-topic'.",
+    )
+    show_power_table = st.sidebar.checkbox(
+        "Show full table (power user)", value=False,
+        help="Show the original sortable dataframe with all columns.",
     )
 
-    tcol1, tcol2, tcol3, tcol4 = st.columns([2, 2, 2, 2])
-    with tcol1:
-        type_choice = st.selectbox("Type", ["engaged", "internal", "all"], index=0)
-    with tcol2:
-        min_papers = st.number_input("Min newspapers", min_value=1, max_value=10, value=2, step=1)
-    with tcol3:
-        sort_choice = st.selectbox(
-            "Sort by",
-            ["score", "n_docs", "n_edges", "cross_paper_edges", "span_days", "effective_polemic_strength"],
-        )
-    with tcol4:
-        dir_options = ["any", "internal", "external_defense", "mixed", "n/a"]
-        direction_choice = st.selectbox("polemic_direction", dir_options, index=0)
-
+    # ---- Apply filters ----
     tview = threads_df.copy()
     if type_choice != "all":
         tview = tview[tview["thread_type"] == type_choice]
     tview = tview[tview["n_newspapers"] >= int(min_papers)]
 
-    # Direction filter consults the LLM verdict (first model per thread)
-    if direction_choice != "any" and llm_threads is not None and not llm_threads.empty:
-        _dir_lookup = (llm_threads.sort_values("model")
-                       .drop_duplicates("thread_id", keep="first")
-                       .set_index("thread_id")["polemic_direction"])
-        keep_ids = _dir_lookup[_dir_lookup == direction_choice].index
+    # Per-thread LLM verdict lookup (first model per thread, alphabetical)
+    llm_first = None
+    if llm_threads is not None and not llm_threads.empty:
+        llm_first = (llm_threads.sort_values("model")
+                     .drop_duplicates("thread_id", keep="first")
+                     .set_index("thread_id"))
+
+    if direction_choice != "any" and llm_first is not None and "polemic_direction" in llm_first.columns:
+        keep_ids = llm_first.index[llm_first["polemic_direction"] == direction_choice]
         tview = tview[tview["thread_id"].isin(keep_ids)]
 
-    # Sort: 'effective_polemic_strength' lives in derived_df, others in threads_df
-    if sort_choice == "effective_polemic_strength" and derived_df is not None and not derived_df.empty:
-        _eps = (derived_df.sort_values("model")
-                .drop_duplicates("thread_id", keep="first")
-                .set_index("thread_id")["effective_polemic_strength"])
-        tview = tview.assign(effective_polemic_strength=tview["thread_id"].map(_eps).fillna(0.0))
+    # Derived metrics lookup (effective_polemic_strength, purity, core_doc_count)
+    derived_first = None
+    if derived_df is not None and not derived_df.empty:
+        derived_first = (derived_df.sort_values("model")
+                         .drop_duplicates("thread_id", keep="first")
+                         .set_index("thread_id"))
+
+    if sort_choice == "effective_polemic_strength" and derived_first is not None:
+        tview = tview.assign(
+            effective_polemic_strength=tview["thread_id"].map(
+                derived_first["effective_polemic_strength"]
+            ).fillna(0.0)
+        )
     tview = tview.sort_values(sort_choice, ascending=False).reset_index(drop=True)
+
+    arb_ids = set()
+    if arbitration_targets is not None and not arbitration_targets.empty:
+        arb_ids = set(arbitration_targets["thread_id"].astype(int).tolist())
+
+    # ---- Header ----
+    st.subheader("Thread Browser")
+    st.caption(
+        f"{len(threads_df)} threads — an engaged thread crosses newspapers; an internal thread "
+        "stays within one paper."
+    )
+
+    # ---- Reserved timeline container (future viz lands here) ----
+    with st.container(border=True):
+        st.markdown("**Timeline of threads**")
+        st.caption("Coming soon: each thread plotted along its date span, colour-coded by verdict. "
+                   "Brush a date range to filter the sections below.")
 
     if len(tview) == 0:
         st.info("No threads match these filters.")
         st.stop()
 
-    summary_cols = ["thread_id", "cluster_id", "n_docs", "n_newspapers", "span_days",
-                    "n_edges", "cross_paper_edges", "same_paper_edges", "edge_types",
-                    "thread_type", "score", "newspapers"]
-    top_table = tview[summary_cols].head(50).copy()
-    if llm_threads is not None and not llm_threads.empty:
-        # Pick first model per thread for the summary column
-        llm_first = (llm_threads.sort_values("model")
-                     .drop_duplicates("thread_id", keep="first")
-                     .set_index("thread_id"))
-        top_table["llm_verdict"] = top_table["thread_id"].map(
-            lambda t: ("✓" if llm_first.loc[t]["is_polemic_thread"] else "✗")
-            if t in llm_first.index else "—"
-        )
-        top_table["llm_score"] = top_table["thread_id"].map(
-            lambda t: round(float(llm_first.loc[t]["polemic_score"]), 2)
-            if t in llm_first.index and pd.notna(llm_first.loc[t].get("polemic_score")) else None
-        )
-        top_table["llm_type"] = top_table["thread_id"].map(
-            lambda t: llm_first.loc[t]["polemic_type"] if t in llm_first.index else None
-        )
-        if "polemic_direction" in llm_first.columns:
-            top_table["llm_dir"] = top_table["thread_id"].map(
-                lambda t: llm_first.loc[t].get("polemic_direction") if t in llm_first.index else None
-            )
-        if "sub_thread_signal" in llm_first.columns:
-            top_table["sub_thread"] = top_table["thread_id"].map(
-                lambda t: "⚠" if (t in llm_first.index and bool(llm_first.loc[t].get("sub_thread_signal"))) else ""
-            )
-    if derived_df is not None and not derived_df.empty:
-        _d = (derived_df.sort_values("model")
-              .drop_duplicates("thread_id", keep="first")
-              .set_index("thread_id"))
-        top_table["purity"] = top_table["thread_id"].map(
-            lambda t: round(float(_d.loc[t]["thread_purity"]), 2)
-            if t in _d.index and pd.notna(_d.loc[t].get("thread_purity")) else None
-        )
-        top_table["core_n"] = top_table["thread_id"].map(
-            lambda t: int(_d.loc[t]["core_doc_count"])
-            if t in _d.index and pd.notna(_d.loc[t].get("core_doc_count")) else None
-        )
-        top_table["eff_strength"] = top_table["thread_id"].map(
-            lambda t: round(float(_d.loc[t]["effective_polemic_strength"]), 2)
-            if t in _d.index and pd.notna(_d.loc[t].get("effective_polemic_strength")) else None
-        )
-    if arbitration_targets is not None and not arbitration_targets.empty:
-        _arb = set(arbitration_targets["thread_id"].astype(int).tolist())
-        top_table["arbitrate?"] = top_table["thread_id"].map(
-            lambda t: "⚠" if int(t) in _arb else ""
-        )
-    if lit_review is not None and not lit_review.empty:
-        lit_idx = lit_review.set_index("thread_id")
-        top_table["lit_status"] = top_table["thread_id"].map(
-            lambda t: str(lit_idx.loc[t].get("is_documented") or "—")
-            if t in lit_idx.index else "—"
-        )
-        top_table["lit_canonical"] = top_table["thread_id"].map(
-            lambda t: "✓" if (t in lit_idx.index and bool(lit_idx.loc[t].get("is_canonical_event")))
-            else "" if t in lit_idx.index else "—"
-        )
-    st.markdown("**Top threads**")
-    st.dataframe(top_table, use_container_width=True, height=280)
+    # ---- Bucket threads by verdict ----
+    def _classify(tid):
+        tid_i = int(tid)
+        if tid_i in arb_ids:
+            return "arbitrate"
+        if llm_first is None or tid_i not in llm_first.index:
+            return "unreviewed"
+        v = llm_first.loc[tid_i].get("is_polemic_thread")
+        if bool(v):
+            return "polemic"
+        if v is False or v == 0:
+            return "not_polemic"
+        return "unreviewed"
 
-    def _thread_label(tid):
-        r = tview[tview["thread_id"] == tid].iloc[0]
-        return (f"#{int(tid)} — {int(r['n_docs'])} docs · {int(r['n_newspapers'])} papers "
-                f"· {int(r['span_days'])}d · score {r['score']:.1f} · {r['newspapers']}")
+    tview = tview.assign(_bucket=tview["thread_id"].map(_classify))
 
-    thread_id_sel = st.selectbox(
-        "Select a thread to inspect",
-        tview["thread_id"].head(50).tolist(),
-        format_func=_thread_label,
-    )
+    BUCKETS = [
+        ("polemic", "🔴 Confirmed polemic", True),
+        ("arbitrate", "⚠ Mixed / awaiting arbitration", True),
+        ("not_polemic", "⚪ Reviewed, not polemic", False),
+        ("unreviewed", "❓ Unreviewed", False),
+    ]
+
+    if "selected_thread_id" not in st.session_state:
+        # Default selection: first thread in the top bucket
+        for key, _, _ in BUCKETS:
+            sub = tview[tview["_bucket"] == key]
+            if not sub.empty:
+                st.session_state["selected_thread_id"] = int(sub.iloc[0]["thread_id"])
+                break
+
+    def _verdict_emoji(tid):
+        if int(tid) in arb_ids:
+            return "⚠"
+        if llm_first is not None and int(tid) in llm_first.index:
+            return "🔴" if bool(llm_first.loc[int(tid)].get("is_polemic_thread")) else "⚪"
+        return "❓"
+
+    def _topic_for(tid):
+        if llm_first is not None and int(tid) in llm_first.index:
+            lbl = llm_first.loc[int(tid)].get("topic_label")
+            if lbl and isinstance(lbl, str):
+                return lbl
+            narr = llm_first.loc[int(tid)].get("narrative")
+            if narr and isinstance(narr, str):
+                return narr[:120] + ("…" if len(narr) > 120 else "")
+        return ""
+
+    def _render_card(col, trow):
+        tid = int(trow["thread_id"])
+        emoji = _verdict_emoji(tid)
+        topic = _topic_for(tid)
+        n_docs = int(trow["n_docs"])
+        n_pap = int(trow["n_newspapers"])
+        span = int(trow["span_days"])
+
+        eps_s = ""
+        purity_s = ""
+        if derived_first is not None and tid in derived_first.index:
+            d_row = derived_first.loc[tid]
+            if pd.notna(d_row.get("effective_polemic_strength")):
+                eps_s = f"strength {float(d_row['effective_polemic_strength']):.2f}"
+            if pd.notna(d_row.get("thread_purity")):
+                purity_s = f"on-topic {float(d_row['thread_purity']):.0%}"
+
+        warnings = []
+        if tid in arb_ids:
+            warnings.append("⚠ arbitrate")
+        if llm_first is not None and tid in llm_first.index:
+            if bool(llm_first.loc[tid].get("sub_thread_signal", False)):
+                warnings.append("⚠ mixed sub-threads")
+        if lit_review is not None and not lit_review.empty:
+            lit_idx_local = lit_review.set_index("thread_id")
+            if tid in lit_idx_local.index:
+                if str(lit_idx_local.loc[tid].get("is_documented") or "") == "well-documented":
+                    warnings.append("📚 documented")
+
+        with col.container(border=True):
+            st.markdown(f"### {emoji} Thread #{tid}")
+            if topic:
+                st.markdown(f"<small>{topic}</small>", unsafe_allow_html=True)
+            st.markdown(
+                f"<small style='color:#666;'>{n_docs} docs · {n_pap} papers · {span}d</small>",
+                unsafe_allow_html=True,
+            )
+            if eps_s or purity_s:
+                st.markdown(
+                    f"<small style='color:#666;'>{' · '.join(s for s in (eps_s, purity_s) if s)}</small>",
+                    unsafe_allow_html=True,
+                )
+            if warnings:
+                st.markdown(
+                    f"<small style='color:#a00;'>{' · '.join(warnings)}</small>",
+                    unsafe_allow_html=True,
+                )
+            if st.button("Open thread →", key=f"open_thread_{tid}", use_container_width=True):
+                st.session_state["selected_thread_id"] = tid
+                st.session_state["scroll_to_detail"] = True
+                st.rerun()
+
+    # ---- Render bucket sections ----
+    for key, title, default_open in BUCKETS:
+        sub = tview[tview["_bucket"] == key]
+        if sub.empty:
+            continue
+        with st.expander(f"{title} ({len(sub)})", expanded=default_open):
+            shown = sub.head(24)  # cap per-section
+            n_cols = 3
+            for i in range(0, len(shown), n_cols):
+                row_cards = shown.iloc[i : i + n_cols]
+                cols = st.columns(n_cols)
+                for j, (_, trow) in enumerate(row_cards.iterrows()):
+                    _render_card(cols[j], trow)
+            if len(sub) > len(shown):
+                st.caption(f"…{len(sub) - len(shown)} more not shown. Use the full table to see them all.")
+
+    # ---- Optional power-user table ----
+    if show_power_table:
+        summary_cols = ["thread_id", "cluster_id", "n_docs", "n_newspapers", "span_days",
+                        "n_edges", "cross_paper_edges", "same_paper_edges", "edge_types",
+                        "thread_type", "score", "newspapers"]
+        top_table = tview[summary_cols].head(50).copy()
+        if llm_first is not None:
+            top_table["llm_verdict"] = top_table["thread_id"].map(
+                lambda t: ("✓" if llm_first.loc[t]["is_polemic_thread"] else "✗")
+                if t in llm_first.index else "—"
+            )
+            top_table["llm_score"] = top_table["thread_id"].map(
+                lambda t: round(float(llm_first.loc[t]["polemic_score"]), 2)
+                if t in llm_first.index and pd.notna(llm_first.loc[t].get("polemic_score")) else None
+            )
+            top_table["llm_type"] = top_table["thread_id"].map(
+                lambda t: llm_first.loc[t]["polemic_type"] if t in llm_first.index else None
+            )
+            if "polemic_direction" in llm_first.columns:
+                top_table["llm_dir"] = top_table["thread_id"].map(
+                    lambda t: llm_first.loc[t].get("polemic_direction") if t in llm_first.index else None
+                )
+            if "sub_thread_signal" in llm_first.columns:
+                top_table["sub_thread"] = top_table["thread_id"].map(
+                    lambda t: "⚠" if (t in llm_first.index and bool(llm_first.loc[t].get("sub_thread_signal"))) else ""
+                )
+        if derived_first is not None:
+            top_table["purity"] = top_table["thread_id"].map(
+                lambda t: round(float(derived_first.loc[t]["thread_purity"]), 2)
+                if t in derived_first.index and pd.notna(derived_first.loc[t].get("thread_purity")) else None
+            )
+            top_table["core_n"] = top_table["thread_id"].map(
+                lambda t: int(derived_first.loc[t]["core_doc_count"])
+                if t in derived_first.index and pd.notna(derived_first.loc[t].get("core_doc_count")) else None
+            )
+            top_table["eff_strength"] = top_table["thread_id"].map(
+                lambda t: round(float(derived_first.loc[t]["effective_polemic_strength"]), 2)
+                if t in derived_first.index and pd.notna(derived_first.loc[t].get("effective_polemic_strength")) else None
+            )
+        if arb_ids:
+            top_table["arbitrate?"] = top_table["thread_id"].map(
+                lambda t: "⚠" if int(t) in arb_ids else ""
+            )
+        if lit_review is not None and not lit_review.empty:
+            lit_idx = lit_review.set_index("thread_id")
+            top_table["lit_status"] = top_table["thread_id"].map(
+                lambda t: str(lit_idx.loc[t].get("is_documented") or "—")
+                if t in lit_idx.index else "—"
+            )
+            top_table["lit_canonical"] = top_table["thread_id"].map(
+                lambda t: "✓" if (t in lit_idx.index and bool(lit_idx.loc[t].get("is_canonical_event")))
+                else "" if t in lit_idx.index else "—"
+            )
+        with st.expander("Full table", expanded=True):
+            st.dataframe(top_table, use_container_width=True, height=280)
+
+    # ---- Resolve the selected thread for the detail panel ----
+    thread_id_sel = st.session_state.get("selected_thread_id")
+    if thread_id_sel is None or thread_id_sel not in set(tview["thread_id"].tolist()):
+        # Selection lost (e.g. filtered out). Fall back to first in current view.
+        thread_id_sel = int(tview.iloc[0]["thread_id"])
+        st.session_state["selected_thread_id"] = thread_id_sel
+    st.markdown('<div id="thread-detail-anchor"></div>', unsafe_allow_html=True)
+    st.markdown("---")
+
+    # One-shot scroll: when "Open thread →" was clicked, smooth-scroll the parent
+    # page to the detail anchor on this rerun.
+    if st.session_state.pop("scroll_to_detail", False):
+        import streamlit.components.v1 as _components
+        _components.html(
+            """
+            <script>
+            const doc = window.parent.document;
+            const target = doc.getElementById('thread-detail-anchor');
+            if (target) {
+                target.scrollIntoView({behavior: 'smooth', block: 'start'});
+            }
+            </script>
+            """,
+            height=0,
+        )
 
     trow = tview[tview["thread_id"] == thread_id_sel].iloc[0]
     doc_ids = [d.strip() for d in str(trow["doc_ids"]).split(",") if d.strip()]
