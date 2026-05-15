@@ -311,3 +311,52 @@ Shared infrastructure between the two: the entity layer (currently 6.7% recall) 
 
 Demos illustrating each branch follow in separate files (`logs/demos/`).
 
+---
+
+## Findings surfaced during demo construction — JPress data-quality and pseudonym handling
+
+*Added 2026-05-15. Single working example: the demo for egeret_3442 (Y.L. Gordon, ער"ח אייר תר"ל, attacking Yechiel Bril of הלבנון).*
+
+The very first letter we built a presentation-grade demo around — a private 1870 letter by Y.L. Gordon — surfaced three distinct data-quality issues in the underlying press archive that the post-pilot infrastructure will have to address. These are not blockers for the pilot's findings; they are concrete examples of the scaling work the press-polemic project will require.
+
+### 1. JPress article-level segmentation errors
+
+The letter refers to its recipient's article in *HaMelitz* issue 13 of 1870. In the JPress digitization, the relevant article (HMZ 1870-04-11, article 5) is in fact two distinct articles glued into a single OLIVE article-ID: a preceding short report from New York followed by the Šiauliai letter we actually want. This caused a momentary mis-identification during the demo build (reading the first part of article 5 as the recipient's piece, and concluding incorrectly that the recipient was in New York) before close reading clarified that BY editor's annotation "ר"א אפרתי בשאוועל" was correct all along.
+
+**Post-pilot infrastructure implication.** Cross-corpus links that depend on JPress article identifiers cannot trust those identifiers as one-to-one with authored articles. The press-polemic project will need an article-boundary correction layer — either by detecting in-article transitions (typographic separators, signature lines, dateline changes) at OCR-box level rather than at OLIVE-article level, or by feeding back corrections to NLI through an explicit "segmentation issues" channel.
+
+### 2. JPress OCR quality
+
+Beyond segmentation, JPress OCR output for 19th-c. Hebrew press contains routine misreadings (final-form letter substitutions, ligature splits, vocalization misreads). For matching purposes this is workable — fuzzy matching handles it — but for any *display* of press text inside an enriched BY view, the raw OCR is not publication-grade. The press-polemic project will need a review-and-correction loop, likely combining better re-OCR (modern Hebrew historical-script models) with crowd-sourced corrections at NLI level.
+
+### 3. Pseudonym and acronym resolution
+
+The letter's recipient is named in the BY editorial annotation as "ר"א אפרתי" but signs the corresponding *HaMelitz* article as **"א.ל."** — two-initial acronym. The BY editor's identification is an expansion based on context that the source itself does not preserve. Acronyms, initials, and pseudonyms are pervasive in Hebrew press of this period; reliable cross-corpus matching by author requires resolving them.
+
+**Resources for post-pilot pseudonym/acronym work.** Several catalogues exist that the post-pilot project will need to integrate or harvest:
+
+- **Kressel's lexicon of the Hebrew press** (גצל קרסל, *לקסיקון הספרות העברית בדורות האחרונים*) records many pseudonyms and their resolutions for 19th–20th-c. writers.
+- **RAMBI author-name authority records** at the National Library of Israel maintain pseudonym → real-name links for indexed authors.
+- **Project Ben-Yehuda's own author authority files** (the `authorities` subsystem the BY project already uses internally) maintain pseudonym lists for authors in their corpus.
+- **JPress contributor metadata** for some papers includes signed/unsigned distinctions but rarely with resolutions.
+
+A focused post-pilot deliverable: a pseudonym-resolution layer that ingests these sources, exposes a `(signature_form, resolved_identity, confidence, source)` table, and gets applied automatically when the pipeline encounters initialed or pseudonymous bylines in either egeret or press.
+
+### 4. Internal cleaning-pipeline bug: final-form restoration breaks across gershayim
+
+While building the demo I noticed the displayed letter contained `אעף"י` where the correct form is `אעפ"י` (an abbreviation of *af-al-pi*). This is not a JPress artifact — it's a bug in our own `src/cleaning.py:restore_final_forms`, which applies final-form letters at any non-Hebrew character including the gershayim `"`. The regex `(?=\s|[^א-ת]|$)` treats `"` and `'` as word-end markers; in any Hebrew abbreviation where a final-form-eligible letter (כ מ נ פ צ) appears immediately before gershayim, the function wrongly restores it as ך/ם/ן/ף/ץ.
+
+**Post-pilot fix.** Trivial: extend the negation class to include `"`, `'`, and the Unicode gershayim/geresh codepoints (U+05F3, U+05F4). But the broader implication is that **anything we have already displayed via `restore_final_forms` should be audited** — any acronym ending in פ, צ, מ, נ, כ will have been corrupted. The corruption is cosmetic (it doesn't affect upstream classification, which works on the normalized form) but it makes the displayed text look wrong to a careful Hebrew reader, which is fatal for a publication-grade output.
+
+### 5. UX patterns proven by the demo build
+
+Building the egeret_3442 demo to presentation-grade also surfaced three UX patterns that should be carried into the production platform of either follow-up project:
+
+- **Provenance toggle.** A single toggle that dims AI-derived blocks so human-curated content reads through. This is the only credible answer to "what's authoritative vs AI-suggested?" — the question every scholarly user asks first. Without it, hybrid pages cannot be defended.
+- **Invitation to research.** When automated literature search returns "not-found," the gap is itself the contribution. Surface it as a panel of open questions with starter sentences and explore-with-AI buttons. Recruits users into the research; doesn't bury the absence.
+- **Demo-as-proposal-to-partner.** Rather than describing what an enriched letter view *could* look like at the Ben-Yehuda Project, the demo *is* one — same palette, font, breadcrumb, RTL, with the enrichments slotted in. This frames the post-pilot project as a collaboration request, not a separate platform build. (See `logs/demos/demo_egeret_3442_bypage_mockup.html` and the `feedback_demo_design` memory for the full conventions.)
+
+### Why this matters for the project framing
+
+The pilot's "two projects" synthesis above argues that press-polemic and BY-enrichment are different downstream tasks. These three findings show that the *shared infrastructure layer* under both projects has more scope than just NER + reference extraction: it also needs (1) press-archive segmentation correction, (2) press-archive OCR quality control, and (3) cross-corpus pseudonym resolution. Each of the two projects can ship usefully without the full infrastructure, but the infrastructure investment is what compounds across both.
+

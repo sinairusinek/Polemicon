@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>אגרת שבעים ותשע — יל"ג, ער"ח אייר תר"ל [תצוגת־מוצעת]</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alef:wght@400;700&family=Frank+Ruhl+Libre:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<style>
+  :root {
+    --by-accent: #660248;
+    --by-accent-dark: #2b0d22;
+    --by-light: #d9cdd5;
+    --by-tertiary: #907989;
+    --by-footer: #430230;
+    --by-text: #242424;
+    --by-bg: #ffffff;
+    --by-soft: #faf6f8;
+    --by-rule: #e6dce1;
+    /* entity colors */
+    --c-sender: #a05a2a;       /* rust — Gordon / Telz */
+    --c-sender-bg: #f5e7d8;
+    --c-recipient: #5a3a8a;    /* purple — recipient / Šiauliai */
+    --c-recipient-bg: #e8e0f0;
+    --c-person: #660248;       /* accent pink — other persons */
+    --c-person-bg: #f8e8ef;
+    --c-place: #3b6b3b;        /* green — other places */
+    --c-place-bg: #e6f0e6;
+    --c-newspaper: #6b4ea0;    /* violet — newspapers */
+    --c-newspaper-bg: #ece4f5;
+    --c-publication: #a08a3a;  /* yellow/amber — articles, works, publications */
+    --c-publication-bg: #fff8d6;
+    --c-unknown-line: #907989;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--by-bg);
+    color: var(--by-text);
+    font-family: 'Alef', 'Arial Hebrew', Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.65;
+  }
+  a { color: var(--by-accent); text-decoration: none; border-bottom: 1px dotted var(--by-accent); }
+  a:hover { color: var(--by-accent-dark); border-bottom-style: solid; }
+
+  /* --- mockup banner --- */
+  .mockup-banner {
+    background: #fff4cc;
+    color: #5a4400;
+    border-bottom: 2px solid #d6b94a;
+    padding: 10px 24px;
+    font-size: 14px;
+    text-align: center;
+    font-weight: 700;
+  }
+  .mockup-banner .small { font-weight: 400; opacity: 0.85; margin-inline-start: 12px; }
+
+  /* --- header bar --- */
+  header.site {
+    background: var(--by-bg);
+    border-bottom: 3px solid var(--by-accent);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  header.site .logo {
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 28px;
+    color: var(--by-accent);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  header.site nav { display: flex; gap: 18px; font-size: 15px; color: var(--by-tertiary); }
+  header.site nav a { color: var(--by-tertiary); border: none; }
+  header.site nav a:hover { color: var(--by-accent); }
+
+  /* --- breadcrumb --- */
+  .crumb {
+    background: var(--by-soft);
+    padding: 8px 32px;
+    font-size: 13px;
+    color: var(--by-tertiary);
+    border-bottom: 1px solid var(--by-rule);
+  }
+  .crumb a { color: var(--by-tertiary); border: none; }
+  .crumb .sep { margin: 0 8px; opacity: 0.4; }
+
+  /* --- layout --- */
+  .wrap { max-width: 1480px; margin: 0 auto; padding: 24px 32px 60px; display: grid; grid-template-columns: 320px 1fr 380px; gap: 24px; }
+  @media (max-width: 1200px) { .wrap { grid-template-columns: 1fr 380px; } aside.side-right { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; } }
+  @media (max-width: 800px) { .wrap { grid-template-columns: 1fr; } aside.side-right { grid-template-columns: 1fr; } }
+  aside.side-right { display: flex; flex-direction: column; gap: 20px; }
+  /* legacy width rule below replaced by the grid rules above */
+  .wrap-legacy { max-width: 1280px; margin: 0 auto; padding: 24px 32px 60px; display: grid; grid-template-columns: 1fr 440px; gap: 32px; }
+  @media (max-width: 980px) { .wrap { grid-template-columns: 1fr; } }
+
+  /* --- letter header --- */
+  .letter-head {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 20px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--by-rule);
+    margin-bottom: 22px;
+  }
+  .letter-head img.portrait {
+    width: 110px; height: 140px; object-fit: cover;
+    border: 1px solid var(--by-rule);
+    background: var(--by-soft);
+  }
+  .letter-head h1 {
+    margin: 0 0 6px 0;
+    font-size: 26px;
+    color: var(--by-accent);
+    font-family: 'Frank Ruhl Libre', serif;
+    font-weight: 700;
+  }
+  .letter-head .meta { font-size: 14px; color: var(--by-tertiary); }
+  .letter-head .meta .author { color: var(--by-text); font-weight: 700; }
+  .letter-head .meta div { margin-bottom: 3px; }
+
+  /* --- letter body --- */
+  .letter-body {
+    font-family: 'Frank Ruhl Libre', 'David', serif;
+    font-size: 18px;
+    line-height: 1.95;
+    color: var(--by-text);
+    text-align: justify;
+  }
+  .letter-body p { margin: 0 0 18px 0; }
+  .letter-body .stage-direction {
+    font-size: 14px;
+    color: var(--by-tertiary);
+    font-style: italic;
+    font-family: 'Alef', sans-serif;
+  }
+  /* letter toolbar */
+  .letter-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; padding: 6px 10px; margin-bottom: 14px;
+    background: var(--by-soft); border: 1px solid var(--by-rule); border-radius: 4px;
+    font-size: 12px; color: var(--by-tertiary);
+  }
+  .letter-toolbar label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+  .letter-toolbar input[type=checkbox] { accent-color: var(--by-accent); }
+  .letter-toolbar .tb-hint { opacity: 0.8; font-style: italic; }
+
+  /* NER off mode: neutralize all entity styling */
+  body.entities-hidden .entity {
+    background: transparent !important;
+    outline: none !important;
+    border-bottom: none !important;
+    cursor: text !important;
+    padding: 0 !important;
+  }
+  body.entities-hidden .entity:hover { filter: none !important; }
+
+  /* Explore-with-AI button (research-invitation box) */
+  .explore-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 6px;
+    background: #fff; border: 1px solid #c6a64a; color: #6b4a00;
+    font-family: 'Alef', sans-serif; font-size: 11px;
+    padding: 4px 10px; border-radius: 3px; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .explore-btn:hover { background: #fff4cc; }
+
+  /* Explore-with-AI modal */
+  #explore-modal .modal { max-width: 640px; }
+  .chat-window {
+    background: #faf6f8; border: 1px solid var(--by-rule); border-radius: 4px;
+    padding: 8px; margin-top: 6px; min-height: 120px; max-height: 240px; overflow-y: auto;
+    font-size: 12px; line-height: 1.5;
+  }
+  .chat-msg { padding: 6px 8px; margin-bottom: 5px; border-radius: 3px; }
+  .chat-msg.user { background: #e8e0f0; color: var(--by-text); margin-inline-start: 28px; }
+  .chat-msg.ai   { background: #fff; color: var(--by-text); border: 1px solid var(--by-rule); margin-inline-end: 28px; }
+  .chat-msg .who { font-weight: 700; font-size: 10px; color: var(--by-tertiary); margin-bottom: 2px; }
+  .chat-row { display: flex; gap: 6px; margin-top: 8px; }
+  .chat-row input { flex: 1; padding: 6px 8px; border: 1px solid var(--by-rule); border-radius: 3px; font-family: 'Alef', sans-serif; font-size: 13px; direction: rtl; }
+  .chat-row button { background: var(--by-accent); color: #fff; border: none; padding: 6px 14px; border-radius: 3px; cursor: pointer; font-family: 'Alef', sans-serif; font-size: 12px; }
+  .chat-suggested { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+  .chat-suggested .sg {
+    background: var(--by-soft); border: 1px solid var(--by-rule); color: var(--by-accent);
+    font-size: 11px; padding: 2px 8px; border-radius: 10px; cursor: pointer;
+  }
+  .chat-suggested .sg:hover { background: var(--by-light); }
+
+  /* "מצאתי שגיאה" BYP-style button + modal */
+  .report-error-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: none; border: 1px solid var(--c-place); color: var(--c-place);
+    font-family: 'Alef', sans-serif; font-size: 12px;
+    padding: 4px 10px; border-radius: 3px; cursor: pointer;
+    text-decoration: none;
+  }
+  .report-error-btn:hover { background: var(--c-place); color: #fff; }
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(40, 0, 25, 0.45);
+    display: none; align-items: center; justify-content: center; z-index: 10000;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #fff; border-radius: 6px; padding: 24px;
+    max-width: 480px; width: 92%; direction: rtl; text-align: right;
+    font-family: 'Alef', sans-serif; font-size: 14px;
+    box-shadow: 0 8px 32px rgba(60,0,30,0.3);
+  }
+  .modal h3 { margin: 0 0 4px 0; color: var(--by-accent); font-size: 18px; font-family: 'Frank Ruhl Libre', serif; }
+  .modal .sub { font-size: 12px; color: var(--by-tertiary); margin-bottom: 14px; }
+  .modal label { display: block; font-size: 12px; font-weight: 700; margin: 10px 0 4px; color: var(--by-text); }
+  .modal textarea, .modal input[type=text], .modal input[type=email] {
+    width: 100%; padding: 6px 8px; border: 1px solid var(--by-rule); border-radius: 3px;
+    font-family: 'Alef', sans-serif; font-size: 13px; direction: rtl;
+  }
+  .modal textarea { resize: vertical; min-height: 70px; }
+  .modal .modal-actions { display: flex; gap: 10px; justify-content: flex-start; margin-top: 16px; }
+  .modal button.primary { background: var(--by-accent); color: #fff; border: none; padding: 6px 18px; border-radius: 3px; cursor: pointer; font-family: 'Alef', sans-serif; font-size: 13px; }
+  .modal button.secondary { background: none; color: var(--by-tertiary); border: 1px solid var(--by-rule); padding: 6px 14px; border-radius: 3px; cursor: pointer; font-family: 'Alef', sans-serif; font-size: 13px; }
+  .modal .modal-notice { font-size: 11px; color: var(--by-tertiary); margin-top: 14px; font-style: italic; padding: 8px 10px; background: var(--by-soft); border-radius: 3px; }
+
+  /* BY-style tag box */
+  .tag-box {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dotted var(--by-rule);
+  }
+  .tag-box .tag-header {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--by-tertiary); margin-bottom: 6px;
+  }
+  .tag-box .tag-new-badge {
+    background: var(--by-accent); color: #fff;
+    font-size: 10px; padding: 1px 6px; border-radius: 8px; font-weight: 700;
+  }
+  .tag-box .tag-list {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;
+  }
+  .tag {
+    display: inline-flex; align-items: center;
+    background: var(--by-soft); border: 1px solid var(--by-rule);
+    color: var(--by-accent); font-size: 12px;
+    padding: 2px 8px; border-radius: 12px;
+    cursor: pointer; text-decoration: none;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .tag:hover { background: var(--by-light); border-color: var(--by-accent); }
+  .tag.suggest {
+    background: transparent; color: var(--by-tertiary);
+    border: 1px dashed var(--by-tertiary);
+  }
+  .tag.suggest:hover { color: var(--by-accent); border-color: var(--by-accent); }
+  .tag .tag-plus { font-weight: 700; margin-inline-end: 4px; }
+
+  /* unified entity highlighting */
+  .entity {
+    background: var(--c-person-bg);
+    color: inherit;
+    padding: 1px 3px;
+    border-radius: 2px;
+    cursor: pointer;
+    border-bottom: 1px dotted transparent;
+    transition: background 0.15s, border-bottom-color 0.15s;
+  }
+  .entity:hover { filter: brightness(0.94); border-bottom-color: var(--by-accent); }
+  .entity.k-person      { background: var(--c-person-bg); }
+  .entity.k-sender      { background: var(--c-sender-bg); }
+  .entity.k-recipient   { background: var(--c-recipient-bg); }
+  .entity.k-newspaper   { background: var(--c-newspaper-bg); }
+  .entity.k-place       { background: var(--c-place-bg); }
+  .entity.k-publication { background: var(--c-publication-bg); }
+  .entity.k-work        { background: var(--c-publication-bg); }
+  .entity.k-unknown     { background: #fff; outline: 1px dashed var(--c-unknown-line); outline-offset: -2px; }
+
+  /* popup */
+  #entity-popup {
+    position: fixed;
+    z-index: 9999;
+    display: none;
+    max-width: 320px;
+    background: #fff;
+    border: 1px solid var(--by-rule);
+    border-radius: 6px;
+    box-shadow: 0 6px 18px rgba(60, 0, 30, 0.18);
+    padding: 12px 14px;
+    font-family: 'Alef', sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--by-text);
+    direction: rtl;
+    text-align: right;
+    pointer-events: auto;
+  }
+  #entity-popup .ep-head {
+    display: grid;
+    grid-template-columns: 54px 1fr;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  #entity-popup .ep-img {
+    width: 54px; height: 64px; object-fit: cover;
+    border: 1px solid var(--by-rule);
+    background: var(--by-light);
+    border-radius: 3px;
+  }
+  #entity-popup .ep-img.placeholder {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; color: var(--by-accent);
+    background: var(--by-soft);
+  }
+  #entity-popup .ep-name { font-weight: 700; color: var(--by-accent); font-size: 14px; margin-bottom: 2px; }
+  #entity-popup .ep-role { color: var(--by-tertiary); font-size: 12px; }
+  #entity-popup .ep-desc { color: var(--by-text); font-size: 13px; margin-top: 6px; }
+  #entity-popup .ep-links { margin-top: 8px; font-size: 12px; display: flex; gap: 10px; flex-wrap: wrap; }
+  #entity-popup .ep-links a { color: var(--by-accent); border-bottom: 1px dotted; }
+  #entity-popup .ep-kind {
+    display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 8px;
+    background: var(--by-light); color: var(--by-accent-dark);
+    margin-inline-start: 6px; vertical-align: middle;
+  }
+
+  /* SVG node hover affordance */
+  svg.network circle[data-entity-id] { cursor: pointer; transition: stroke-width 0.15s; }
+  svg.network circle[data-entity-id]:hover { stroke-width: 4; }
+
+  /* --- sidebar --- */
+  aside.side { display: flex; flex-direction: column; gap: 20px; }
+  .panel {
+    background: var(--by-soft);
+    border: 1px solid var(--by-rule);
+    border-inline-start: 4px solid var(--by-accent);
+    padding: 14px 16px;
+    font-size: 14px;
+  }
+  .panel h3 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: var(--by-accent);
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 700;
+  }
+  .panel.empty { border-inline-start-color: var(--by-tertiary); background: #f5f3f4; }
+  .panel.empty p { color: var(--by-tertiary); font-style: italic; margin: 0; }
+  .panel .source-tag {
+    display: inline-block;
+    font-size: 11px;
+    background: var(--by-light);
+    color: var(--by-accent-dark);
+    padding: 1px 6px;
+    border-radius: 8px;
+    margin-inline-start: 6px;
+    vertical-align: middle;
+  }
+  .panel .source-tag.todo { background: #f0e3a8; color: #5a4400; }
+
+  /* --- actor cards --- */
+  .actor-list { display: flex; flex-direction: column; gap: 10px; }
+  .actor {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 10px;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px dotted var(--by-rule);
+  }
+  .actor:last-child { border-bottom: none; }
+  .actor img {
+    width: 48px; height: 56px; object-fit: cover;
+    border: 1px solid var(--by-rule);
+    background: var(--by-light);
+  }
+  .actor .name { font-weight: 700; font-size: 14px; }
+  .actor .role { font-size: 12px; color: var(--by-tertiary); }
+  .actor .qid { font-size: 11px; }
+
+  /* --- press refs --- */
+  .press-ref { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px dotted var(--by-rule); }
+  .press-ref:last-child { border-bottom: none; }
+  .press-ref img.masthead { display: block; width: 100%; height: auto; margin-bottom: 8px; border: 1px solid var(--by-rule); }
+  .press-ref .masthead-placeholder {
+    display: block; width: 100%; height: 80px; background: var(--by-light);
+    border: 1px dashed var(--by-tertiary); margin-bottom: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: var(--by-accent-dark); text-align: center;
+  }
+  .press-ref .title { font-weight: 700; font-size: 14px; }
+  .press-ref .meta { font-size: 12px; color: var(--by-tertiary); margin: 2px 0; }
+  .press-ref .quote { font-size: 13px; color: var(--by-text); border-inline-start: 2px solid var(--by-tertiary); padding-inline-start: 8px; margin-top: 6px; }
+
+  /* --- section heading --- */
+  section.enrich {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 3px double var(--by-accent);
+  }
+  section.enrich > h2 {
+    font-size: 22px;
+    color: var(--by-accent);
+    margin: 0 0 6px 0;
+    font-family: 'Frank Ruhl Libre', serif;
+  }
+  section.enrich > .lead {
+    color: var(--by-tertiary);
+    font-size: 14px;
+    margin-bottom: 22px;
+    max-width: 800px;
+  }
+
+  /* --- timeline --- */
+  .timeline-wrap { background: var(--by-soft); border: 1px solid var(--by-rule); padding: 20px 18px; }
+  .timeline-wrap h3 { margin: 0 0 4px 0; color: var(--by-accent); font-size: 16px; }
+  .timeline-wrap .sub { color: var(--by-tertiary); font-size: 13px; margin-bottom: 14px; }
+  svg.timeline { width: 100%; height: 200px; display: block; }
+  .tl-legend { display: flex; gap: 14px; font-size: 12px; margin-top: 10px; flex-wrap: wrap; }
+  .tl-legend .sw { display: inline-block; width: 12px; height: 12px; vertical-align: middle; margin-inline-end: 5px; border-radius: 50%; }
+
+  /* --- thread doc list --- */
+  .thread-docs { margin-top: 18px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .thread-doc {
+    background: #fff;
+    border: 1px solid var(--by-rule);
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  .thread-doc .h { font-weight: 700; color: var(--by-accent); margin-bottom: 3px; font-size: 14px; }
+  .thread-doc .m { color: var(--by-tertiary); font-size: 12px; margin-bottom: 5px; }
+  .thread-doc .role { font-size: 12px; color: var(--by-text); margin-bottom: 6px; }
+  .thread-doc a.jpress { font-size: 11px; }
+  .pill {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 8px;
+    background: var(--by-light);
+    color: var(--by-accent-dark);
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .pill.MGD { background: #f3d6e1; }
+  .pill.HMZ { background: #e8e0f0; }
+  .pill.HZF { background: #fce4c2; }
+  .pill.HZT { background: #c9e3d6; }
+  .pill.HLB { background: #ffd9d9; }
+
+  /* --- bibliography --- */
+  .biblio { background: var(--by-soft); border: 1px solid var(--by-rule); padding: 18px 22px; font-size: 14px; }
+  .biblio ul { padding-inline-start: 18px; margin: 0; }
+  .biblio li { margin-bottom: 10px; line-height: 1.5; }
+  .biblio .note { color: var(--by-tertiary); font-size: 12px; display: block; }
+
+  /* --- panel variants by enrichment kind --- */
+  .panel-network { background: #fdf1f5; border: 1px solid #e8c8d4; border-inline-start: 4px solid var(--c-person); }
+  .panel-network h3 { color: var(--c-person); }
+  .panel-map { background: #ebf3eb; border: 1px solid #c0d8c0; border-inline-start: 4px solid var(--c-place); }
+  .panel-map h3 { color: var(--c-place); }
+  .panel-publications { background: var(--c-publication-bg); border: 1px solid #e6d68a; border-inline-start: 4px solid var(--c-publication); }
+  .panel-publications h3 { color: #6e5a1a; }
+  .panel-explain { background: var(--by-soft); border: 1px solid var(--by-rule); border-inline-start: 4px solid var(--by-accent-dark); }
+  .panel-explain h3 { color: var(--by-accent-dark); }
+
+  /* legend panel */
+  .legend-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px;
+    font-size: 12px; line-height: 1.4;
+  }
+  .legend-grid .lg-item { display: flex; align-items: center; gap: 6px; }
+  .legend-grid .lg-sw { display: inline-block; width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+  .legend-grid .lg-sw.unknown { background: #fff; outline: 1px dashed var(--c-unknown-line); outline-offset: -1px; }
+
+  /* under-crumb row: caveat | timeline */
+  .under-crumb {
+    display: grid;
+    grid-template-columns: 1fr 460px;
+    gap: 18px;
+    align-items: stretch;
+    padding: 14px 32px;
+    background: var(--by-soft);
+    border-bottom: 1px solid var(--by-rule);
+  }
+  @media (max-width: 980px) { .under-crumb { grid-template-columns: 1fr; } }
+  .caveat-frame {
+    background: #fff8e8;
+    border: 1px solid #d6b94a;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 12px;
+    line-height: 1.45;
+    color: #5a4400;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px 14px;
+    align-items: center;
+  }
+  .caveat-frame h4 { margin: 0; grid-column: 1 / -1; font-size: 13px; color: #6b4a00; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+  .caveat-frame h4::before { content: "⚙"; font-size: 14px; }
+  .caveat-frame p { margin: 0; }
+  .caveat-actions { display: flex; flex-direction: column; gap: 4px; align-items: stretch; }
+  .caveat-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'Alef', sans-serif; font-size: 11px;
+    padding: 4px 8px; border-radius: 3px; cursor: pointer; text-align: right;
+    background: #fff; border: 1px solid #c6a64a; color: #5a4400;
+  }
+  .caveat-btn:hover { background: #fff4cc; }
+  .caveat-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+  .caveat-btn.active { background: #5a4400; color: #fff8e8; border-color: #5a4400; }
+
+  /* Provenance mode — dim AI-derived blocks, leave human-curated content full-strength */
+  body.show-provenance [data-curation="ai"] {
+    opacity: 0.38;
+    filter: grayscale(0.7);
+    transition: opacity 0.2s, filter 0.2s;
+  }
+  body.show-provenance [data-curation="ai"]:hover {
+    opacity: 0.85;
+    filter: grayscale(0.2);
+  }
+  body.show-provenance [data-curation="human"]::before,
+  body.show-provenance [data-curation="human"]::after { content: ''; }
+  body.show-provenance .caveat-frame { box-shadow: 0 0 0 2px #c6a64a; }
+
+  /* gordon-letters timeline (under breadcrumb, full width) */
+  .gordon-tl-wrap { background: transparent; border: none; padding: 0; }
+  .gordon-tl-wrap h4 { margin: 0 0 4px 0; font-size: 13px; color: var(--by-accent); font-weight: 700; }
+  .gordon-tl-wrap .sub { font-size: 11px; color: var(--by-tertiary); margin-bottom: 8px; }
+  svg.gordon-tl { width: 100%; height: 60px; display: block; }
+  svg.gordon-tl .ax-line { stroke: #907989; stroke-width: 0.8; }
+  svg.gordon-tl .ax-tick { font-family: 'Alef', sans-serif; font-size: 10px; fill: var(--by-tertiary); }
+  svg.gordon-tl .all-letter { fill: #e6dce1; opacity: 0.5; }
+  svg.gordon-tl .gordon-letter { fill: #a89099; }
+  svg.gordon-tl .this-letter { fill: var(--c-sender); stroke: #fff; stroke-width: 2; }
+  .gordon-tl-legend { display: flex; gap: 14px; font-size: 11px; margin-top: 6px; color: var(--by-tertiary); }
+
+  /* publications mini-list */
+  .pub-list { display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+  .pub-item {
+    display: grid; grid-template-columns: 36px 1fr; gap: 8px; align-items: center;
+    padding: 6px; background: rgba(255,255,255,0.6); border: 1px solid #e6d68a; border-radius: 3px;
+  }
+  .pub-item .thumb {
+    width: 36px; height: 30px; object-fit: cover; border: 1px solid #d6c25a; background: #fff;
+  }
+  .pub-item .thumb.placeholder {
+    display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--c-publication);
+  }
+  .pub-item .pub-name { font-weight: 700; font-size: 12px; color: #5a4a1a; }
+  .pub-item .pub-meta { font-size: 11px; color: var(--by-tertiary); }
+  .pub-item a { color: var(--c-publication); border-bottom: 1px dotted; }
+
+  /* --- diachronic network --- */
+  .network-wrap { background: #fdf1f5; border: 1px solid #e8c8d4; border-inline-start: 4px solid var(--c-person); padding: 14px; }
+  .network-wrap h3 { margin: 0 0 4px 0; color: var(--by-accent); font-size: 15px; }
+  .network-wrap .sub { color: var(--by-tertiary); font-size: 12px; margin-bottom: 8px; }
+  svg.network { width: 100%; height: 380px; display: block; background: #fff; border: 1px solid var(--by-rule); }
+  svg.network .zone-letter { fill: #fdf4f8; }
+  svg.network .zone-press { fill: #f4f1f7; }
+  svg.network .zone-label { font-family: 'Alef', sans-serif; font-size: 11px; fill: var(--by-tertiary); font-weight: 700; }
+  svg.network .axis-tick { font-family: 'Alef', sans-serif; font-size: 10px; fill: var(--by-tertiary); }
+  svg.network .edge { stroke: #907989; stroke-width: 1; fill: none; }
+  svg.network .edge-key { stroke: var(--by-accent); stroke-width: 1.6; }
+  svg.network .edge-soft { stroke: #c9bfc4; stroke-width: 1; stroke-dasharray: 3 3; }
+  svg.network .node-sender    { fill: var(--c-sender);    stroke: #fff; stroke-width: 3; }
+  svg.network .node-recipient { fill: var(--c-recipient); stroke: #fff; stroke-width: 2.5; }
+  svg.network .node-known     { fill: var(--c-person);    stroke: #fff; stroke-width: 2; }
+  svg.network .node-side      { fill: #a89099;            stroke: #fff; stroke-width: 1.5; }
+  svg.network .node-unknown   { fill: #fff; stroke: var(--c-unknown-line); stroke-width: 1.5; stroke-dasharray: 2 2; }
+  svg.network text.label { font-family: 'Alef', sans-serif; font-size: 11px; fill: var(--by-text); }
+  svg.network text.role { font-family: 'Alef', sans-serif; font-size: 9px; fill: var(--by-tertiary); }
+  .network-legend { display: flex; gap: 12px; font-size: 11px; margin-top: 8px; flex-wrap: wrap; color: var(--by-tertiary); }
+  .network-legend .nl-sw { display: inline-block; width: 10px; height: 10px; border-radius: 50%; vertical-align: middle; margin-inline-end: 4px; }
+
+  /* --- map --- */
+  .map-wrap { background: #ebf3eb; border: 1px solid #c0d8c0; border-inline-start: 4px solid var(--c-place); padding: 14px; }
+  .map-wrap h3 { margin: 0 0 4px 0; color: var(--c-place); font-size: 15px; }
+  .map-wrap .sub { color: var(--by-tertiary); font-size: 12px; margin-bottom: 10px; }
+  #map { width: 100%; height: 340px; border: 1px solid var(--by-rule); background: #f0e8ec; }
+  .map-legend { display: flex; gap: 12px; font-size: 11px; margin-top: 10px; flex-wrap: wrap; }
+  .map-legend .pin-pub, .map-legend .pin-mention { display: inline-block; width: 14px; height: 14px; border-radius: 50%; vertical-align: middle; margin-inline-end: 6px; }
+  .map-legend .pin-pub { background: #660248; border: 2px solid #fff; box-shadow: 0 0 0 1px #660248; }
+  .map-legend .pin-mention { background: #907989; border: 2px solid #fff; box-shadow: 0 0 0 1px #907989; }
+  .leaflet-popup-content { font-family: 'Alef', sans-serif; font-size: 13px; line-height: 1.5; direction: rtl; text-align: right; }
+  .leaflet-popup-content strong { color: var(--by-accent); }
+
+  /* --- footer --- */
+  footer.site {
+    background: var(--by-footer);
+    color: #efe0ea;
+    padding: 30px 32px;
+    font-size: 13px;
+    margin-top: 50px;
+  }
+  footer.site .infra-note { max-width: 1100px; margin: 0 auto; }
+  footer.site h4 { color: #fff; margin: 0 0 10px 0; font-size: 15px; }
+  footer.site table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  footer.site th, footer.site td { text-align: start; padding: 6px 10px; border-bottom: 1px solid #5b1845; vertical-align: top; }
+  footer.site th { color: #ffcce0; font-weight: 700; }
+
+  /* In provenance mode, AI-extracted inline entity tags are dimmed regardless of host */
+  body.show-provenance .entity { opacity: 0.55; }
+  body.show-provenance [data-curation="human"] .entity { opacity: 0.55; }
+</style>
+</head>
+<body>
+
+<div class="mockup-banner">
+  תצוגת־דמו מוצעת · לא חלק מאתר פרויקט בן־יהודה
+  <span class="small">מקטעי המכתב, המאגר והמקורות נטענו אוטומטית מקורפוס Polemicon · 2026-05-15</span>
+</div>
+
+<header class="site">
+  <div class="logo">פרויקט בן־יהודה <span style="font-size:13px;color:var(--by-tertiary);font-family:Alef,sans-serif;font-weight:400;">· גלגול־דמו</span></div>
+  <nav>
+    <a href="https://benyehuda.org">בית</a>
+    <a href="https://benyehuda.org/authors">יוצרים</a>
+    <a href="https://benyehuda.org/works">יצירות</a>
+    <a href="#">חיפוש</a>
+  </nav>
+</header>
+
+<div class="crumb">
+  <a href="https://benyehuda.org">בית</a>
+  <span class="sep">›</span>
+  <a href="https://benyehuda.org/author/46">יהודה ליב גורדון</a>
+  <span class="sep">›</span>
+  <a href="https://benyehuda.org/collections/9991">אגרות יל"ג</a>
+  <span class="sep">›</span>
+  <a href="https://benyehuda.org/collections/9991">שנת תר"ל</a>
+  <span class="sep">›</span>
+  <span>אגרת שבעים ותשע</span>
+</div>
+
+<div class="under-crumb">
+<div class="gordon-tl-wrap" data-curation="human">
+  <h4>אגרת זו במסגרת אגרות יל"ג ובאוסף האגרות הכולל</h4>
+<svg class="gordon-tl" viewBox="0 0 1000 80" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0, 14)"><polygon points="624.2,5 619.2,-3 629.2,-3" fill="#a05a2a"/><text class="ax-tick" x="624.2" y="-6" text-anchor="middle" style="fill:#a05a2a;font-weight:700;font-size:11px;">אגרת זו · ער"ח אייר תר"ל (1870)</text><line class="ax-line" x1="20" y1="50" x2="980" y2="50"/><rect class="all-letter" x="20.0" y="46.6" width="8.4" height="3.4"><title>1820: 6 מכתבים באוסף</title></rect><rect class="all-letter" x="32.0" y="46.6" width="8.4" height="3.4"><title>1821: 6 מכתבים באוסף</title></rect><rect class="all-letter" x="44.0" y="45.0" width="8.4" height="5.0"><title>1822: 9 מכתבים באוסף</title></rect><rect class="all-letter" x="56.0" y="47.2" width="8.4" height="2.8"><title>1823: 5 מכתבים באוסף</title></rect><rect class="all-letter" x="68.0" y="47.8" width="8.4" height="2.2"><title>1824: 4 מכתבים באוסף</title></rect><rect class="all-letter" x="80.0" y="49.4" width="8.4" height="0.6"><title>1825: 1 מכתבים באוסף</title></rect><rect class="all-letter" x="104.0" y="49.4" width="8.4" height="0.6"><title>1827: 1 מכתבים באוסף</title></rect><rect class="all-letter" x="116.0" y="47.8" width="8.4" height="2.2"><title>1828: 4 מכתבים באוסף</title></rect><rect class="all-letter" x="128.0" y="48.3" width="8.4" height="1.7"><title>1829: 3 מכתבים באוסף</title></rect><rect class="all-letter" x="140.0" y="48.3" width="8.4" height="1.7"><title>1830: 3 מכתבים באוסף</title></rect><rect class="all-letter" x="152.0" y="46.1" width="8.4" height="3.9"><title>1831: 7 מכתבים באוסף</title></rect><rect class="all-letter" x="164.0" y="48.3" width="8.4" height="1.7"><title>1832: 3 מכתבים באוסף</title></rect><rect class="all-letter" x="176.0" y="43.3" width="8.4" height="6.7"><title>1833: 12 מכתבים באוסף</title></rect><rect class="all-letter" x="188.0" y="45.0" width="8.4" height="5.0"><title>1834: 9 מכתבים באוסף</title></rect><rect class="all-letter" x="200.0" y="46.1" width="8.4" height="3.9"><title>1835: 7 מכתבים באוסף</title></rect><rect class="all-letter" x="212.0" y="38.2" width="8.4" height="11.8"><title>1836: 21 מכתבים באוסף</title></rect><rect class="all-letter" x="224.0" y="32.1" width="8.4" height="17.9"><title>1837: 32 מכתבים באוסף</title></rect><rect class="all-letter" x="236.0" y="27.6" width="8.4" height="22.4"><title>1838: 40 מכתבים באוסף</title></rect><rect class="all-letter" x="248.0" y="42.2" width="8.4" height="7.8"><title>1839: 14 מכתבים באוסף</title></rect><rect class="all-letter" x="260.0" y="46.6" width="8.4" height="3.4"><title>1840: 6 מכתבים באוסף</title></rect><rect class="all-letter" x="272.0" y="41.6" width="8.4" height="8.4"><title>1841: 15 מכתבים באוסף</title></rect><rect class="all-letter" x="284.0" y="45.5" width="8.4" height="4.5"><title>1842: 8 מכתבים באוסף</title></rect><rect class="all-letter" x="296.0" y="40.5" width="8.4" height="9.5"><title>1843: 17 מכתבים באוסף</title></rect><rect class="all-letter" x="308.0" y="42.7" width="8.4" height="7.3"><title>1844: 13 מכתבים באוסף</title></rect><rect class="all-letter" x="320.0" y="46.6" width="8.4" height="3.4"><title>1845: 6 מכתבים באוסף</title></rect><rect class="gordon-letter" x="320.0" y="49.4" width="8.4" height="0.6"><title>1845: 1 מכתבי יל"ג</title></rect><rect class="all-letter" x="332.0" y="47.8" width="8.4" height="2.2"><title>1846: 4 מכתבים באוסף</title></rect><rect class="all-letter" x="344.0" y="48.9" width="8.4" height="1.1"><title>1847: 2 מכתבים באוסף</title></rect><rect class="gordon-letter" x="344.0" y="49.4" width="8.4" height="0.6"><title>1847: 1 מכתבי יל"ג</title></rect><rect class="all-letter" x="356.0" y="48.3" width="8.4" height="1.7"><title>1848: 3 מכתבים באוסף</title></rect><rect class="all-letter" x="368.0" y="49.4" width="8.4" height="0.6"><title>1849: 1 מכתבים באוסף</title></rect><rect class="all-letter" x="380.0" y="43.3" width="8.4" height="6.7"><title>1850: 12 מכתבים באוסף</title></rect><rect class="all-letter" x="392.0" y="45.0" width="8.4" height="5.0"><title>1851: 9 מכתבים באוסף</title></rect><rect class="all-letter" x="404.0" y="47.2" width="8.4" height="2.8"><title>1852: 5 מכתבים באוסף</title></rect><rect class="all-letter" x="416.0" y="43.3" width="8.4" height="6.7"><title>1853: 12 מכתבים באוסף</title></rect><rect class="all-letter" x="428.0" y="49.4" width="8.4" height="0.6"><title>1854: 1 מכתבים באוסף</title></rect><rect class="all-letter" x="464.0" y="48.3" width="8.4" height="1.7"><title>1857: 3 מכתבים באוסף</title></rect><rect class="gordon-letter" x="464.0" y="48.3" width="8.4" height="1.7"><title>1857: 3 מכתבי יל"ג</title></rect><rect class="all-letter" x="476.0" y="42.7" width="8.4" height="7.3"><title>1858: 13 מכתבים באוסף</title></rect><rect class="gordon-letter" x="476.0" y="43.3" width="8.4" height="6.7"><title>1858: 12 מכתבי יל"ג</title></rect><rect class="all-letter" x="488.0" y="47.8" width="8.4" height="2.2"><title>1859: 4 מכתבים באוסף</title></rect><rect class="gordon-letter" x="488.0" y="47.8" width="8.4" height="2.2"><title>1859: 4 מכתבי יל"ג</title></rect><rect class="all-letter" x="500.0" y="45.0" width="8.4" height="5.0"><title>1860: 9 מכתבים באוסף</title></rect><rect class="gordon-letter" x="500.0" y="47.2" width="8.4" height="2.8"><title>1860: 5 מכתבי יל"ג</title></rect><rect class="all-letter" x="512.0" y="43.3" width="8.4" height="6.7"><title>1861: 12 מכתבים באוסף</title></rect><rect class="gordon-letter" x="512.0" y="49.4" width="8.4" height="0.6"><title>1861: 1 מכתבי יל"ג</title></rect><rect class="all-letter" x="524.0" y="45.5" width="8.4" height="4.5"><title>1862: 8 מכתבים באוסף</title></rect><rect class="gordon-letter" x="524.0" y="49.4" width="8.4" height="0.6"><title>1862: 1 מכתבי יל"ג</title></rect><rect class="all-letter" x="536.0" y="48.3" width="8.4" height="1.7"><title>1863: 3 מכתבים באוסף</title></rect><rect class="gordon-letter" x="536.0" y="48.9" width="8.4" height="1.1"><title>1863: 2 מכתבי יל"ג</title></rect><rect class="all-letter" x="548.0" y="47.2" width="8.4" height="2.8"><title>1864: 5 מכתבים באוסף</title></rect><rect class="gordon-letter" x="548.0" y="47.2" width="8.4" height="2.8"><title>1864: 5 מכתבי יל"ג</title></rect><rect class="all-letter" x="572.0" y="48.9" width="8.4" height="1.1"><title>1866: 2 מכתבים באוסף</title></rect><rect class="gordon-letter" x="572.0" y="48.9" width="8.4" height="1.1"><title>1866: 2 מכתבי יל"ג</title></rect><rect class="all-letter" x="584.0" y="47.2" width="8.4" height="2.8"><title>1867: 5 מכתבים באוסף</title></rect><rect class="gordon-letter" x="584.0" y="47.8" width="8.4" height="2.2"><title>1867: 4 מכתבי יל"ג</title></rect><rect class="all-letter" x="596.0" y="46.1" width="8.4" height="3.9"><title>1868: 7 מכתבים באוסף</title></rect><rect class="gordon-letter" x="596.0" y="46.1" width="8.4" height="3.9"><title>1868: 7 מכתבי יל"ג</title></rect><rect class="all-letter" x="620.0" y="45.5" width="8.4" height="4.5"><title>1870: 8 מכתבים באוסף</title></rect><rect class="this-letter" x="620.0" y="45.5" width="8.4" height="4.5"><title>1870: 8 מכתבי יל"ג</title></rect><rect class="all-letter" x="632.0" y="46.6" width="8.4" height="3.4"><title>1871: 6 מכתבים באוסף</title></rect><rect class="gordon-letter" x="632.0" y="47.2" width="8.4" height="2.8"><title>1871: 5 מכתבי יל"ג</title></rect><rect class="all-letter" x="644.0" y="47.2" width="8.4" height="2.8"><title>1872: 5 מכתבים באוסף</title></rect><rect class="gordon-letter" x="644.0" y="47.2" width="8.4" height="2.8"><title>1872: 5 מכתבי יל"ג</title></rect><rect class="all-letter" x="656.0" y="48.3" width="8.4" height="1.7"><title>1873: 3 מכתבים באוסף</title></rect><rect class="gordon-letter" x="656.0" y="49.4" width="8.4" height="0.6"><title>1873: 1 מכתבי יל"ג</title></rect><rect class="all-letter" x="668.0" y="48.3" width="8.4" height="1.7"><title>1874: 3 מכתבים באוסף</title></rect><rect class="gordon-letter" x="668.0" y="48.9" width="8.4" height="1.1"><title>1874: 2 מכתבי יל"ג</title></rect><rect class="all-letter" x="680.0" y="48.9" width="8.4" height="1.1"><title>1875: 2 מכתבים באוסף</title></rect><rect class="gordon-letter" x="680.0" y="48.9" width="8.4" height="1.1"><title>1875: 2 מכתבי יל"ג</title></rect><rect class="all-letter" x="692.0" y="44.4" width="8.4" height="5.6"><title>1876: 10 מכתבים באוסף</title></rect><rect class="gordon-letter" x="692.0" y="45.0" width="8.4" height="5.0"><title>1876: 9 מכתבי יל"ג</title></rect><rect class="all-letter" x="704.0" y="43.8" width="8.4" height="6.2"><title>1877: 11 מכתבים באוסף</title></rect><rect class="gordon-letter" x="704.0" y="46.1" width="8.4" height="3.9"><title>1877: 7 מכתבי יל"ג</title></rect><rect class="all-letter" x="716.0" y="34.9" width="8.4" height="15.1"><title>1878: 27 מכתבים באוסף</title></rect><rect class="gordon-letter" x="716.0" y="41.6" width="8.4" height="8.4"><title>1878: 15 מכתבי יל"ג</title></rect><rect class="all-letter" x="728.0" y="37.7" width="8.4" height="12.3"><title>1879: 22 מכתבים באוסף</title></rect><rect class="gordon-letter" x="728.0" y="44.4" width="8.4" height="5.6"><title>1879: 10 מכתבי יל"ג</title></rect><rect class="all-letter" x="740.0" y="34.9" width="8.4" height="15.1"><title>1880: 27 מכתבים באוסף</title></rect><rect class="gordon-letter" x="740.0" y="39.9" width="8.4" height="10.1"><title>1880: 18 מכתבי יל"ג</title></rect><rect class="all-letter" x="752.0" y="27.6" width="8.4" height="22.4"><title>1881: 40 מכתבים באוסף</title></rect><rect class="gordon-letter" x="752.0" y="40.5" width="8.4" height="9.5"><title>1881: 17 מכתבי יל"ג</title></rect><rect class="all-letter" x="764.0" y="43.3" width="8.4" height="6.7"><title>1882: 12 מכתבים באוסף</title></rect><rect class="gordon-letter" x="764.0" y="46.1" width="8.4" height="3.9"><title>1882: 7 מכתבי יל"ג</title></rect><rect class="all-letter" x="776.0" y="28.7" width="8.4" height="21.3"><title>1883: 38 מכתבים באוסף</title></rect><rect class="gordon-letter" x="776.0" y="37.1" width="8.4" height="12.9"><title>1883: 23 מכתבי יל"ג</title></rect><rect class="all-letter" x="788.0" y="29.3" width="8.4" height="20.7"><title>1884: 37 מכתבים באוסף</title></rect><rect class="gordon-letter" x="788.0" y="38.2" width="8.4" height="11.8"><title>1884: 21 מכתבי יל"ג</title></rect><rect class="all-letter" x="800.0" y="23.7" width="8.4" height="26.3"><title>1885: 47 מכתבים באוסף</title></rect><rect class="gordon-letter" x="800.0" y="34.9" width="8.4" height="15.1"><title>1885: 27 מכתבי יל"ג</title></rect><rect class="all-letter" x="812.0" y="31.5" width="8.4" height="18.5"><title>1886: 33 מכתבים באוסף</title></rect><rect class="gordon-letter" x="812.0" y="35.4" width="8.4" height="14.6"><title>1886: 26 מכתבי יל"ג</title></rect><rect class="all-letter" x="824.0" y="48.3" width="8.4" height="1.7"><title>1887: 3 מכתבים באוסף</title></rect><rect class="all-letter" x="836.0" y="47.8" width="8.4" height="2.2"><title>1888: 4 מכתבים באוסף</title></rect><rect class="all-letter" x="848.0" y="47.2" width="8.4" height="2.8"><title>1889: 5 מכתבים באוסף</title></rect><rect class="all-letter" x="860.0" y="46.1" width="8.4" height="3.9"><title>1890: 7 מכתבים באוסף</title></rect><rect class="all-letter" x="872.0" y="42.7" width="8.4" height="7.3"><title>1891: 13 מכתבים באוסף</title></rect><rect class="all-letter" x="884.0" y="41.0" width="8.4" height="9.0"><title>1892: 16 מכתבים באוסף</title></rect><rect class="gordon-letter" x="884.0" y="49.4" width="8.4" height="0.6"><title>1892: 1 מכתבי יל"ג</title></rect><rect class="all-letter" x="896.0" y="42.2" width="8.4" height="7.8"><title>1893: 14 מכתבים באוסף</title></rect><rect class="all-letter" x="908.0" y="8.0" width="8.4" height="42.0"><title>1894: 75 מכתבים באוסף</title></rect><rect class="all-letter" x="920.0" y="18.1" width="8.4" height="31.9"><title>1895: 57 מכתבים באוסף</title></rect><rect class="all-letter" x="932.0" y="25.4" width="8.4" height="24.6"><title>1896: 44 מכתבים באוסף</title></rect><rect class="all-letter" x="944.0" y="15.3" width="8.4" height="34.7"><title>1897: 62 מכתבים באוסף</title></rect><rect class="all-letter" x="956.0" y="33.8" width="8.4" height="16.2"><title>1898: 29 מכתבים באוסף</title></rect><rect class="gordon-letter" x="956.0" y="49.4" width="8.4" height="0.6"><title>1898: 1 מכתבי יל"ג</title></rect><rect class="all-letter" x="968.0" y="19.2" width="8.4" height="30.8"><title>1899: 55 מכתבים באוסף</title></rect><rect class="all-letter" x="980.0" y="11.9" width="8.4" height="38.1"><title>1900: 68 מכתבים באוסף</title></rect><rect class="gordon-letter" x="980.0" y="49.4" width="8.4" height="0.6"><title>1900: 1 מכתבי יל"ג</title></rect><line class="ax-line" x1="20.0" y1="50" x2="20.0" y2="53"/><text class="ax-tick" x="20.0" y="63" text-anchor="middle">1820</text><line class="ax-line" x1="260.0" y1="50" x2="260.0" y2="53"/><text class="ax-tick" x="260.0" y="63" text-anchor="middle">1840</text><line class="ax-line" x1="500.0" y1="50" x2="500.0" y2="53"/><text class="ax-tick" x="500.0" y="63" text-anchor="middle">1860</text><line class="ax-line" x1="740.0" y1="50" x2="740.0" y2="53"/><text class="ax-tick" x="740.0" y="63" text-anchor="middle">1880</text><line class="ax-line" x1="980.0" y1="50" x2="980.0" y2="53"/><text class="ax-tick" x="980.0" y="63" text-anchor="middle">1900</text></g></svg>
+  <div class="gordon-tl-legend">
+    <span><span style="display:inline-block;width:10px;height:10px;background:var(--c-sender);border:1.5px solid #fff;outline:1px solid var(--c-sender);vertical-align:middle;margin-inline-end:5px;"></span>אגרת זו (1870)</span>
+    <span><span style="display:inline-block;width:10px;height:10px;background:#a89099;vertical-align:middle;margin-inline-end:5px;"></span>אגרות יל"ג (255 מתוארכות)</span>
+    <span><span style="display:inline-block;width:10px;height:10px;background:#e6dce1;opacity:0.7;vertical-align:middle;margin-inline-end:5px;"></span>שאר אגרות הקורפוס</span>
+  </div>
+</div>
+
+<aside class="caveat-frame" aria-label="הערת תיווך AI">
+  <h4>שקיפות בעיבוד המידע</h4>
+  <p>המידע המעשיר את עמוד האגרת — זיהוי ישויות, רשת הקשרים, סקירת ספרות מחקרית, וההסבר ההקשרי — הופק על־ידי מודלי שפה. טקסט האגרת עצמו, המטא־דאטא, רשימת האגרות הסמוכות וקואורדינטות המקומות מבוססים על אוסף פרויקט בן־יהודה ועל קריאה אנושית.</p>
+  <div class="caveat-actions">
+    <button type="button" class="caveat-btn" id="provenance-toggle">✋ הדגש מידע שאושר על ידי אדם</button>
+    <button type="button" class="caveat-btn" id="docs-btn" disabled title="התיעוד המלא יהיה זמין בגרסת ההפקה">📄 לתיעוד מלא של תהליך המידע</button>
+  </div>
+</aside>
+
+</div>
+
+<div class="wrap">
+
+  <!-- RIGHT SIDEBAR (context / scholarship) -->
+  <aside class="side-right">
+    <div class="panel panel-explain" data-curation="ai">
+      <h3>הסבר ההקשר של המכתב <button type="button" id="explain-toggle" style="float:left;background:none;border:1px solid var(--by-rule);color:var(--by-tertiary);font-family:'Alef',sans-serif;font-size:11px;padding:1px 8px;border-radius:3px;cursor:pointer;">הרחבה ↕</button></h3>
+      <div id="explain-body" style="font-size:13px;line-height:1.65;">
+        <p style="margin:0 0 8px 0;">המכתב משקף רגע מתוך פולמוס ציבורי מ־1870: <a href="https://www.wikidata.org/wiki/Q12408083" target="_blank">יחיאל בריל</a>, עורך <em>הלבנון</em> שבפאריז, מנהל קמפיין מתמשך נגד יל"ג ומאשים את שירתו ההשכלית בקריאת תיגר על אמונת ישראל. בריל קורא ליל"ג "עוכר השכלת ישראל". יל"ג, בעת המכתב — נסוג, מהסס, ומחפש בני־ברית.</p>
+        <div id="explain-extra" style="display:none;">
+          <p style="margin:0 0 8px 0;"><strong>מהלך הפולמוס:</strong> נמען המכתב (בשאוועל, חתום "א.ל." במאמרו) פרסם זה עתה הגנה על יל"ג ב<em>המליץ</em> נו' 13. המכתב משלב הודיה ("נותן כבוד לשמך על חסדך ועל אמתך"), חידוד פולמי ("האף אמנם הריב הזה לא לכם הוא כי אם לי לבדי?"), והודעה על תשובתו שלו — סאטירה בשם "ודוי הגדול לדניאל באג'ר" שנשלחה לוואלפסון להמליץ לפני הפסח. יל"ג חושש שעורך המליץ יסרב להדפיסה.</p>
+          <p style="margin:0 0 8px 0;"><strong>הקשר ארוך־טווח:</strong> זוהי דוגמה מובהקת ממלחמות־העיתונות בין השכלה לאורתודוקסיה ברוסיה בשנים 1869–1871, אך הפולמוס הספציפי הזה אינו מנותח כאירוע נפרד במחקר הזמין (ראו פאנל ספרות מחקרית בהמשך). הביוגרפיה האנגלית המרכזית ליל"ג היא של מ. סטניסלבסקי (1988).</p>
+          <p style="margin:0;"><strong>קורות חיים פרטיים שנשזרים במכתב:</strong> מחלת יל"ג לפני הפסח, שהיית אשתו בשאוועל, ספרות וקורספונדנציה — שלוש פיסות עניין בלתי־פולמוסיות (אבן גבירול, תרגום תפילה לרוסית, מחלוקת שוחטים) שמראות את אותו יל"ג כסופר־הזמנות־לעבודה ולא רק כמתפלמס.</p>
+        </div>
+
+        <div class="tag-box">
+          <div class="tag-header">
+            <span class="tag-new-badge">תגיות</span>
+          </div>
+          <div class="tag-list">
+            <a class="tag" href="#" data-tag="polmus-sofrim">פולמוס סופרים</a>
+            <a class="tag" href="#" data-tag="haskalah-orthodoxy">השכלה ואורתודוקסיה</a>
+            <a class="tag" href="#" data-tag="press-wars">מלחמות עיתונות</a>
+            <a class="tag" href="#" data-tag="halevanon">'הלבנון'</a>
+            <a class="tag" href="#" data-tag="hamelitz">'המליץ'</a>
+            <a class="tag" href="#" data-tag="bril">יחיאל בריל</a>
+            <a class="tag" href="#" data-tag="satire">סאטירה</a>
+            <a class="tag suggest" href="#" id="suggest-tag-btn"><span class="tag-plus">+</span>הצעת תגית חדשה</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- PUBLICATIONS REFERENCED IN THE LETTER -->
+    <div class="panel panel-publications" data-curation="human">
+      <h3>פרסומים שנזכרים במכתב</h3>
+      <div class="pub-list">
+        <div class="pub-item" data-eid="hamelitz_n13" style="cursor:pointer;">
+          <img class="thumb" src="https://commons.wikimedia.org/wiki/Special:FilePath/Melitz22.jpg" alt="המליץ"
+               onerror="this.outerHTML='<div class=&quot;thumb placeholder&quot;>📰</div>'">
+          <div>
+            <div class="pub-name">המליץ, גליון נו' 13 (11.4.1870)</div>
+            <div class="pub-meta">המאמר המרכזי של הנמען נגד בריל · <a href="https://www.nli.org.il/en/newspapers/hmz/1870/04/11/01/article/5" target="_blank">JPress ↗</a></div>
+          </div>
+        </div>
+        <div class="pub-item" data-eid="meshiv_milkhama" style="cursor:pointer;">
+          <img class="thumb" src="https://commons.wikimedia.org/wiki/Special:FilePath/Melitz22.jpg" alt="המליץ"
+               onerror="this.outerHTML='<div class=&quot;thumb placeholder&quot;>📰</div>'">
+          <div>
+            <div class="pub-name">"משיב מלחמה שערה" — עורך המליץ</div>
+            <div class="pub-meta">המליץ, 4.4.1870, מאמר 1 · <a href="https://www.nli.org.il/en/newspapers/hmz/1870/04/04/01/article/1" target="_blank">JPress ↗</a></div>
+          </div>
+        </div>
+        <div class="pub-item" data-eid="halevanon" style="cursor:pointer;">
+          <img class="thumb" src="https://commons.wikimedia.org/wiki/Special:FilePath/Halvanon22.jpg" alt="הלבנון"
+               onerror="this.outerHTML='<div class=&quot;thumb placeholder&quot;>📰</div>'">
+          <div>
+            <div class="pub-name">הלבנון (Le Libanon)</div>
+            <div class="pub-meta">שבועון עברי בעריכת בריל, פאריז 1868–1870 · <a href="https://www.nli.org.il/en/newspapers/hlb/1870/01/10/01/" target="_blank">גליון 10.1.1870 ↗</a></div>
+          </div>
+        </div>
+        <div class="pub-item" data-eid="vidui" style="cursor:pointer;">
+          <div class="thumb placeholder">✎</div>
+          <div>
+            <div class="pub-name">"ודוי הגדול לדניאל באג'ר"</div>
+            <div class="pub-meta">סאטירה של יל"ג, נשלחה להמליץ לפני הפסח 1870 · לא נדפסה במקור?</div>
+          </div>
+        </div>
+        <div class="pub-item" data-eid="ibn_gabirol_book" style="cursor:pointer;">
+          <div class="thumb placeholder">📖</div>
+          <div>
+            <div class="pub-name">"שיר השירים לבן גבירול"</div>
+            <div class="pub-meta">ספרו של ש' זק"ש, נשלח ליל"ג לחוות־דעת · 1870</div>
+          </div>
+        </div>
+        <div class="pub-item">
+          <div class="thumb placeholder">📖</div>
+          <div>
+            <div class="pub-name">סדר התפילה בתרגום רוסי</div>
+            <div class="pub-meta">תרגום ר' יוסף הורוויץ מהוראדנא · יל"ג מספק הערות</div>
+          </div>
+        </div>
+        <div class="pub-item">
+          <div class="thumb placeholder">✎</div>
+          <div>
+            <div class="pub-name">"אשקא דריספק חרבה ביתר"</div>
+            <div class="pub-meta">שיר של יל"ג שנמצא תחת יד בעל המליץ · אזכור פנימי במכתב</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel" data-curation="human">
+      <h3>אגרות נוספות באותו ההקשר</h3>
+      <div style="font-size:13px;line-height:1.6;">
+        <p style="margin:0 0 8px 0;color:var(--by-tertiary);font-size:12px;">אגרות יל"ג נוספות מאותו פרק זמן (1870–1871) הקשורות לפולמוס סופרים ולעיתונאות העברית:</p>
+        <p style="margin:0 0 8px 0;"><strong>אגרת פ"ג</strong> (תר"ל, יולי 1870) — יל"ג שולח ליהושע סירקין שירים, וטוען על דחיית מאמרו ב'המליץ' על־ידי ליליענבלום. <span style="color:var(--by-tertiary);font-size:11px;">egeret_3446</span></p>
+        <p style="margin:0 0 8px 0;"><strong>אגרת פ"ה</strong> (תרל"א, ינואר 1871) — יל"ג בייאוש על עורכי העיתונים: "רב לנו פזר את דרכינו לזרים, ולשלוח לכתבי עתים מאמרים אשר המה בידי המוציאם לאור כחומר ביד היוצר". <span style="color:var(--by-tertiary);font-size:11px;">egeret_3448</span></p>
+        <p style="margin:0 0 8px 0;"><strong>אגרת פ"ז</strong> (תרל"א, מאי 1871) — יל"ג לשמואל יוסף פין על מאמרו "ספרי ישראל וסופריו בזמננו". <span style="color:var(--by-tertiary);font-size:11px;">egeret_3450</span></p>
+        <p style="margin:8px 0 0 0;"><a href="https://benyehuda.org/collections/9991" target="_blank">כל האגרות באוסף — שנת תר"ל / תרל"א ↗</a></p>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+    <div class="letter-head" data-curation="human">
+      <img class="portrait"
+           src="https://s3.amazonaws.com/bybeprod/authorities/profile_images/000/000/046/thumb/Gordon_L.jpg"
+           alt="יהודה ליב גורדון">
+      <div>
+        <h1>אגרת שבעים ותשע</h1>
+        <div class="meta">
+          <div><span class="author">יהודה ליב גורדון</span> (יל"ג) · 1830–1892</div>
+          <div>תאריך: מוצש"ק ער"ח אייר תר"ל (≈ 30 באפריל 1870)</div>
+          <div>מקום: טעלז (Telšiai)</div>
+          <div>נמען: ר"א אפרתי בשאוועל (זיהוי משוער של עורך כתב־היד)</div>
+          <div>מקור: <a href="https://benyehuda.org/collections/9991">אגרון יל"ג, אסופת אגרות תרי"ח–תרנ"ב</a> · פריט 77 באוסף</div>
+          <div>מזהה Polemicon: <code style="background:var(--by-soft);padding:1px 5px;border:1px solid var(--by-rule);">egeret_3442</code></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="letter-toolbar">
+      <label>
+        <input type="checkbox" id="ner-toggle" checked>
+        הצג סימוני ישויות (NER) — צבעים, מסגרות וקופצים
+      </label>
+      <span class="tb-hint">כיבוי מציג את גוף הטקסט נטו, ללא הדגשות</span>
+    </div>
+
+    <article class="letter-body" data-curation="human">
+      <p class="stage-direction">[נמצא רשום מלמעלה בעטעפרת בעצם כת"י בזה"ל: לא אזכור למי; כמדומה לי <span class="entity k-recipient" data-eid="recipient">ר"א אפרתי</span> ב<span class="entity k-recipient" data-eid="shavli">שאוועל</span>]</p>
+
+      <p>ידידי היקר והחביב, מכל יודעי מסביב! את קולך שמעתי מתהלך היום ב<span class="entity k-publication" data-eid="hamelitz_n13">המליץ נו' 13</span> ואכירך; והנני נותן כבוד לשמך על חסדך ועל אמתך בשמרך את הברית ואת החסד אלי ותתעורר מעצמך להרים קולך לטובתי בעת קמו פרחח ויסלו עלי ארחות עטם; בהגידך בלי משא פנים דברים קשים כגידים ותרמוס את החוח אשר ב<span class="entity k-newspaper" data-eid="halevanon">לבנון</span> בעברך ברוח משפט לעוכר השכלת ישראל הוא <span class="entity k-person" data-eid="bril">יחיאל בריל</span>, החפץ להוליכנו מאפלה לעלטה גדולה, ולהוביש כל מזרע השכלה וחירות הדעת בקרבנו בקדמת שלף.</p>
+
+      <p>אבל מאד נפלאתי על הדברים אשר הפליטה עטך: "כי מה לנו להתעבר על ריב לא לנו?" הכרתי רגע אחד את דרכך והלך נפשך האוהבת לנוח ולהשקט במנוחת שלום ושלוה והשקט ובטח. ואולם כשאנחנו לעצמנו ואין זר בינותינו הגידה נא לי ידידי: האף אמנם הריב הזה לא לכם הוא כי אם לי לבדי? האם לטובתי ולהנאתי עוררתי אוכלי לויתן מבצאתם, למען בצוע בצע וקחת כופר עוררתי מתרדמתם את הרבנים ערלי הלב ורפי הידים המביאים קצף גדול ורעה גדולה על כל ישראל?</p>
+
+      <p>האם עיניך לא תראינה כאשר עיני רואות וכלות כי בצרה גדולה אנחנו, האם לבך לא יאב כלבי על עם ה' ועל בית ישראל כי נפלו ואין מקימם? הלא אתה ידעתני ובחנתני האם באמת להשמיד אמונתנו בלבבי ולהכרית מתורתנו לא מעט, כאשר יאמרו עלי זנבות האודים האלה העשנים בחרי אפם? ומדוע נסוגות אחור ולא העידות עלי כי איני שונא את עמי וכי חפצי לתקן ולא לקלקל?</p>
+
+      <p>וכל זה וכיוצא בזה הלא אי אפשר לי להעיד על עצמי אעפ"י שידי לא אסורות ושפתי אתי. והנה כבר הגדתי לך ידידי שאנכי התמהמהתי מענות לכסילי הלבנון באולתם מחמת שרבים יעצוני לחשות ויש מהם (ומהם <span class="entity k-unknown" data-eid="slutsk_maggid">המגיד מסלוצק</span>) שהבטיחוני להלחם לי; על כן הוחלתי עד בוש; ובין כך וכך נפלתי למשכב והייתי חולה שבועות אחדים כאשר ידעת; ואולם לפני חג הפסח שלחתי תשובתי ל<span class="entity k-unknown" data-eid="wolfssohn">ר' משה דוד וואלפֿסאהן</span> ל<span class="entity k-newspaper" data-eid="hamelitz">המליץ</span> בשם: <span class="entity k-work" data-eid="vidui">"ודוי הגדול לדניאל באג'ר"</span>; משם המאמר תבין את תוכנו כי אנכי שב ונחם על אשמתי ולמשופטי אתחנן ומבקש רחמם ממנו עלי ועל נפשי.</p>
+
+      <p>ואני טרם אדע אם ידפיסנה <span class="entity k-unknown" data-eid="hamelitz_editor">בעל המליץ</span>; כי מראשית מאמרו <span class="entity k-work" data-eid="meshiv_milkhama">"משיב מלחמה שערה"</span> הוא נראה כעושה הנה והנה. ועוד החילותי לערוך מאמר ארוך בדבר מעמדנו החומרי והמוסרי והמדיני, בדבר מנהגי קהלותינו ועוד ועוד לברר וללבן את העקלקלות שבלב מריני ושוטני הנשארים בלבנון ועתה רפיתי ממנו לפי שעה עד אשר אראה מה ידבר בזה בעל המליץ במאמרו הנ"ל.</p>
+
+      <p>עוד דברים אחדים יש משלי תחת יד בעל המליץ, אם ידפיסם יראו הרבנים וישמחו. וביחוד השיר: "אשקא דריספק חרבה ביתר". מה תעשה אסיפת הרבנים בעירך? ואיך יפול דבר המשפט בין הגאון האדים עם השוחטים? ומה יענה עתה <span class="entity k-unknown" data-eid="wolfssohn">ר' משה דוד וואלפֿסאהן</span> בדבר השוחטים? האף אמנם רק להחמיר על עצמה יצא? אנא הודיעה נא לי בחשאי פרטים אחדים מן האספה הזאת ומפעולותיה; אולי תהיינה הידיעות האלה דרושות לחפצי לעת מצוא.</p>
+
+      <p>בשבוע העבר קבלתי מ<span class="entity k-person" data-eid="zaks">ר' שניאור זק"ש</span> מ<span class="entity k-place" data-eid="paris">פאריז</span> מהנה על מכתבי אשר כתבתי אליו זה שלש עשרה שנה!! עם המכתב שלח לי את ספרו "<span class="entity k-work" data-eid="ibn_gabirol_book">שיר השירים לבן גבירול</span>" ומבקש ממני לחות דעתי על ספרו זה, והנני עוסק כעת לסדר הערותי ותקוני בשיריו של <span class="entity k-person" data-eid="ibn_gabirol">בן גבירול</span>; ויש בתקוני אלה דברים טובים. וכן עוסק אנכי, לבקשת המחבר, לכתוב הערות ותקונים בהעתקת סדר התפלה ללשון רוסיה שנעשה ע"י הרב מ<span class="entity k-place" data-eid="grodno">הוראדנא</span> <span class="entity k-person" data-eid="horowitz">ר' יוסף הורוויץ</span>. הראית את ההעתקה הזאת?</p>
+
+      <p>מלבד המכתב הראשון אשר קבלתי מאשתי, כתוב ביום בואה ל<span class="entity k-recipient" data-eid="shavli">שאוועל</span>, לא שמעתי ממנה דבר, ולא אדע איפה היא כעת; וכבר כתבתי אליה ל<span class="entity k-place" data-eid="kaunas">קאוונא</span>, כי אחשוב שכבר יצאה את העיר שאוועל.</p>
+
+      <p class="stage-direction">[נמצא בלי חתימה]</p>
+    </article>
+
+
+
+    <!-- BELOW LETTER: SECONDARY LITERATURE -->
+    <section class="enrich" style="margin-top:30px;padding-top:24px;border-top:3px double var(--by-accent);">
+      <h2 style="font-size:22px;color:var(--by-accent);margin:0 0 18px 0;font-family:'Frank Ruhl Libre',serif;">ספרות מחקרית והקשר ביבליוגרפי</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;">
+    <div class="panel" data-curation="ai">
+      <h3>ספרות מחקרית רלוונטית <span class="source-tag">Gemini 2.5 Flash · 2026-05-15</span></h3>
+      <div style="font-size:12px;color:var(--by-tertiary);margin-bottom:8px;line-height:1.5;">
+        חיפוש ממוקד למכתב זה: <strong>mentioned-in-passing</strong>. הפולמוס הספציפי 1870 בין יל"ג לבריל אינו מנותח כאירוע נפרד; הקיים הוא ביוגרפי על שתי הדמויות + הקשר רחב על מלחמות־עיתונות השכלה–אורתודוקסיה.
+      </div>
+      <div style="font-size:13px;line-height:1.55;">
+        <p style="margin:0 0 8px 0;"><strong>ביוגרפיה אנגלית מרכזית (מומלץ לאמת חלקים):</strong></p>
+        <p style="margin:0 0 8px 0;">• Michael Stanislawski, <em>For Whom Do I Toil? Judah Leib Gordon and the Crisis of Russian Jewry</em> (Oxford UP, 1988) · <a href="https://archive.org/details/forwhomdoitoilju0000stan" target="_blank">Internet Archive ↗</a>. הביוגרפיה המרכזית של יל"ג; דנה בפולמוס 1870 — אימות פרקים פתוח לקריאה ב־Archive.org.</p>
+
+        <p style="margin:8px 0 6px 0;"><strong>אנציקלופדיות (ביוגרפי):</strong></p>
+        <p style="margin:0 0 6px 0;">• <a href="https://yivoencyclopedia.org/article.aspx/Gordon_Yehudah_Leib" target="_blank">YIVO · Gordon, Yehudah Leib</a> — מציין את המעבר של יל"ג בסוף שנות ה־60 ליצירות הומניזם־עברי הטרודוקסיות.</p>
+        <p style="margin:0 0 6px 0;">• <a href="https://www.encyclopedia.com/religion/encyclopedias-almanacs-transcripts-and-maps/gordon-judah-leib" target="_blank">Encyclopedia.com · Gordon, Judah Leib</a> — מציג את יל"ג כ"לוחם הראשי" נגד תחלואי החברה היהודית והקונסרבטיזם הדתי.</p>
+        <p style="margin:0 0 6px 0;">• <a href="https://www.jewishencyclopedia.com/articles/3655-brill-jehiel" target="_blank">Jewish Encyclopedia · Brill, Jehiel</a> — 'הלבנון' בעריכת בריל מתואר כאורגן אולטרה־קונסרבטיבי עם רבנים אדוקים כתורמים.</p>
+        <p style="margin:0 0 6px 0;">• <a href="https://www.jewishculture.org/bril-yechiel/" target="_blank">Congress for Jewish Culture · Bril, Yeḥiel</a> — בריל כיריב ההשכלה, הלבנון כבמה לרבנים האורתודוקסים, מאבקיו נגד הציונות הקדומה.</p>
+
+        <p style="margin:8px 0 6px 0;"><strong>הקשר כללי (השכלה–אורתודוקסיה):</strong></p>
+        <p style="margin:0 0 6px 0;">• <a href="https://yivoencyclopedia.org/article.aspx/Haskalah" target="_blank">YIVO · Haskalah</a> — הטון החריף של ההשכלה במזרח־אירופה (סאטירה, אירוניה) ותגובות החברה השמרנית.</p>
+        <p style="margin:0 0 6px 0;">• Jacob S. Raisin, <em>The Haskalah Movement in Russia</em> (1913) — <a href="https://www.gutenberg.org/files/16065/16065-h/16065-h.htm" target="_blank">Project Gutenberg</a>. ההשכלה כתנועה תוקפנית; הציטוט מתייחס ליל"ג כ"מתקן מיליטנטי" בעל סאטירות חותכות.</p>
+
+      </div>
+    </div>
+    <div class="panel" data-curation="human" style="background:#fff8e8;border:1px solid #d6b94a;border-inline-start:4px solid #a08a3a;">
+      <h3 style="color:#6b4a00;">הזמנה למחקר <span class="source-tag" style="background:#f0e3a8;color:#5a4400;">שאלות פתוחות</span></h3>
+      <div style="font-size:12px;color:#7a6520;margin-bottom:10px;line-height:1.5;">
+        החיפוש הספרותי האוטומטי לא העלה דיון אקדמי מובהק בפולמוס יל"ג–בריל 1870, ביצירה הסאטירית "ודוי הגדול לדניאל באג'ר", או בזיהוי "א.ל." משאוועל. האגרת פותחת שורת שאלות שטרם נחקרו. לכל שאלה — כפתור פתיחת ממשק חקירה בעזרת AI, שבסופו ניתן לתרום את הממצא להעשרת האגרת.
+      </div>
+      <ol style="margin:0;padding-inline-start:18px;font-size:13px;line-height:1.6;">
+        <li style="margin-bottom:10px;">
+          <strong>מי הוא "א.ל." מ"שאוועל"?</strong>
+          <div style="color:var(--by-text);margin-top:3px;">החתימה "א.ל." במאמרו ב<em>המליץ</em> נו' 13 (1870-04-11, מאמר 5) היא קצרה ועלומה. עורך כתב־היד שיער "ר"א אפרתי" — אך השם אינו מופיע בכתב־היד עצמו. שני קווי בדיקה: (א) מפתחות פסבדונימים עבריים — לקסיקון הספרות העברית של קרסל, רמב"י, מפתח קולברט; (ב) רישומי קהילת שאוועל מסביבות 1870 — מסכות יהודי ליטא, ארכיון YIVO.</div>
+        
+          <button type="button" class="explore-btn" data-qid="efrati" data-qtitle="מי הוא "א.ל." מ"שאוועל"?">🔍 צאו למחקר</button>
+        </li>
+        <li style="margin-bottom:10px;">
+          <strong>היכן השיר "אשקא דריספק חרבה ביתר"?</strong>
+          <div style="color:var(--by-text);margin-top:3px;">יל"ג מציין במכתב: "עוד דברים אחדים יש משלי תחת יד בעל המליץ, אם ידפיסם יראו הרבנים וישמחו. וביחוד השיר: אשקא דריספק חרבה ביתר". האם השיר נדפס בסופו של דבר ב<em>המליץ</em>? אם כן, באיזה גליון? האם הוא נכלל באסופות שיריו של יל"ג (וברנפלד 1894; קלוזנר; מהדורת דביר), ואם לא — מה גורלו של כתב־היד?</div>
+        
+          <button type="button" class="explore-btn" data-qid="ashka" data-qtitle="היכן השיר "אשקא דריספק חרבה ביתר"?">🔍 צאו למחקר</button>
+        </li>
+        <li style="margin-bottom:10px;">
+          <strong>מהו "ודוי הגדול לדניאל באג'ר"?</strong>
+          <div style="color:var(--by-text);margin-top:3px;">יל"ג שלח את היצירה הזו לוואלפסון ל<em>המליץ</em> לפני הפסח 1870 כתשובה להתקפות בריל. הסאטירה לובשת מסכה של "וידוי". "דניאל באג'ר" הוא כינוי משונה (Bager?) — קריקטורה של יל"ג עצמו? של אחר? של דמות מהמסורת? האם היצירה הודפסה, ובאיזו צורה היא נכללת ביצירות הסאטיריות של יל"ג?</div>
+        
+          <button type="button" class="explore-btn" data-qid="vidui" data-qtitle="מהו "ודוי הגדול לדניאל באג'ר"?">🔍 צאו למחקר</button>
+        </li>
+        <li style="margin-bottom:10px;">
+          <strong>למה הפולמוס יל"ג–בריל 1870 אינו נחקר כאירוע ספציפי?</strong>
+          <div style="color:var(--by-text);margin-top:3px;">חוט הפולמוס הזה (HMZ אפריל 1870 · HLB סוף 1869–1870) כולל מאמרים מזוהים, שמות סופרים, ויצירה סאטירית מרכזית. עם זאת — אפס תוצאות בחיפוש אנגלי דיגיטלי וברמב"י. האם הוא מטופל בעבודות עבריות לא־מאונדקסות — מונוגרפיות של פיינר, סלמון, פלאי, אורבך — או בפרק חבוי במהדורות יל"ג עצמן? המקור האנגלי הקאנוני (סטניסלבסקי 1988) זמין באינטרנט ארכייב — האם פרק כלשהו עוסק במחלוקת זו במישרין?</div>
+        
+          <button type="button" class="explore-btn" data-qid="gap" data-qtitle="למה הפולמוס יל"ג–בריל 1870 אינו נחקר כאירוע ספציפי?">🔍 צאו למחקר</button>
+        </li>
+        <li>
+          <strong>מי היה "המגיד מסלוצק"?</strong>
+          <div style="color:var(--by-text);margin-top:3px;">דמות שהבטיחה ליל"ג להלחם בעבורו בעיתונות, ושימשה תירוץ לעיכוב תגובתו שלו. "המגיד" כאן הוא תפקיד דרשני־קהילתי, לא העיתון בעל אותו שם. בסביבת סלוצק 1870 פעלו רבנים ודרשנים בולטים שכמה מהם השאירו עקבות בעיתונות העברית. זיהויו פותח עוד נדבך ברשת ההגנה של יל"ג.</div>
+        
+          <button type="button" class="explore-btn" data-qid="maggid" data-qtitle="מי היה "המגיד מסלוצק"?">🔍 צאו למחקר</button>
+        </li>
+      </ol>
+    </div>
+      </div>
+    </section>
+  </main>
+
+
+  <!-- SIDEBAR -->
+  <aside class="side">
+
+
+    <!-- RELATIONAL NETWORK (1870 letter only) -->
+    <div class="network-wrap" data-curation="ai">
+      <h3>רשת אנשי המכתב</h3>
+      <div class="sub">הדמויות הנזכרות במכתב, מסודרות סביב יל"ג כצומת. סוג הקשר מסומן בצבע הקו. העבירו את העכבר על נקודה לפרטים.</div>
+      <svg class="network" viewBox="0 0 400 360" xmlns="http://www.w3.org/2000/svg">
+
+        <!-- soft group backgrounds (no time axis: relational only) -->
+        <text class="zone-label" x="200" y="22" text-anchor="middle">המכתב והקשר העיתונאי שלו · ער"ח אייר תר"ל (1870)</text>
+
+        <!-- EDGES — drawn first so nodes overlap -->
+        <!-- Antagonist axis (red-tinted) -->
+        <line class="edge edge-attack" x1="200" y1="180" x2="320" y2="80"><title>יחיאל בריל תוקף את יל"ג ב'הלבנון' — וקורא לו "עוכר השכלת ישראל"</title></line>
+        <line class="edge edge-attack" x1="80" y1="80" x2="320" y2="80"><title>ר"א אפרתי / "א.ל." תוקף את בריל בגלוי ב'המליץ' נו' 13, מגן על יל"ג</title></line>
+
+        <!-- Defender / ally axis -->
+        <line class="edge edge-key" x1="200" y1="180" x2="80" y2="80"><title>יל"ג מודה לנמען (ר"א אפרתי?) על ההגנה במליץ נו' 13</title></line>
+        <line class="edge edge-key" x1="200" y1="180" x2="200" y2="80"><title>"המגיד מסלוצק" הבטיח ליל"ג להלחם בעבורו</title></line>
+
+        <!-- Publication route through HaMelitz -->
+        <line class="edge" x1="200" y1="180" x2="140" y2="270"><title>יל"ג שלח את "ודוי הגדול לדניאל באג'ר" לר' מ.ד. וואלפסון להמליץ</title></line>
+        <line class="edge" x1="200" y1="180" x2="260" y2="270"><title>"בעל המליץ" — העורך שיל"ג חושש שלא ידפיס את תשובתו (מאמרו "משיב מלחמה שערה")</title></line>
+        <line class="edge" x1="140" y1="270" x2="260" y2="270" stroke-dasharray="2 2"><title>וואלפסון פועל בתוך מערכת 'המליץ', מתווך אל העורך</title></line>
+
+        <!-- Other correspondence (peripheral, gray) -->
+        <line class="edge edge-soft" x1="200" y1="180" x2="350" y2="200"><title>שניאור זק"ש מפאריז שלח ליל"ג את ספרו "שיר השירים לבן גבירול" לחוות דעה</title></line>
+        <line class="edge edge-soft" x1="200" y1="180" x2="50" y2="200"><title>ר' יוסף הורוויץ מהוראדנא הזמין מיל"ג הערות לתרגום סדר התפילה לרוסית</title></line>
+
+        <!-- NODES (data-eid links to popup data) -->
+        <circle class="node-sender" cx="200" cy="180" r="11" data-eid="gordon"></circle>
+        <text class="label" x="200" y="163" text-anchor="middle" font-weight="700" font-size="13">יל"ג</text>
+        <text class="role" x="200" y="205" text-anchor="middle">מחבר המכתב</text>
+
+        <circle class="node-known" cx="320" cy="80" r="7" data-eid="bril"></circle>
+        <text class="label" x="320" y="66" text-anchor="middle">י' בריל</text>
+        <text class="role" x="320" y="98" text-anchor="middle">עורך 'הלבנון'</text>
+
+        <circle class="node-recipient" cx="80" cy="80" r="8" data-eid="recipient"></circle>
+        <text class="label" x="80" y="66" text-anchor="middle">"א.ל." / ר"א אפרתי?</text>
+        <text class="role" x="80" y="98" text-anchor="middle">נמען, מגן ב'המליץ'</text>
+
+        <circle class="node-unknown" cx="200" cy="80" r="7" data-eid="slutsk_maggid"></circle>
+        <text class="label" x="200" y="66" text-anchor="middle">המגיד מסלוצק?</text>
+        <text class="role" x="200" y="98" text-anchor="middle">בעל ברית מובטח</text>
+
+        <circle class="node-unknown" cx="140" cy="270" r="7" data-eid="wolfssohn"></circle>
+        <text class="label" x="140" y="288" text-anchor="middle">מ.ד. וואלפסון</text>
+        <text class="role" x="140" y="300" text-anchor="middle">קשר 'המליץ'</text>
+
+        <circle class="node-unknown" cx="260" cy="270" r="7" data-eid="hamelitz_editor"></circle>
+        <text class="label" x="260" y="288" text-anchor="middle">בעל 'המליץ'</text>
+        <text class="role" x="260" y="300" text-anchor="middle">עורך</text>
+
+        <circle class="node-side" cx="350" cy="200" r="6" data-eid="zaks"></circle>
+        <text class="label" x="350" y="187" text-anchor="middle">ש' זק"ש</text>
+        <text class="role" x="350" y="218" text-anchor="middle">פאריז · התכתבות</text>
+
+        <circle class="node-side" cx="50" cy="200" r="6" data-eid="horowitz"></circle>
+        <text class="label" x="50" y="187" text-anchor="middle">י' הורוויץ</text>
+        <text class="role" x="50" y="218" text-anchor="middle">הוראדנא · עמלות</text>
+
+      </svg>
+      <div class="network-legend">
+        <span><span class="nl-sw" style="background:#a05a2a;border:3px solid #fff;outline:1px solid #a05a2a;"></span>שולח (יל"ג)</span>
+        <span><span class="nl-sw" style="background:#5a3a8a;border:2px solid #fff;outline:1px solid #5a3a8a;"></span>נמען</span>
+        <span><span class="nl-sw" style="background:#660248;border:2px solid #fff;outline:1px solid #660248;"></span>זוהה</span>
+        <span><span class="nl-sw" style="background:#fff;border:1.5px dashed #907989;"></span>לא זוהה</span>
+        <span><span class="nl-sw" style="background:#a89099;border:1.5px solid #fff;outline:1px solid #a89099;"></span>היקפי</span>
+        <span style="opacity:0.8;">— קשר רגיל · ═ קשר מרכזי · ┄ גשר דיאכרוני</span>
+      </div>
+    </div>
+
+
+
+
+
+
+
+    <!-- LEGEND -->
+    <div class="panel" data-curation="human">
+      <h3>מקרא — צבעי הישויות בטקסט</h3>
+      <div class="legend-grid">
+        <div class="lg-item"><span class="lg-sw" style="background:var(--c-sender-bg);"></span>שולח המכתב</div>
+        <div class="lg-item"><span class="lg-sw" style="background:var(--c-recipient-bg);"></span>נמען המכתב</div>
+        <div class="lg-item"><span class="lg-sw" style="background:var(--c-person-bg);"></span>אדם (מזוהה)</div>
+        <div class="lg-item"><span class="lg-sw unknown"></span>אדם לא־מזוהה</div>
+        <div class="lg-item"><span class="lg-sw" style="background:var(--c-place-bg);"></span>מקום</div>
+        <div class="lg-item"><span class="lg-sw" style="background:var(--c-newspaper-bg);"></span>עיתון</div>
+        <div class="lg-item" style="grid-column:1/-1;"><span class="lg-sw" style="background:var(--c-publication-bg);"></span>מאמר/יצירה/גליון ספציפי (קישור ישיר)</div>
+      </div>
+    </div>
+    <!-- MAP -->
+    <div class="map-wrap" data-curation="human">
+      <h3>גיאוגרפיה</h3>
+      <div class="sub">המקומות הנזכרים במכתב. השולח והנמען מסומנים בנפרד; שאר המקומות תחת "מקומות אחרים".</div>
+      <div id="map"></div>
+      <div class="map-legend">
+        <span><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#a05a2a;border:2px solid #fff;outline:1px solid #a05a2a;vertical-align:middle;margin-inline-end:5px;"></span>מקום השולח (טעלז)</span>
+        <span><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#5a3a8a;border:2px solid #fff;outline:1px solid #5a3a8a;vertical-align:middle;margin-inline-end:5px;"></span>מקום הנמען (שאוועל)</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#3b6b3b;border:1.5px solid #fff;outline:1px solid #3b6b3b;vertical-align:middle;margin-inline-end:5px;"></span>מקומות אחרים</span>
+      </div>
+    </div>
+
+    <!-- REPORT-ERROR BUTTON (BYP-style) -->
+    <div style="text-align:center;padding:6px 0;">
+      <button type="button" class="report-error-btn" id="report-error-btn">
+        <span aria-hidden="true">⚠</span> מצאתי שגיאה
+      </button>
+      <div style="font-size:11px;color:var(--by-tertiary);margin-top:4px;">בנוסח, בתעתיק, בזיהוי, או במטא־דאטא</div>
+    </div>
+  </aside>
+
+</div>
+
+<footer class="site">
+  <div class="infra-note">
+    <h4>תשתית: ידני בדמו הזה ↔ אוטומציה בשלב שאחרי הפיילוט</h4>
+    <table>
+      <thead>
+        <tr><th>צעד בדמו הנוכחי</th><th>החלפה בשלב הבא</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>קישורי JPress הוזנו ידנית; דמואים מקשרים לעמוד הגליון ולא מטמיעים תמונה</td>
+          <td>NLI Discovery API (Primo VE) · שאילתה לפי קוד־עיתון + תאריך → מזהה גליון, קישור עמוק למאמר, וגישה לכותרות וכותרי־משנה כתמונות (image endpoint)</td>
+        </tr>
+        <tr>
+          <td>כתובת אגרת 3442 ממופה ידנית לאסופה 9991 (אין כתובת לאגרת בודדת)</td>
+          <td>שיתוף־פעולה עם פרויקט בן־יהודה — מזהים יציבים לאגרות + תצוגת־אגרת בודדת (כפי שמודגם כאן)</td>
+        </tr>
+        <tr>
+          <td>תמונות אישים נשלפות ידנית מ־Wikidata לפי Q-ID</td>
+          <td>SPARQL ל־Wikidata: <code>P31=Q5</code> + תווית עברית → שליפת <code>P18</code> אוטומטית לכל שחקני־הפולמוס</td>
+        </tr>
+        <tr>
+          <td>חיפושי רמב"י לא בוצעו (חסום בצד SPA)</td>
+          <td>Primo VE API עם scope=Rambi; OAI-PMH ל־harvest מקומי; שיתוף־פעולה עם NLI</td>
+        </tr>
+        <tr>
+          <td>מאמרי המליץ זוהו בקריאה צמודה אנושית של המכתב (גליון 13 מאמר 5; "משיב מלחמה שערה" 4.4.1870 מאמר 1); מאמר בריל הספציפי ב'הלבנון' עדיין לא זוהה</td>
+          <td>NER + מודל קוריפרנס על טקסט המכתב → התאמה אוטומטית של ציטוטים שמיים ("המליץ נו' 13", שמות־מאמרים בגרשיים) למסד JPress; pipeline משולב עם זרימת thread_summaries</td>
+        </tr>
+        <tr>
+          <td>קואורדינטות המקומות נכתבו ידנית בקוד; שמות הערים מוצמדים לאזכורים על־ידי קריאה אנושית של המכתב</td>
+          <td>NER גיאוגרפי על המכתב והחוט → קישור לטוקנים של Wikidata (<code>P31</code> ⊂ {Q515,Q486972}) → שליפת <code>P625</code> (קואורדינטות) אוטומטית; טיפול בכתיבים היסטוריים (טעלז↔Telšiai, ליק↔Ełk) כשכבת תרגום ייעודית</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin-top:16px;font-size:12px;opacity:0.85;">
+      דמו: פרויקט Polemicon · 2026-05-15 · נתונים: <code>thread_id=381</code>, <code>egeret_3442</code> ·
+      קוד המקור והסכמה: <code>logs/demos/demo_polemic_thread_381.json</code>
+    </p>
+  </div>
+</footer>
+
+<!-- Floating entity popup -->
+<div id="entity-popup" role="tooltip" aria-hidden="true"></div>
+
+<!-- Explore-with-AI modal -->
+<div class="modal-overlay" id="explore-modal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-labelledby="explore-modal-title">
+    <h3 id="explore-modal-title">חקירה בעזרת AI</h3>
+    <div class="sub" id="explore-question">—</div>
+
+    <label>שיחה עם הסוכן</label>
+    <div class="chat-window" id="explore-chat"></div>
+
+    <div class="chat-suggested" id="explore-suggested"></div>
+
+    <div class="chat-row">
+      <input type="text" id="explore-input" placeholder="שאלו שאלת המשך, או השאירו את העכבר ריק ולחצו 'שלחו' לקבל הצעת מחקר">
+      <button type="button" id="explore-send">שלחו</button>
+    </div>
+
+    <label for="explore-finding" style="margin-top:14px;">הממצא שלכם — לתרומה להעשרת האגרת</label>
+    <textarea id="explore-finding" rows="3" placeholder="לאחר בירור עם הסוכן: סכמו את הממצא, את המקורות, ואת רמת הוודאות שלכם. עורכי האסופה יבחנו את התרומה."></textarea>
+
+    <div class="modal-actions">
+      <button type="button" class="primary" id="explore-submit">תרמו ממצא להעשרה</button>
+      <button type="button" class="secondary" id="explore-cancel">סגירה</button>
+    </div>
+    <div class="modal-notice">
+      ⓘ בדמו זה, ה־AI הוא הדגמה — התשובות הן תבניות מוכנות מראש. בפלטפורמה החיה ייערכו חיפושים בקטלוגים (רמב"י, פרויקט בן־יהודה, JPress, Wikidata) ויוחזרו תוצאות אמת.
+    </div>
+  </div>
+</div>
+
+<!-- Report-error modal -->
+<div class="modal-overlay" id="report-modal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-labelledby="report-modal-title">
+    <h3 id="report-modal-title">מצאתי שגיאה</h3>
+    <div class="sub">דווחו על שגיאה בנוסח, בתעתיק, בזיהוי שֵם או מטא־דאטא של אגרת זו. הדיווח יועבר לעורכי האסופה.</div>
+    <label for="re-text">תיאור השגיאה / תיקון מוצע</label>
+    <textarea id="re-text" rows="4" placeholder="לדוגמה: התעתיק במשפט X איננו נכון, צ"ל… / השם 'א.ל.' כנראה מזוהה כ… / וכו'"></textarea>
+    <label for="re-loc">הקטע הרלוונטי במכתב (אופציונלי)</label>
+    <input type="text" id="re-loc" placeholder="מספר פסקה, מילה־מנחה או ציטוט קצר">
+    <label for="re-email">דוא"ל לקבלת עדכון (אופציונלי)</label>
+    <input type="email" id="re-email" placeholder="name@example.com">
+    <label for="re-check">לאימות: שם משפחתו של המשורר הלאומי?</label>
+    <input type="text" id="re-check" placeholder="הקלידו את שם המשפחה">
+    <div class="modal-actions">
+      <button type="button" class="primary" id="re-submit">שליחה</button>
+      <button type="button" class="secondary" id="re-cancel">ביטול</button>
+    </div>
+    <div class="modal-notice">
+      ⓘ בדמו זה, השליחה היא הדגמה בלבד. בפלטפורמה החיה הדיווח ייגנז עם זיהוי המסמך (<code>egeret_3442</code>) ועם הקטע המסומן אוטומטית.
+    </div>
+  </div>
+</div>
+
+<script>
+  // ====== ENTITY DATA ======
+  const ENTITIES = {
+    gordon: { kind: 'sender', name: 'יהודה ליב גורדון (יל"ג)', dates: '1830–1892', role: 'משורר עברי, דמות מרכזית בהשכלה הרוסית · מחבר המכתב',
+              desc: 'בעת המכתב — נתון להתקפה מתמשכת ב\'הלבנון\' של בריל, המאשים אותו בהריסת אמונת ישראל בשירתו הסאטירית.',
+              img: 'https://s3.amazonaws.com/bybeprod/authorities/profile_images/000/000/046/thumb/Gordon_L.jpg',
+              links: [['פרויקט בן־יהודה','https://benyehuda.org/author/46']] },
+    bril: { kind: 'person', name: 'יחיאל בריל', dates: '1836–1886', role: 'עורך \'הלבנון\' · מתקיף יל"ג',
+            desc: '\'הלבנון\' תחת עריכתו (פאריז 1868–1870) הפך לאורגן אולטרה־קונסרבטיבי שתקף את ההשכלה בעוצמה. בריל קרא ליל"ג "עוכר השכלת ישראל".',
+            img: 'https://commons.wikimedia.org/wiki/Special:FilePath/Yechiel%20bril.jpg',
+            links: [['Wikidata Q12408083','https://www.wikidata.org/wiki/Q12408083'],['Jewish Encyclopedia','https://www.jewishencyclopedia.com/articles/3655-brill-jehiel']] },
+    recipient: { kind: 'recipient', name: 'הנמען — "א.ל." / ר"א אפרתי (?)', dates: 'משאוועל, פעיל ב־1870', role: 'נמען המכתב · מגן יל"ג ב\'המליץ\'',
+                 desc: 'חתום "א.ל." במאמרו ב\'המליץ\' גליון 13 (11.4.1870). השם המלא "ר"א אפרתי" הוא השערת עורך כתב־היד; אינו ניתן לאימות ודאי מהמקורות הזמינים. ראו במחקר הפסבדונימים את מפתחי קרסל ורמב"י.',
+                 img: '', icon: '?',
+                 links: [['המאמר ב־JPress','https://www.nli.org.il/en/newspapers/hmz/1870/04/11/01/article/5']] },
+    slutsk_maggid: { kind: 'unknown', name: '"המגיד מסלוצק"', dates: 'פעיל ~1870', role: 'בעל ברית מובטח',
+                     desc: 'כינוי תפקיד (המגיד = הדרשן), לא שם פרטי. הבטיח ליל"ג להלחם בעבורו נגד הלבנון, מה שגרם ליל"ג להמתין מלהשיב בעצמו. הזיהוי דורש עבודת ארכיון בקהילת סלוצק.',
+                     img: '', icon: '?',
+                     links: [] },
+    wolfssohn: { kind: 'unknown', name: 'ר\' משה דוד וואלפֿסאהן', dates: 'פעיל ~1870', role: 'קשר במערכת \'המליץ\'',
+                 desc: 'יל"ג שלח אליו את "ודוי הגדול לדניאל באג\'ר" לפרסום ב\'המליץ\'. נזכר גם בקשר לפולמוס השוחטים בעיר הנמען. הזיהוי הוודאי דורש חיפוש בארכיוני \'המליץ\'.',
+                 img: '', icon: '?',
+                 links: [] },
+    hamelitz_editor: { kind: 'unknown', name: '"בעל המליץ"', dates: 'פעיל 1870', role: 'עורך \'המליץ\'',
+                       desc: 'כותב המאמר הדו־חלקי "משיב מלחמה שערה" שיל"ג חושש שיגרור היסוס בהדפסת תשובתו. בעת זו עורך הראשי של המליץ היה אלכסנדר צדרבוים — אך הזיהוי לא ודאי מהמכתב לבדו.',
+                       img: '', icon: '✎',
+                       links: [['"משיב מלחמה שערה" ב־JPress','https://www.nli.org.il/en/newspapers/hmz/1870/04/04/01/article/1']] },
+    zaks: { kind: 'person', name: 'שניאור (Senior) זק"ש', dates: '1816–1892', role: 'חוקר ימי הביניים, פאריז',
+            desc: 'שלח ליל"ג את ספרו על "שיר השירים לבן גבירול" 13 שנה לאחר התכתבותם הראשונה ובקש חוות־דעת.',
+            img: '', icon: '👤',
+            links: [] },
+    horowitz: { kind: 'person', name: 'ר\' יוסף הורוויץ מהוראדנא', dates: 'פעיל ~1870', role: 'מתרגם סדר התפילה לרוסית',
+                desc: 'הזמין מיל"ג הערות ותיקונים על תרגום סדר התפילה לרוסית.',
+                img: '', icon: '👤',
+                links: [] },
+    ibn_gabirol: { kind: 'person', name: 'שלמה אבן גבירול', dates: '~1021–~1058', role: 'משורר ופילוסוף עברי בספרד',
+                   desc: 'יל"ג עוסק בעת המכתב בהערות ותיקונים על שיריו של אבן גבירול, לבקשת המוציא ר\' שניאור זק"ש.',
+                   img: '', icon: '👤',
+                   links: [['Wikidata Q189564','https://www.wikidata.org/wiki/Q189564']] },
+
+    // newspapers
+    halevanon: { kind: 'newspaper', name: 'הלבנון (HLB)', dates: '1863–1886, פאריז (1868–1870)', role: 'שבועון עברי בעריכת יחיאל בריל',
+                 desc: 'אורגן עברי קונסרבטיבי; בעת המכתב יוצא לאור בפאריז ומתקיף את יל"ג ואת ההשכלה הרוסית.',
+                 img: 'https://commons.wikimedia.org/wiki/Special:FilePath/Halvanon22.jpg',
+                 links: [['גליון 10 בינואר 1870 ב־JPress','https://www.nli.org.il/en/newspapers/hlb/1870/01/10/01/']] },
+    hamelitz: { kind: 'newspaper', name: 'המליץ (HMZ)', dates: '1860–1904, אודסה', role: 'שבועון עברי משכילי',
+                desc: 'במה משכילית חשובה. בעת המכתב — מפרסם את מאמר הנמען נגד בריל, וגם מאמרו של "בעל המליץ" "משיב מלחמה שערה". יל"ג שלח אליו את תשובתו.',
+                img: 'https://commons.wikimedia.org/wiki/Special:FilePath/Melitz22.jpg',
+                links: [['JPress','https://www.nli.org.il/he/newspapers/hmz']] },
+    hamelitz_n13: { kind: 'publication', name: 'המליץ נו\' 13 (1870-04-11)', dates: '11 באפריל 1870', role: 'הגליון שמכיל את מאמר הנמען',
+                    desc: 'מאמר 5 ב־JPress מכיל את הכתבה הרלוונטית — אם כי בגלל סגמנטציה לקויה צמודה לפניה כתבה קצרה מנ.יורק שאינה שייכת.',
+                    img: 'https://commons.wikimedia.org/wiki/Special:FilePath/Melitz22.jpg',
+                    links: [['המאמר ב־JPress','https://www.nli.org.il/en/newspapers/hmz/1870/04/11/01/article/5']] },
+
+    // places
+    telz: { kind: 'sender', name: 'טעלז (Telšiai)', dates: 'ליטא', role: 'מקום כתיבת המכתב',
+            desc: 'יל"ג כותב את המכתב מטעלז, ער"ח אייר תר"ל ≈ 30 באפריל 1870.',
+            img: '', icon: '⌖', links: [] },
+    shavli: { kind: 'recipient', name: 'שאוועל (Šiauliai)', dates: 'ליטא', role: 'מקום הנמען וגם אשת יל"ג',
+              desc: 'מקומו של הנמען (השערת עורך כתב־היד, תואמת את חתימת המאמר ב\'המליץ\'). גם — היכן שהתה אשת יל"ג בעת כתיבת המכתב.',
+              img: '', icon: '⌖', links: [] },
+    paris: { kind: 'place', name: 'פאריז', dates: '1870', role: 'מרכז פרסום \'הלבנון\' ומקום ש\' זק"ש',
+             desc: 'מקום הוצאת \'הלבנון\' בעריכת בריל (1868–1870); גם — מקום שבתו של ש\' זק"ש ששלח ליל"ג את ספרו על אבן גבירול.',
+             img: '', icon: '⌖', links: [] },
+    grodno: { kind: 'place', name: 'הוראדנא (Grodno)', dates: 'אימפריה רוסית', role: 'מקום ר\' י\' הורוויץ',
+              desc: 'מקום מושבו של ר\' יוסף הורוויץ שתרגם את סדר התפילה לרוסית והזמין מיל"ג הערות.',
+              img: '', icon: '⌖', links: [] },
+    kaunas: { kind: 'place', name: 'קאוונא (Kaunas)', dates: 'ליטא', role: 'צומת תקשורת',
+              desc: 'יל"ג כתב גם לקאוונא בחיפוש אחר אשתו לאחר שעזבה את שאוועל.',
+              img: '', icon: '⌖', links: [] },
+
+    // works mentioned
+    vidui: { kind: 'work', name: '"ודוי הגדול לדניאל באג\'ר"', dates: 'אביב 1870', role: 'מאמר/שיר סאטירי של יל"ג',
+             desc: 'תשובת יל"ג להתקפות בריל, נשלחה לוואלפסון להמליץ לפני חג הפסח 1870. הסאטירה לובשת מסכה של "וידוי" — מתחזה ל\'תיקון\' של עצמו תוך לעג למבקריו האורתודוקסים. לא נמצא דיון אקדמי על היצירה הזו במחקר הזמין.',
+             img: '', icon: '✎', links: [] },
+    meshiv_milkhama: { kind: 'work', name: '"משיב מלחמה שערה"', dates: 'אפריל 1870', role: 'מאמר דו־חלקי של עורך המליץ',
+                      desc: 'יל"ג חושש שטון המאמר ההיסוסי של עורך \'המליץ\' מאותת שלא ידפיס את תשובתו שלו.',
+                      img: '', icon: '✎',
+                      links: [['ב־JPress','https://www.nli.org.il/en/newspapers/hmz/1870/04/04/01/article/1']] },
+    ibn_gabirol_book: { kind: 'work', name: '"שיר השירים לבן גבירול"', dates: 'נשלח 1870', role: 'ספר ש\' זק"ש על אבן גבירול',
+                       desc: 'הספר שש\' זק"ש מפאריז שלח ליל"ג לחוות־דעת.',
+                       img: '', icon: '✎', links: [] },
+  };
+
+  // ====== POPUP ELEMENT + HANDLERS ======
+  const popup = document.getElementById('entity-popup');
+  let pinned = null;
+
+  function kindBadge(kind) {
+    const labels = {sender:'שולח המכתב', recipient:'נמען המכתב', person:'אדם', unknown:'לא־מזוהה', newspaper:'עיתון', place:'מקום', publication:'עיתון/מאמר/יצירה', work:'יצירה'};
+    return labels[kind] || kind;
+  }
+  function buildPopupHTML(eid) {
+    const e = ENTITIES[eid];
+    if (!e) return `<div class="ep-name">${eid}</div><div class="ep-role">אין נתונים זמינים</div>`;
+    const imgBlock = e.img
+      ? `<img class="ep-img" src="${e.img}" alt="${e.name}" onerror="this.outerHTML='<div class=&quot;ep-img placeholder&quot;>${(e.icon||'?')}</div>'">`
+      : `<div class="ep-img placeholder">${e.icon || '?'}</div>`;
+    const links = (e.links || []).map(([t,u]) => `<a href="${u}" target="_blank">${t} ↗</a>`).join('');
+    return `
+      <div class="ep-head">
+        ${imgBlock}
+        <div>
+          <div class="ep-name">${e.name}<span class="ep-kind">${kindBadge(e.kind)}</span></div>
+          <div class="ep-role">${e.role || ''}${e.dates ? ' · ' + e.dates : ''}</div>
+        </div>
+      </div>
+      <div class="ep-desc">${e.desc || ''}</div>
+      ${links ? `<div class="ep-links">${links}</div>` : ''}
+    `;
+  }
+
+  function showPopup(eid, x, y) {
+    popup.innerHTML = buildPopupHTML(eid);
+    popup.style.display = 'block';
+    popup.setAttribute('aria-hidden', 'false');
+    positionPopup(x, y);
+  }
+  function positionPopup(x, y) {
+    const pad = 12;
+    const rect = popup.getBoundingClientRect();
+    let px = x + pad, py = y + pad;
+    if (px + rect.width > window.innerWidth - 10) px = x - rect.width - pad;
+    if (py + rect.height > window.innerHeight - 10) py = y - rect.height - pad;
+    if (px < 10) px = 10;
+    if (py < 10) py = 10;
+    popup.style.left = px + 'px';
+    popup.style.top = py + 'px';
+  }
+  function hidePopup() {
+    if (pinned) return;
+    popup.style.display = 'none';
+    popup.setAttribute('aria-hidden', 'true');
+  }
+
+  function bindEntities(scope) {
+    scope.querySelectorAll('[data-eid]').forEach(el => {
+      el.addEventListener('mouseenter', (ev) => {
+        const eid = el.getAttribute('data-eid');
+        if (pinned && pinned !== eid) pinned = null;
+        showPopup(eid, ev.clientX, ev.clientY);
+      });
+      el.addEventListener('mousemove', (ev) => {
+        if (pinned) return;
+        positionPopup(ev.clientX, ev.clientY);
+      });
+      el.addEventListener('mouseleave', hidePopup);
+      el.addEventListener('click', (ev) => {
+        const eid = el.getAttribute('data-eid');
+        if (pinned === eid) { pinned = null; hidePopup(); }
+        else { pinned = eid; showPopup(eid, ev.clientX, ev.clientY); }
+        ev.stopPropagation();
+      });
+    });
+  }
+  document.addEventListener('click', (ev) => {
+    if (pinned && !ev.target.closest('#entity-popup') && !ev.target.closest('[data-eid]')) {
+      pinned = null; hidePopup();
+    }
+  });
+  bindEntities(document);
+
+  // Explore-with-AI modal
+  const exploreModal = document.getElementById('explore-modal');
+  const exploreChat = document.getElementById('explore-chat');
+  const exploreSuggested = document.getElementById('explore-suggested');
+  const exploreInput = document.getElementById('explore-input');
+  const exploreQuestion = document.getElementById('explore-question');
+
+  const EXPLORE_DATA = {
+    efrati: {
+      title: 'מי הוא "א.ל." מ"שאוועל"?',
+      initial: 'אשמח לסייע בזיהוי. נתחיל מהעובדות: החתימה "א.ל." במאמר ב\'המליץ\' נו\' 13 (1870-04-11), כותב משאוועל, מגן על יל"ג נגד יחיאל בריל. עורך כתב־היד שיער "ר"א אפרתי" — בלי בסיס מפורש בטקסט. קווי החיפוש שזמינים: מפתח קרסל לפסבדונימים, רישומי קהילת שאוועל, ארכיון YIVO על יהדות ליטא, ומפתחות עיתונאיים של המליץ.',
+      suggestions: ['חפש "א.ל." בלקסיקון קרסל', 'הצג מאמרים אחרים בהמליץ 1870 מאת "א.ל."', 'מי היו הסופרים העבריים בשאוועל ב־1870?']
+    },
+    ashka: {
+      title: 'היכן השיר "אשקא דריספק חרבה ביתר"?',
+      initial: 'השיר הזה מופיע במכתב כיצירה שכבר נשלחה ל"בעל המליץ" אך טרם נדפסה. כדי לאתר אותו אפשר: (א) לסרוק את גליונות המליץ 1870–1872 לכותרת זו; (ב) לבדוק אם השיר נכלל באסופות יל"ג שיצאו בחייו ולאחר מותו (וברנפלד 1894; קלוזנר; מהדורת דביר); (ג) לבדוק כתבי־יד של יל"ג ששרדו בארכיון בית הספרים הלאומי.',
+      suggestions: ['חפש "אשקא דריספק" באוסף שירי יל"ג', 'סרוק כותרות המליץ 1870–1872', 'איפה כתבי־היד של יל"ג מאוחסנים?']
+    },
+    vidui: {
+      title: 'מהו "ודוי הגדול לדניאל באג\'ר"?',
+      initial: 'יל"ג שלח את היצירה הזו ל\'המליץ\' באמצעות מ.ד. וואלפסון לפני הפסח 1870. השם "דניאל באג\'ר" (Bager) הוא ככל הנראה כינוי סאטירי — אולי קריקטורה של עצמו (במסכת ה"וידוי" המדומה), אולי של מתנגדיו האורתודוקסים. בדיקות אפשריות: סריקת המליץ אחרי אפריל 1870 לפרסום היצירה, התאמה לאוסף השירים הסאטיריים של יל"ג, ובחינת השם "באג\'ר" באוסף הכינויים הספרותיים שלו.',
+      suggestions: ['פרסום במליץ אחרי הפסח 1870', '"באג\'ר" — כינוי של מי?', 'הופעה באסופות יל"ג']
+    },
+    gap: {
+      title: 'למה הפולמוס יל"ג–בריל 1870 אינו נחקר כאירוע ספציפי?',
+      initial: 'הפולמוס מתועד היטב במקור (גליונות המליץ והלבנון), השחקנים ידועים (יל"ג, בריל, אפרתי?, וואלפסון), והנושא קאנוני (השכלה מול אורתודוקסיה). אבל בחיפוש דיגיטלי — אין דיון אקדמי ממוקד. ההסברים האפשריים: (א) הוא נדון בפרק כלשהו אצל סטניסלבסקי 1988 שלא הופיע בחיפוש; (ב) הוא נדון בעבודות עבריות שאינן מאונדקסות (פיינר, סלמון, אורבך); (ג) הוא נחשב מקרה־ראיה בלי שם מוכר ולא קיבל ניתוח נפרד.',
+      suggestions: ['בדוק את אינדקס סטניסלבסקי 1988', 'חפש בפיינר "Haskalah and History" על 1870', 'איתור פרק בעברית על יל"ג–בריל']
+    },
+    maggid: {
+      title: 'מי היה "המגיד מסלוצק"?',
+      initial: '"מגיד" בסביבה הזו = דרשן קהילתי, לא העיתון. בסביבת סלוצק 1870 פעלו דרשנים ובעלי השפעה משכילית־מסורתית. מועמדים אפשריים: ר\' יוסף סינגר (מגיד סלוצק בסוף שנות ה־60), ר\' ישראל סלוצקי (סלוצק־בריסק) ועוד. בדיקה דורשת רשימות קהל סלוצק מ־1870, התכתבויות מקבילות של יל"ג, ועיון בעיתונות עברית במאמרים החתומים "מגיד" באותה תקופה.',
+      suggestions: ['רשימת רבני סלוצק 1870', 'מאמרים בעיתונות חתומים "המגיד"', 'התכתבות יל"ג נוספת על סלוצק']
+    }
+  };
+
+  function appendChatMsg(who, txt) {
+    const div = document.createElement('div');
+    div.className = 'chat-msg ' + (who === 'AI' ? 'ai' : 'user');
+    div.innerHTML = `<div class="who">${who}</div>${txt}`;
+    exploreChat.appendChild(div);
+    exploreChat.scrollTop = exploreChat.scrollHeight;
+  }
+  function openExplore(qid, qtitle) {
+    const data = EXPLORE_DATA[qid] || { initial: 'אין נתוני דמו לשאלה זו.', suggestions: [] };
+    exploreQuestion.textContent = qtitle || data.title;
+    exploreChat.innerHTML = '';
+    appendChatMsg('AI', data.initial);
+    exploreSuggested.innerHTML = '';
+    (data.suggestions || []).forEach(s => {
+      const sg = document.createElement('span');
+      sg.className = 'sg'; sg.textContent = s;
+      sg.addEventListener('click', () => { exploreInput.value = s; exploreInput.focus(); });
+      exploreSuggested.appendChild(sg);
+    });
+    exploreInput.value = '';
+    document.getElementById('explore-finding').value = '';
+    exploreModal.classList.add('open');
+    exploreModal.setAttribute('aria-hidden', 'false');
+  }
+  function closeExplore() {
+    exploreModal.classList.remove('open');
+    exploreModal.setAttribute('aria-hidden', 'true');
+  }
+  document.querySelectorAll('.explore-btn').forEach(b => {
+    b.addEventListener('click', () => openExplore(b.dataset.qid, b.dataset.qtitle));
+  });
+  document.getElementById('explore-cancel').addEventListener('click', closeExplore);
+  document.getElementById('explore-send').addEventListener('click', () => {
+    const q = exploreInput.value.trim();
+    if (!q) return;
+    appendChatMsg('אתם', q);
+    setTimeout(() => {
+      appendChatMsg('AI', 'בפלטפורמה החיה הייתי מבצע חיפוש מקביל ברמב"י, פרויקט בן־יהודה, JPress ו־Wikidata על השאלה הזו, ומחזיר ציטוטים ספציפיים עם קישורים. (זהו דמו — אין כאן חיפוש אמיתי.)');
+    }, 400);
+    exploreInput.value = '';
+  });
+  exploreInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('explore-send').click(); });
+  document.getElementById('explore-submit').addEventListener('click', () => {
+    const txt = document.getElementById('explore-finding').value.trim();
+    if (!txt) { document.getElementById('explore-finding').focus(); return; }
+    alert('תודה! בפלטפורמה החיה הממצא היה נשלח לעורכי האסופה לבדיקה ולהוספה לעמוד האגרת. (זהו דמו.)');
+    closeExplore();
+  });
+  exploreModal.addEventListener('click', (e) => { if (e.target === exploreModal) closeExplore(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && exploreModal.classList.contains('open')) closeExplore(); });
+
+  // Tag clicks (demo behavior)
+  document.querySelectorAll('.tag').forEach(t => {
+    t.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      if (t.id === 'suggest-tag-btn') {
+        const v = prompt('הציעו תגית חדשה לאגרת זו:');
+        if (v && v.trim()) alert('תודה! בפלטפורמה החיה ההצעה הייתה נשלחת לעורכי האסופה לאישור. (זהו דמו.)');
+      } else {
+        alert('בפלטפורמה החיה, לחיצה כאן הייתה מציגה את כל האגרות תחת התגית: "' + t.textContent.trim() + '". (זהו דמו.)');
+      }
+    });
+  });
+
+  // Provenance toggle — highlight human-curated vs AI-derived
+  const provenanceBtn = document.getElementById('provenance-toggle');
+  if (provenanceBtn) {
+    provenanceBtn.addEventListener('click', () => {
+      const on = document.body.classList.toggle('show-provenance');
+      provenanceBtn.classList.toggle('active', on);
+      provenanceBtn.textContent = on ? '✓ פעיל — לחצו לכיבוי' : '✋ הדגש מידע שאושר על ידי אדם';
+    });
+  }
+
+  // NER highlight toggle
+  const nerToggle = document.getElementById('ner-toggle');
+  if (nerToggle) {
+    nerToggle.addEventListener('change', () => {
+      document.body.classList.toggle('entities-hidden', !nerToggle.checked);
+      if (!nerToggle.checked) { pinned = null; hidePopup(); }
+    });
+  }
+
+  // Report-error modal
+  const reportBtn = document.getElementById('report-error-btn');
+  const reportModal = document.getElementById('report-modal');
+  const reCancel = document.getElementById('re-cancel');
+  const reSubmit = document.getElementById('re-submit');
+  function openReportModal() {
+    reportModal.classList.add('open');
+    reportModal.setAttribute('aria-hidden', 'false');
+    setTimeout(() => document.getElementById('re-text').focus(), 60);
+  }
+  function closeReportModal() {
+    reportModal.classList.remove('open');
+    reportModal.setAttribute('aria-hidden', 'true');
+  }
+  if (reportBtn) reportBtn.addEventListener('click', openReportModal);
+  if (reCancel) reCancel.addEventListener('click', closeReportModal);
+  if (reSubmit) reSubmit.addEventListener('click', () => {
+    const txt = (document.getElementById('re-text').value || '').trim();
+    if (!txt) { document.getElementById('re-text').focus(); return; }
+    alert('תודה! בפלטפורמה החיה הדיווח היה נשלח לעורכי האסופה. (זהו דמו — הדיווח לא נשמר.)');
+    closeReportModal();
+    document.getElementById('re-text').value = '';
+    document.getElementById('re-loc').value = '';
+    document.getElementById('re-email').value = '';
+    document.getElementById('re-check').value = '';
+  });
+  reportModal && reportModal.addEventListener('click', (e) => { if (e.target === reportModal) closeReportModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && reportModal.classList.contains('open')) closeReportModal(); });
+
+  // Expand/collapse the explanation panel
+  const explainBtn = document.getElementById('explain-toggle');
+  const explainExtra = document.getElementById('explain-extra');
+  if (explainBtn && explainExtra) {
+    explainBtn.addEventListener('click', () => {
+      const open = explainExtra.style.display !== 'none';
+      explainExtra.style.display = open ? 'none' : 'block';
+      explainBtn.textContent = open ? 'הרחבה ↕' : 'צמצום ↕';
+    });
+  }
+
+  // Map of publication centers and places mentioned in egeret_3442 / thread 381
+  const map = L.map('map', { scrollWheelZoom: false }).setView([52.0, 22.0], 4);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 8
+  }).addTo(map);
+
+  function makeIcon(color, size) {
+    const border = Math.max(2, Math.round(size/9));
+    return L.divIcon({
+      className: 'pin',
+      html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:${border}px solid #fff;box-shadow:0 0 0 1px ${color},0 1px 3px rgba(0,0,0,0.35);"></div>`,
+      iconSize: [size, size], iconAnchor: [size/2, size/2], popupAnchor: [0, -size/2]
+    });
+  }
+  const senderIcon    = makeIcon('#a05a2a', 20);  // Telz — sender's writing place
+  const recipientIcon = makeIcon('#5a3a8a', 20);  // Šiauliai — recipient
+  const placeIcon     = makeIcon('#3b6b3b', 14);  // other places
+
+  // All places, with role classification
+  const places = [
+    { lat: 55.9839, lng: 22.2469, role: 'sender',    name: 'טעלז (Telšiai)',
+      note: 'מקום השולח — יל"ג כתב את המכתב מטעלז, ער"ח אייר תר"ל (≈ 30 באפריל 1870).' },
+    { lat: 55.9333, lng: 23.3167, role: 'recipient', name: 'שאוועל (Šiauliai)',
+      note: 'מקום הנמען — חתום "א.ל." במאמרו ב\'המליץ\' נו\' 13. גם — היכן ששהתה אשת יל"ג בעת המכתב.' },
+    { lat: 48.8566, lng: 2.3522,  role: 'place',     name: 'פאריז',
+      note: 'מקום הוצאת \'הלבנון\' של בריל; גם — מקומו של ר\' שניאור זק"ש ששלח ליל"ג את ספרו על אבן גבירול.' },
+    { lat: 46.4825, lng: 30.7233, role: 'place',     name: 'אודסה',
+      note: 'מקום הוצאת \'המליץ\' — שם הופיע מאמר הנמען (גליון 13), ולשם נשלחה תשובת יל"ג "ודוי הגדול לדניאל באג\'ר".' },
+    { lat: 53.0274, lng: 27.5586, role: 'place',     name: 'סלוצק',
+      note: '"המגיד מסלוצק" הבטיח ליל"ג להלחם בעבורו נגד הלבנון.' },
+    { lat: 54.8985, lng: 23.9036, role: 'place',     name: 'קאוונא (Kaunas)',
+      note: 'יל"ג כתב לאשתו לקאוונא לאחר שעזבה את שאוועל.' },
+    { lat: 53.6884, lng: 23.8326, role: 'place',     name: 'הוראדנא (Grodno)',
+      note: 'מקום ר\' יוסף הורוויץ שתרגם את סדר התפילה לרוסית והזמין מיל"ג הערות.' }
+  ];
+
+  places.forEach(p => {
+    let ic = placeIcon, label = 'מקומות אחרים';
+    if (p.role === 'sender')    { ic = senderIcon;    label = 'מקום השולח'; }
+    if (p.role === 'recipient') { ic = recipientIcon; label = 'מקום הנמען'; }
+    L.marker([p.lat, p.lng], { icon: ic })
+      .bindPopup(`<strong>${p.name}</strong><br><span style="color:#907989;font-size:11px;">${label}</span><br><span style="font-size:12px;">${p.note}</span>`)
+      .addTo(map);
+  });
+
+  map.fitBounds(places.map(p => [p.lat, p.lng]), { padding: [40, 40] });
+</script>
+
+</body>
+</html>
