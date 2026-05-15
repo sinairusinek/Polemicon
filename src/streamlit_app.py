@@ -172,6 +172,30 @@ def load_thread_literature_review():
     return None
 
 
+@st.cache_data(ttl=600)
+def load_thread_summaries_derived():
+    path = os.path.join(DATA_DIR, "thread_summaries_derived.parquet")
+    if os.path.exists(path):
+        return pd.read_parquet(path)
+    return None
+
+
+@st.cache_data(ttl=600)
+def load_citation_verification():
+    path = os.path.join(DATA_DIR, "thread_literature_review_verified.parquet")
+    if os.path.exists(path):
+        return pd.read_parquet(path)
+    return None
+
+
+@st.cache_data(ttl=600)
+def load_arbitration_targets():
+    path = os.path.join(DATA_DIR, "thread_arbitration_targets.parquet")
+    if os.path.exists(path):
+        return pd.read_parquet(path)
+    return None
+
+
 @st.cache_data(ttl=3600)
 def load_vocab():
     path = os.path.join(DATA_DIR, "pilot_vocab.parquet")
@@ -348,6 +372,9 @@ if view_mode == "Thread Browser":
     llm_threads = load_thread_llm_summaries()
     llm_docs = load_thread_doc_summaries()
     lit_review = load_thread_literature_review()
+    derived_df = load_thread_summaries_derived()
+    citations_verified = load_citation_verification()
+    arbitration_targets = load_arbitration_targets()
 
     st.subheader("Thread Browser")
     st.caption(
@@ -355,7 +382,7 @@ if view_mode == "Thread Browser":
         "internal threads are within-paper sequences."
     )
 
-    tcol1, tcol2, tcol3 = st.columns([2, 2, 2])
+    tcol1, tcol2, tcol3, tcol4 = st.columns([2, 2, 2, 2])
     with tcol1:
         type_choice = st.selectbox("Type", ["engaged", "internal", "all"], index=0)
     with tcol2:
@@ -363,13 +390,31 @@ if view_mode == "Thread Browser":
     with tcol3:
         sort_choice = st.selectbox(
             "Sort by",
-            ["score", "n_docs", "n_edges", "cross_paper_edges", "span_days"],
+            ["score", "n_docs", "n_edges", "cross_paper_edges", "span_days", "effective_polemic_strength"],
         )
+    with tcol4:
+        dir_options = ["any", "internal", "external_defense", "mixed", "n/a"]
+        direction_choice = st.selectbox("polemic_direction", dir_options, index=0)
 
     tview = threads_df.copy()
     if type_choice != "all":
         tview = tview[tview["thread_type"] == type_choice]
     tview = tview[tview["n_newspapers"] >= int(min_papers)]
+
+    # Direction filter consults the LLM verdict (first model per thread)
+    if direction_choice != "any" and llm_threads is not None and not llm_threads.empty:
+        _dir_lookup = (llm_threads.sort_values("model")
+                       .drop_duplicates("thread_id", keep="first")
+                       .set_index("thread_id")["polemic_direction"])
+        keep_ids = _dir_lookup[_dir_lookup == direction_choice].index
+        tview = tview[tview["thread_id"].isin(keep_ids)]
+
+    # Sort: 'effective_polemic_strength' lives in derived_df, others in threads_df
+    if sort_choice == "effective_polemic_strength" and derived_df is not None and not derived_df.empty:
+        _eps = (derived_df.sort_values("model")
+                .drop_duplicates("thread_id", keep="first")
+                .set_index("thread_id")["effective_polemic_strength"])
+        tview = tview.assign(effective_polemic_strength=tview["thread_id"].map(_eps).fillna(0.0))
     tview = tview.sort_values(sort_choice, ascending=False).reset_index(drop=True)
 
     if len(tview) == 0:
@@ -395,6 +440,35 @@ if view_mode == "Thread Browser":
         )
         top_table["llm_type"] = top_table["thread_id"].map(
             lambda t: llm_first.loc[t]["polemic_type"] if t in llm_first.index else None
+        )
+        if "polemic_direction" in llm_first.columns:
+            top_table["llm_dir"] = top_table["thread_id"].map(
+                lambda t: llm_first.loc[t].get("polemic_direction") if t in llm_first.index else None
+            )
+        if "sub_thread_signal" in llm_first.columns:
+            top_table["sub_thread"] = top_table["thread_id"].map(
+                lambda t: "⚠" if (t in llm_first.index and bool(llm_first.loc[t].get("sub_thread_signal"))) else ""
+            )
+    if derived_df is not None and not derived_df.empty:
+        _d = (derived_df.sort_values("model")
+              .drop_duplicates("thread_id", keep="first")
+              .set_index("thread_id"))
+        top_table["purity"] = top_table["thread_id"].map(
+            lambda t: round(float(_d.loc[t]["thread_purity"]), 2)
+            if t in _d.index and pd.notna(_d.loc[t].get("thread_purity")) else None
+        )
+        top_table["core_n"] = top_table["thread_id"].map(
+            lambda t: int(_d.loc[t]["core_doc_count"])
+            if t in _d.index and pd.notna(_d.loc[t].get("core_doc_count")) else None
+        )
+        top_table["eff_strength"] = top_table["thread_id"].map(
+            lambda t: round(float(_d.loc[t]["effective_polemic_strength"]), 2)
+            if t in _d.index and pd.notna(_d.loc[t].get("effective_polemic_strength")) else None
+        )
+    if arbitration_targets is not None and not arbitration_targets.empty:
+        _arb = set(arbitration_targets["thread_id"].astype(int).tolist())
+        top_table["arbitrate?"] = top_table["thread_id"].map(
+            lambda t: "⚠" if int(t) in _arb else ""
         )
     if lit_review is not None and not lit_review.empty:
         lit_idx = lit_review.set_index("thread_id")
@@ -443,12 +517,63 @@ if view_mode == "Thread Browser":
 
     # Initialize before the LLM panel so the per-doc loop below can rely on it
     outliers_map = {}
+    # Union of outliers across all models, with per-model attribution
+    outliers_by_model = {}  # {doc_id: {model: reason, ...}}
+    if llm_threads is not None:
+        import json as _json
+        _all_rows = llm_threads[llm_threads["thread_id"] == int(thread_id_sel)]
+        for _, _arow in _all_rows.iterrows():
+            _raw = _arow.get("outlier_docs") or "[]"
+            try:
+                _items = _json.loads(_raw) if isinstance(_raw, str) else list(_raw)
+            except Exception:
+                _items = []
+            for _it in _items:
+                if isinstance(_it, dict) and _it.get("doc_id"):
+                    did_x = str(_it["doc_id"])
+                    outliers_by_model.setdefault(did_x, {})[_arow["model"]] = str(_it.get("reason") or "")
+
+    # --- Arbitration warning ---
+    if arbitration_targets is not None and not arbitration_targets.empty:
+        _arb_row = arbitration_targets[arbitration_targets["thread_id"] == int(thread_id_sel)]
+        if not _arb_row.empty:
+            st.warning(
+                f"⚠ This thread is flagged for Opus arbitration. Reasons: "
+                f"{_arb_row.iloc[0]['reasons']}"
+            )
+
+    # --- Per-model comparison strip ---
+    if llm_threads is not None:
+        _cmp_rows = llm_threads[llm_threads["thread_id"] == int(thread_id_sel)]
+        if not _cmp_rows.empty and len(_cmp_rows) > 1:
+            import json as _json
+            cmp_data = []
+            for _, _cr in _cmp_rows.iterrows():
+                try:
+                    _outs = _json.loads(_cr.get("outlier_docs") or "[]")
+                except Exception:
+                    _outs = []
+                cmp_data.append({
+                    "model": _cr["model"],
+                    "polemic?": "✓" if bool(_cr.get("is_polemic_thread")) else "✗",
+                    "score": round(float(_cr.get("polemic_score") or 0), 2),
+                    "direction": _cr.get("polemic_direction") or "",
+                    "type": _cr.get("polemic_type") or "",
+                    "n_outliers": len(_outs),
+                    "sub_thread": "⚠" if bool(_cr.get("sub_thread_signal")) else "",
+                })
+            with st.expander(f"Cross-model comparison ({len(cmp_data)} models)", expanded=True):
+                st.dataframe(pd.DataFrame(cmp_data), use_container_width=True, hide_index=True)
 
     # --- LLM verdict panel (if available) ---
     if llm_threads is not None:
         llm_rows = llm_threads[llm_threads["thread_id"] == int(thread_id_sel)]
         if not llm_rows.empty:
-            model_choices = llm_rows["model"].unique().tolist()
+            # Prefer Opus → Sonnet → Gemini if present
+            preferred_order = ["cli_opus", "cli_sonnet", "gemini_flash3"]
+            model_choices_raw = llm_rows["model"].unique().tolist()
+            model_choices = [m for m in preferred_order if m in model_choices_raw] + \
+                            [m for m in model_choices_raw if m not in preferred_order]
             sel_model = st.selectbox("LLM model", model_choices, key="llm_model_select")
             lr = llm_rows[llm_rows["model"] == sel_model].iloc[0]
             verdict = lr.get("is_polemic_thread")
@@ -531,10 +656,24 @@ if view_mode == "Thread Browser":
                         outliers_map = {}
                 if outliers_map:
                     purity = (len(doc_ids) - len(outliers_map)) / max(1, len(doc_ids))
+                    core_n = len(doc_ids) - len(outliers_map)
+                    try:
+                        _eps_val = float(score_f or 0.0) * (core_n ** 0.5)
+                    except Exception:
+                        _eps_val = 0.0
                     st.markdown(
                         f"**Outliers flagged ({len(outliers_map)} of {len(doc_ids)}, "
-                        f"purity {purity:.0%}):** the model judges these docs to be "
-                        f"algorithmically clustered but not part of the polemic. Greyed out below."
+                        f"purity {purity:.0%}, core={core_n} docs, "
+                        f"effective polemic strength = score×√core = {_eps_val:.2f}):** "
+                        "the model judges these docs to be algorithmically clustered "
+                        "but not part of the polemic. Greyed out below."
+                    )
+
+                if bool(lr.get("sub_thread_signal", False)):
+                    st.warning(
+                        "⚠ **Sub-thread signal raised** — this model judges the cluster "
+                        "to contain 2+ distinct disputes that cannot be summarized as a "
+                        "single polemic. The narrative should enumerate each sub-dispute."
                     )
 
                 edges_raw = lr.get("rebuttal_edges") if "rebuttal_edges" in lr.index else None
@@ -581,6 +720,31 @@ if view_mode == "Thread Browser":
                     notes = lit.get("notes") or ""
                     if notes:
                         st.caption(notes)
+                    # Per-citation verification status (from verify_citations.py)
+                    cit_status_map = {}
+                    cit_issues_map = {}
+                    if citations_verified is not None and not citations_verified.empty:
+                        _cv = citations_verified[citations_verified["thread_id"] == int(thread_id_sel)]
+                        for _, _crow in _cv.iterrows():
+                            cit_status_map[int(_crow["src_index"])] = str(_crow["status"])
+                            cit_issues_map[int(_crow["src_index"])] = str(_crow.get("issues") or "")
+
+                    show_only_verified = False
+                    if cit_status_map:
+                        _vc = sum(1 for s in cit_status_map.values() if s == "verified")
+                        _fc = sum(1 for s in cit_status_map.values() if s == "flagged")
+                        _uc = sum(1 for s in cit_status_map.values() if s == "unverifiable")
+                        st.caption(
+                            f"Citation verification (Crossref/DOI): "
+                            f"✅ {_vc} verified · ⚠ {_fc} flagged · ❓ {_uc} unverifiable"
+                        )
+                        show_only_verified = st.checkbox(
+                            "Show only verified citations",
+                            value=False,
+                            key=f"only_verified_{int(thread_id_sel)}",
+                            help="Hide flagged + unverifiable sources. Use this view for any public-facing surface.",
+                        )
+
                     sources_raw = lit.get("key_sources")
                     if sources_raw:
                         try:
@@ -588,7 +752,10 @@ if view_mode == "Thread Browser":
                             sources = _json.loads(sources_raw) if isinstance(sources_raw, str) else list(sources_raw)
                             if sources:
                                 st.markdown("**Sources:**")
-                                for s in sources:
+                                for _src_idx, s in enumerate(sources):
+                                    cit_status = cit_status_map.get(_src_idx, "")
+                                    if show_only_verified and cit_status != "verified":
+                                        continue
                                     author = str(s.get("author") or "").strip()
                                     title = str(s.get("title") or "").strip()
                                     year = s.get("year") or ""
@@ -602,13 +769,22 @@ if view_mode == "Thread Browser":
                                         head_str += f" ({year})" if head_str else f"({year})"
                                     if title:
                                         head_str += f" — *{title}*" if head_str else f"*{title}*"
+                                    status_badge = ""
+                                    if cit_status == "verified":
+                                        status_badge = ' <span style="background:#2ca02c;color:white;padding:1px 6px;border-radius:3px;font-size:11px;">✅ verified</span>'
+                                    elif cit_status == "flagged":
+                                        _iss = cit_issues_map.get(_src_idx, "")
+                                        status_badge = f' <span style="background:#d62728;color:white;padding:1px 6px;border-radius:3px;font-size:11px;" title="{_iss}">⚠ flagged</span>'
+                                    elif cit_status == "unverifiable":
+                                        status_badge = ' <span style="background:#aaa;color:white;padding:1px 6px;border-radius:3px;font-size:11px;" title="No resolvable DOI — manual curation required.">❓ unverifiable</span>'
                                     if url:
                                         line = f"- [{head_str}]({url})"
                                     else:
                                         line = f"- {head_str}"
                                     if stype:
                                         line += f" `{stype}`"
-                                    st.markdown(line)
+                                    line += status_badge
+                                    st.markdown(line, unsafe_allow_html=True)
                                     if where:
                                         st.markdown(
                                             f"&nbsp;&nbsp;&nbsp;&nbsp;<small style='color:#888;'>{where}</small>",
@@ -617,11 +793,35 @@ if view_mode == "Thread Browser":
                         except Exception:
                             pass
 
-    text_limit = st.slider("Text preview length", 200, 3000, 800, 100)
-    hide_outliers = st.checkbox(
-        "Hide outlier docs (LLM-flagged as off-topic)", value=False,
-        help="When checked, docs the LLM marked as algorithmically clustered but not actually part of the polemic are hidden entirely.",
-    ) if outliers_map else False
+    ctl1, ctl2, ctl3 = st.columns([3, 2, 2])
+    with ctl1:
+        text_limit = st.slider("Text preview length", 200, 3000, 800, 100)
+    with ctl2:
+        outlier_source = st.radio(
+            "Outlier scope",
+            ["selected model", "union (any model)", "intersection (all models)"],
+            index=0, horizontal=False,
+            help="Which model(s) define what counts as an outlier doc below.",
+        ) if outliers_by_model else "selected model"
+    with ctl3:
+        hide_outliers = st.checkbox(
+            "Hide outlier docs", value=False,
+            help="Hide docs flagged as outliers under the chosen scope.",
+        ) if (outliers_map or outliers_by_model) else False
+
+    # Resolve outlier set per the chosen scope
+    if outlier_source == "union (any model)" and outliers_by_model:
+        outliers_map = {
+            did_x: " | ".join(f"[{m}] {r}" for m, r in mods.items() if r)
+            for did_x, mods in outliers_by_model.items()
+        }
+    elif outlier_source == "intersection (all models)" and outliers_by_model:
+        _n_models = max(1, len(llm_threads[llm_threads["thread_id"] == int(thread_id_sel)]["model"].unique()))
+        outliers_map = {
+            did_x: " | ".join(f"[{m}] {r}" for m, r in mods.items() if r)
+            for did_x, mods in outliers_by_model.items()
+            if len(mods) == _n_models
+        }
 
     # Sort: in-thread docs first (preserve date order), outliers at the bottom
     if outliers_map:

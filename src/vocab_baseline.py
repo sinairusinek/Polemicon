@@ -37,6 +37,19 @@ from cleaning import restore_final_forms  # noqa: E402
 
 DATA = ROOT / "data"
 
+# Minimal Hebrew stopword list — pronouns, common function words, generic
+# corpus-frequent terms surfaced by the unfiltered TF-IDF as top thread terms.
+HEBREW_STOPWORDS = {
+    "עלינו", "אנחנו", "אתמ", "לכמ", "אבותינו", "עמנו", "כלנו", "אחינו", "בנו",
+    "בני", "בני ישראל", "עת", "המה", "נא", "אשר", "כי", "אנו", "אני", "הוא",
+    "היא", "הם", "הן", "אתה", "את", "אתם", "אתן", "אלה", "אלו", "זה", "זאת",
+    "כל", "גם", "רק", "אם", "או", "כמו", "כן", "לא", "לו", "לה", "להם", "להן",
+    "של", "אל", "על", "עם", "מן", "מ", "ב", "ל", "ה", "ו", "ש", "כ",
+    "יש", "אין", "היה", "היתה", "היו", "יהיה", "תהיה", "יהיו",
+    "אמר", "אמרה", "אמרו", "ויאמר", "ויהי", "אך", "אבל", "כאשר",
+    "עוד", "כבר", "אז", "פה", "שם", "מה", "מי", "איך", "למה", "מתי",
+}
+
 
 def load_inputs():
     threads = pd.read_parquet(DATA / "threads.parquet")
@@ -91,8 +104,18 @@ def tfidf_query_terms(thread_docs: pd.DataFrame, corpus_vec, vectorizer,
     bg_mean = np.asarray(bg_mat.mean(axis=0)).ravel()
     # Score = thread mean - bg mean (concentration)
     score = thread_mean - bg_mean
-    top_idx = np.argsort(-score)[:topk]
-    terms = [vectorizer.get_feature_names_out()[i] for i in top_idx if score[i] > 0]
+    feats = vectorizer.get_feature_names_out()
+    ranked = np.argsort(-score)
+    terms = []
+    for i in ranked:
+        if score[i] <= 0:
+            break
+        term = feats[i]
+        if term in HEBREW_STOPWORDS:
+            continue
+        terms.append(term)
+        if len(terms) >= topk:
+            break
     return terms
 
 
@@ -155,6 +178,8 @@ def main():
     ap.add_argument("--top", type=int, default=30)
     ap.add_argument("--thread-ids", type=str, default="")
     ap.add_argument("--topk-terms", type=int, default=12)
+    ap.add_argument("--core-only", action="store_true",
+                    help="Restrict gold set to non-outlier docs (union across models from thread_llm_summaries.outlier_docs).")
     args = ap.parse_args()
 
     threads, corpus, llm = load_inputs()
@@ -171,12 +196,34 @@ def main():
     corpus_ids = corpus["doc_id"].tolist()
     id_to_idx = {did: i for i, did in enumerate(corpus_ids)}
 
+    # Build per-thread outlier set (union across all models) if --core-only.
+    outlier_by_thread: dict = {}
+    if args.core_only:
+        for _, lr in llm.iterrows():
+            raw = lr.get("outlier_docs")
+            if not raw:
+                continue
+            try:
+                items = json.loads(raw) if isinstance(raw, str) else list(raw)
+            except Exception:
+                continue
+            s = outlier_by_thread.setdefault(int(lr["thread_id"]), set())
+            for it in items:
+                did = (it.get("doc_id") if isinstance(it, dict) else str(it)) or ""
+                if did:
+                    s.add(did.strip())
+
     eval_rows = []
     missing_rows = []
     for _, tr in thread_view.iterrows():
         tid = int(tr["thread_id"])
         gold = [d.strip() for d in str(tr["doc_ids"]).split(",") if d.strip()]
+        if args.core_only:
+            drop = outlier_by_thread.get(tid, set())
+            gold = [d for d in gold if d not in drop]
         gold_ids = set(gold)
+        if not gold_ids:
+            continue
         thread_indices = [id_to_idx[d] for d in gold if d in id_to_idx]
         n_gold = len(gold)
 
@@ -223,8 +270,9 @@ def main():
     eval_df = pd.DataFrame(eval_rows)
     miss_df = pd.DataFrame(missing_rows)
 
-    eval_path = DATA / "vocab_baseline_eval.parquet"
-    miss_path = DATA / "vocab_baseline_missing.parquet"
+    suffix = "_core" if args.core_only else ""
+    eval_path = DATA / f"vocab_baseline_eval{suffix}.parquet"
+    miss_path = DATA / f"vocab_baseline_missing{suffix}.parquet"
     eval_df.to_parquet(eval_path, index=False)
     miss_df.to_parquet(miss_path, index=False)
     print(f"\nWrote {eval_path} ({len(eval_df)} rows)")
