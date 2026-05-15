@@ -1,0 +1,62 @@
+Processing 55 threads: [412, 408, 374, 375, 386, 202, 255, 326, 372, 70, 402, 208, 178, 403, 214, 44, 175, 419, 162, 379, 320, 199, 145, 286, 325, 388, 94, 341, 195, 427, 157, 122, 425, 423, 101, 435, 342, 431, 192, 235, 415, 174, 226, 200, 269, 52, 387, 168, 246, 83, 250, 322, 396, 327, 18]
+Stage A scope: 581 unique docs
+
+=== Stage B · cli_opus · 55 thread prompts ===
+  thread 412: ok
+  thread 408: ok
+  thread 374: ok
+  thread 375: ok
+  thread 386: ok
+  thread 202: ok
+  thread 255: ok
+  thread 326: ok
+  thread 372: ok
+  thread 70: ok
+  thread 402: ok
+  thread 208: ok
+  thread 178: ok
+  thread 403: ok
+  thread 214: ok
+  thread 44: ok
+  thread 175: ok
+  thread 419: ok
+  thread 162: ok
+  thread 379: ok
+  thread 320: ok
+  thread 199: ok
+  thread 145: ok
+  thread 286: ok
+  thread 325: ok
+  thread 388: ok
+  thread 94: ok
+  thread 341: ok
+  thread 195: ok
+  thread 427: ok
+  thread 157: ok
+  thread 122: ok
+  thread 425: ok
+  thread 423: ok
+  thread 101: ok
+  thread 435: ok
+  thread 342: ok
+  thread 431: ok
+  thread 192: ok
+  thread 235: ok
+  thread 415: ok
+  thread 174: ok
+  thread 226: ok
+  thread 200: ok
+  thread 269: ok
+  thread 52: ok
+  thread 387: ok
+  thread 168: ok
+  thread 246: ok
+  thread 83: ok
+  thread 250: ok
+  thread 322: ok
+  thread 396: ok
+  thread 327: ok
+  thread 18: ok
+  → wrote /Users/sinairusinek/Documents/GitHub/Polemicon/data/thread_llm_summaries.parquet (431 rows total)
+
+Done.
