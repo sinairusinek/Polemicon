@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>הפולמיקון — מצגת הפיילוט</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700;800;900&family=Heebo:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:        #1a1a1a;
+    --ink-soft:   #3a3a3a;
+    --paper:      #f6f1e6;
+    --paper-2:    #efe7d4;
+    --paper-3:    #fbf7eb;
+    --rule:       #c9bfa6;
+    --rule-2:     #a89c7e;
+    --brick:      #8a2418;
+    --brick-soft: #b04a3a;
+    --teal:       #2d5a5a;
+    --gold:       #a0780f;
+    --muted:      #6b6354;
+    --HMZ: #2d5a5a;
+    --HZF: #8a2418;
+    --HZT: #5a3a2a;
+    --MGD: #1f3d6b;
+    --HLB: #4a2a5a;
+    --bg-dark:    #1a1410;
+    --ink-light:  #f6f1e6;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; scroll-behavior: smooth; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Heebo', 'Arial Hebrew', Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Frank Ruhl Libre', serif;
+    font-weight: 800;
+    line-height: 1.15;
+    margin: 0 0 16px;
+    letter-spacing: -0.01em;
+  }
+  .mono { font-family: 'IBM Plex Mono', monospace; font-size: 0.85em; }
+
+  /* progress bar */
+  #progress {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 3px; background: transparent; z-index: 100;
+  }
+  #progress > div {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--brick), var(--gold));
+    transition: width 0.1s linear;
+  }
+
+  /* section nav */
+  #nav {
+    position: fixed; right: 24px; top: 50%; transform: translateY(-50%);
+    z-index: 90; display: flex; flex-direction: column; gap: 10px;
+  }
+  #nav a {
+    display: block; width: 10px; height: 10px; border-radius: 50%;
+    background: var(--rule); border: 2px solid transparent;
+    transition: all 0.2s; cursor: pointer; position: relative;
+  }
+  #nav a.active { background: var(--brick); transform: scale(1.4); }
+  #nav a:hover { border-color: var(--ink); }
+  #nav a::after {
+    content: attr(data-label); position: absolute; right: 22px; top: -4px;
+    white-space: nowrap; font-size: 13px; color: var(--ink); opacity: 0;
+    background: var(--paper); padding: 2px 8px; border: 1px solid var(--rule);
+    pointer-events: none; transition: opacity 0.2s;
+  }
+  #nav a:hover::after { opacity: 1; }
+
+  /* sections */
+  section {
+    min-height: 100vh; padding: 80px 8vw; position: relative;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  section.full-bleed { padding: 0; min-height: 100vh; }
+  section.dark { background: var(--bg-dark); color: var(--ink-light); }
+  section.dark h1, section.dark h2, section.dark h3 { color: var(--ink-light); }
+
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.8s, transform 0.8s; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh; padding: 0; position: relative; overflow: hidden;
+    background: linear-gradient(180deg, #fbf7eb 0%, #efe7d4 100%);
+  }
+  .hero-content {
+    position: relative; z-index: 5;
+    padding: 80px 8vw 40px; text-align: center;
+  }
+  .hero-eyebrow {
+    font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+    color: var(--brick); letter-spacing: 0.2em; margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+  .hero-title {
+    font-size: clamp(40px, 7vw, 84px); margin: 0 0 16px;
+    color: var(--ink); font-weight: 900;
+  }
+  .hero-sub {
+    font-size: clamp(18px, 2.2vw, 26px); color: var(--ink-soft);
+    max-width: 800px; margin: 0 auto 24px; font-weight: 400;
+  }
+  .hero-meta {
+    font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+    color: var(--muted); letter-spacing: 0.08em;
+  }
+  #hero-viz-stage {
+    position: relative; width: 100%; height: 64vh; max-height: 720px;
+    margin-top: 24px;
+  }
+  #hero-viz-stage svg { width: 100%; height: 100%; }
+  .hero-scroll-hint {
+    position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+    font-size: 13px; color: var(--muted); letter-spacing: 0.15em;
+    text-transform: uppercase; animation: bounce 2s infinite;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(8px); }
+  }
+
+  /* scrolly two-pane */
+  .scrolly {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 60px; align-items: start;
+    max-width: 1400px; margin: 0 auto;
+  }
+  .scrolly .sticky {
+    position: sticky; top: 12vh; height: 76vh;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .scrolly .text > div {
+    min-height: 60vh; padding: 20vh 0 10vh;
+    border-top: 1px solid transparent;
+  }
+  .scrolly .text > div:first-child { padding-top: 0; }
+
+  /* numbers / counters */
+  .stat-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 32px; margin: 40px 0;
+  }
+  .stat {
+    text-align: center; padding: 24px;
+    border-top: 2px solid var(--brick);
+    background: var(--paper-3);
+  }
+  .stat-num {
+    font-family: 'Frank Ruhl Libre', serif; font-size: 56px;
+    font-weight: 800; color: var(--brick); line-height: 1;
+    display: block; margin-bottom: 8px;
+  }
+  .stat-label {
+    font-size: 14px; color: var(--ink-soft);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+
+  /* method diagram */
+  .method-stages {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+    margin: 40px 0; position: relative;
+  }
+  .stage {
+    padding: 28px 24px; background: var(--paper-3);
+    border: 1px solid var(--rule); position: relative;
+    border-left: 0;
+  }
+  .stage:first-child { border-left: 1px solid var(--rule); }
+  .stage::before {
+    content: ""; position: absolute; left: -1px; top: 50%;
+    width: 16px; height: 16px; transform: translate(-50%, -50%) rotate(45deg);
+    background: var(--paper-3); border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule); z-index: 2;
+  }
+  .stage:first-child::before { display: none; }
+  .stage-num {
+    font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+    color: var(--brick); letter-spacing: 0.15em; margin-bottom: 8px;
+  }
+  .stage h3 { font-size: 22px; margin-bottom: 12px; }
+  .stage p { font-size: 14px; color: var(--ink-soft); margin: 0; }
+
+  /* callout box */
+  .callout {
+    border-right: 4px solid var(--brick); background: var(--paper-3);
+    padding: 24px 28px; margin: 32px 0;
+  }
+  .callout .label {
+    font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+    color: var(--brick); letter-spacing: 0.2em; text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .callout h3 { font-size: 24px; margin-bottom: 10px; }
+  .callout p { margin: 8px 0; }
+  blockquote.case {
+    background: #fff7e6; border: 1px solid #e6d9b8; padding: 16px 22px;
+    margin: 16px 0; font-size: 14px; color: var(--ink-soft);
+    font-family: 'Frank Ruhl Libre', serif;
+  }
+
+  /* iframe demo */
+  .demo-frame-wrap {
+    position: relative; width: 100%; height: 100vh;
+    background: var(--bg-dark);
+  }
+  .demo-frame-wrap iframe {
+    width: 100%; height: 100%; border: 0; display: block;
+  }
+  .demo-overlay {
+    position: absolute; top: 0; right: 0; padding: 28px 32px;
+    background: linear-gradient(225deg, rgba(26,20,16,0.92), rgba(26,20,16,0));
+    color: var(--ink-light); z-index: 10; max-width: 480px;
+    pointer-events: none;
+  }
+  .demo-overlay .label {
+    font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+    color: var(--brick-soft); letter-spacing: 0.2em; text-transform: uppercase;
+  }
+  .demo-overlay h2 { font-size: 28px; margin: 8px 0 10px; color: var(--ink-light); }
+  .demo-overlay p { font-size: 14px; opacity: 0.85; margin: 0; }
+  .demo-open-link {
+    position: absolute; bottom: 20px; left: 20px; z-index: 10;
+    background: var(--paper); color: var(--ink); padding: 10px 18px;
+    font-size: 13px; text-decoration: none; border: 1px solid var(--rule-2);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .demo-open-link:hover { background: var(--brick); color: var(--paper); border-color: var(--brick); }
+
+  /* date stream viz */
+  #date-stream-svg { width: 100%; height: 100%; }
+  /* SVG text must not inherit page direction:rtl — it scrambles positioning
+     and breaks mixed-script labels. Hebrew chars stay RTL by Unicode. */
+  svg text { direction: ltr; unicode-bidi: plaintext; }
+  .ds-thread { transition: opacity 0.3s; }
+  .ds-thread.polemic { stroke: var(--brick); stroke-width: 2; }
+  .ds-thread.nonpol { stroke: var(--muted); stroke-width: 1; opacity: 0.35; }
+  .ds-thread.unscored { stroke: var(--rule); stroke-width: 1; opacity: 0.22; }
+  .ds-year-tick { stroke: var(--rule-2); stroke-width: 0.5; }
+  .ds-year-label { fill: var(--muted); font-size: 13px; font-family: 'IBM Plex Mono', monospace; }
+
+  /* network viz */
+  #network-svg { width: 100%; height: 100%; }
+  .net-edge { stroke: var(--brick); fill: none; opacity: 0.4; }
+  .net-edge-mid { stroke: var(--brick-soft); opacity: 0.25; }
+  .net-edge-low { stroke: var(--muted); opacity: 0.15; }
+  .net-node circle { stroke: #fff; stroke-width: 2; }
+  .net-node text {
+    font-family: 'Frank Ruhl Libre', serif; font-weight: 700; font-size: 14px;
+    fill: var(--ink); text-anchor: middle;
+  }
+  .net-node text.count {
+    font-family: 'IBM Plex Mono', monospace; font-weight: 400; font-size: 11px;
+    fill: var(--muted);
+  }
+
+  /* limitations grid */
+  .limit-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px; margin: 32px 0;
+  }
+  .limit-card {
+    background: var(--paper-3); border: 1px solid var(--rule);
+    padding: 24px; border-top: 3px solid var(--gold);
+  }
+  .limit-card h4 {
+    font-size: 18px; margin-bottom: 8px;
+  }
+  .limit-card .big {
+    font-family: 'Frank Ruhl Libre', serif; font-size: 36px;
+    color: var(--gold); font-weight: 800; line-height: 1;
+    margin-bottom: 12px;
+  }
+  .limit-card p { font-size: 14px; color: var(--ink-soft); margin: 0; }
+
+  /* section intro */
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+    color: var(--brick); letter-spacing: 0.2em; text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  h2.big { font-size: clamp(32px, 5vw, 56px); margin-bottom: 24px; }
+
+  .lead { font-size: 20px; max-width: 720px; color: var(--ink-soft); }
+
+  /* close */
+  #close {
+    text-align: center;
+    background: var(--bg-dark); color: var(--ink-light);
+    padding: 100px 8vw;
+  }
+  #close h2 { color: var(--ink-light); font-size: 48px; }
+  #close .links { margin-top: 32px; }
+  #close a {
+    color: var(--paper); border-bottom: 1px solid var(--brick-soft);
+    text-decoration: none; margin: 0 12px; font-size: 16px;
+  }
+  #close a:hover { color: var(--brick-soft); }
+
+  /* mobile fallback */
+  @media (max-width: 800px) {
+    .scrolly { grid-template-columns: 1fr; }
+    .scrolly .sticky { position: relative; height: 50vh; top: 0; }
+    .method-stages { grid-template-columns: 1fr; }
+    .stage::before { display: none; }
+    #nav { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"><div></div></div>
+
+<nav id="nav">
+  <a href="#hero" data-label="פתיחה"></a>
+  <a href="#question" data-label="שאלות"></a>
+  <a href="#corpus" data-label="קורפוס"></a>
+  <a href="#method" data-label="שיטה"></a>
+  <a href="#counterweight" data-label="ההכרעה המתודית"></a>
+  <a href="#tool" data-label="הכלי"></a>
+  <a href="#results" data-label="תוצאות"></a>
+  <a href="#mega" data-label="חוטי־ענק"></a>
+  <a href="#limits" data-label="מגבלות"></a>
+  <a href="#demo-381" data-label="דמו: חוט 381"></a>
+  <a href="#demo-browser" data-label="דמו: דפדפן"></a>
+  <a href="#demo-egeret" data-label="דמו: אגרת"></a>
+  <a href="#future" data-label="ההמשך"></a>
+  <a href="#close" data-label="סיום"></a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-content">
+    <div class="hero-eyebrow">פיילוט · 2026</div>
+    <h1 class="hero-title">הַפּוֹלֶמִיקוֹן</h1>
+    <p class="hero-sub">איתור פולמוסים בעיתונות העברית, 1874–1884: צינור חישובי, הכרעות מתודיות, וממצאים ראשונים.</p>
+    <div class="hero-meta">5 עיתונים · 188 חוטים שעברו הכרעה · 75 פולמוסים בהסכמה גורפת</div>
+
+    <div id="hero-viz-stage">
+      <svg id="date-stream-svg" viewBox="0 0 1400 740" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+  </div>
+  <div class="hero-scroll-hint">↓ גלגל למטה</div>
+</section>
+
+<!-- QUESTION -->
+<section id="question">
+  <div class="reveal">
+    <div class="eyebrow">השאלה</div>
+    <h2 class="big">האם אפשר לאתר פולמוס באופן חישובי?</h2>
+    <p class="lead">
+      העיתונות העברית של המאה ה־19 הייתה זירה פולמוסית חיה: סופרים ועורכים החליפו ביניהם מאמרים, מכתבים, וטורי־התקפה לאורך חודשים ועיתונים. אבל פולמוס אינו רק <em>טון</em> פולמוסי — הוא חליפה של טענות סביב נושא משותף, עם מענה ומענה־שכנגד. הפיילוט בודק האם צינור חישובי, בעזרת מודלים גדולים, יכול לזהות את החליפות הללו ולהבחין בין פולמוס של ממש לבין דיון לוהט אך חד־צדדי.
+    </p>
+  </div>
+  <div class="reveal" style="margin-top:48px;">
+    <h3>שלושת היעדים</h3>
+    <div class="stat-grid">
+      <div class="stat"><span class="stat-num">1</span><span class="stat-label">לבנות צינור איתור הניתן לרפלקציה</span></div>
+      <div class="stat"><span class="stat-num">2</span><span class="stat-label">להעריך מתודות־הכרעה (קריאה הדוקה מול רחבה)</span></div>
+      <div class="stat"><span class="stat-num">3</span><span class="stat-label">לחשוף מועמדי־ממצא חדשים לחקר העיתונות</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- CORPUS -->
+<section id="corpus" style="background:var(--paper-2);">
+  <div class="reveal">
+    <div class="eyebrow">הקורפוס</div>
+    <h2 class="big">3,110 מסמכים, 5 עיתונים, 40 שנה</h2>
+    <p class="lead">
+      קורפוס־המקור: ארכיון JPress של הספרייה הלאומית. נחתכו ממנו חמישה כלי־ביטוי מרכזיים של ההשכלה והעיתונות העברית: <strong>המגיד · המליץ · הצפירה · הצפירה־הצעירה · הלבנון</strong>.
+      נצמדנו לקטעי־דעה ולמאמרים בעלי שם מחבר, ולא לחדשות.
+    </p>
+    <div class="stat-grid">
+      <div class="stat"><span class="stat-num">5</span><span class="stat-label">עיתונים</span></div>
+      <div class="stat"><span class="stat-num">3,110</span><span class="stat-label">מסמכים בחוטים</span></div>
+      <div class="stat"><span class="stat-num">438</span><span class="stat-label">חוטים מועמדים</span></div>
+      <div class="stat"><span class="stat-num">171</span><span class="stat-label">חוטים שעברו הכרעה (engaged press)</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- METHOD -->
+<section id="method">
+  <div class="reveal">
+    <div class="eyebrow">השיטה</div>
+    <h2 class="big">שלושה שלבים מהמסמך לפסק־דין</h2>
+  </div>
+  <div class="method-stages reveal">
+    <div class="stage">
+      <div class="stage-num">שלב 1</div>
+      <h3>ייצוג + אשכול</h3>
+      <p>הטמעות סמנטיות (DictaBERT), חיתוך לפי קרבה לטופוי פולמוסיים, ואשכולות גסים לפי נושא.</p>
+    </div>
+    <div class="stage">
+      <div class="stage-num">שלב 2</div>
+      <h3>חוטים (C.2)</h3>
+      <p>קשתות־ראיה בין מסמכים — הפניות מפורשות, שזירה כרונולוגית, וקרבה סמנטית — בונות גרף שממנו עולים <em>חוטים</em> (לא רק אשכולות). מגבלת־מסמכים מונעת איחוד יתר.</p>
+    </div>
+    <div class="stage">
+      <div class="stage-num">שלב 3</div>
+      <h3>הכרעה (LLM)</h3>
+      <p>שלושה מודלים — Gemini Flash, Sonnet, ו־Opus כבורר — קוראים את כל מסמכי החוט ומחזירים: סוג, כיוון, עוצמה, ודגל תת־חוט.</p>
+    </div>
+  </div>
+  <div class="reveal" style="margin-top:32px;">
+    <p class="lead">הפיילוט אינו אלגוריתם־בלעדי. הוא ארכיטקטורה היברידית: שלב 1–2 מצמצמים מ־3,110 מסמכים ל־438 חוטים, ושלב 3 מעניק את ההכרעה הפרשנית. הצוואר הצר הוא <strong>שלב 3</strong> — ושם נחתכת ההכרעה המתודית המרכזית.</p>
+  </div>
+</section>
+
+<!-- COUNTERWEIGHT -->
+<section id="counterweight" style="background:var(--paper-3);">
+  <div class="reveal">
+    <div class="eyebrow">הכרעה מתודית · א</div>
+    <h2 class="big">סעיף ה־COUNTERWEIGHT</h2>
+    <p class="lead">
+      רגע מכריע בפיתוח השיטה. הבחנה אחת היא העיקרון:
+    </p>
+  </div>
+  <div class="callout reveal">
+    <div class="label">העיקרון</div>
+    <h3>טון פולמוסי איננו פולמוס.</h3>
+    <p>פולמוס דורש <strong>נושא־הפניה משותף</strong>, <strong>מגן/משיב</strong>, ו<strong>חליפה</strong> שניתן לעקוב אחריה. ביוש ציבורי חוצה־עיתונים בלי משיב — הוא הוקעה, לא פולמוס.</p>
+  </div>
+  <div class="reveal">
+    <p>במהלך האודיט של הריצה הראשונה, גילינו שאחרי הרחבת הפרומפט (לתפוס את חוט טיסזה־אסלאר, 406), אחד החוטים — <strong>חוט 433</strong> — שהיה אוסף נושאי של 14 מסמכים בלתי־קשורים מ־1875, סווג פתאום כ"פולמוס פנימי". המודל איחד את הסל הזה לנרטיב יחיד.</p>
+    <blockquote class="case">
+      <strong>חוט 433 לפני הסעיף:</strong> Gemini 0.85, "פולמוס פנימי על דמות היהדות"<br>
+      <strong>חוט 433 אחרי הסעיף:</strong> Gemini 0.20, "n/a — נושאי בלבד"
+    </blockquote>
+    <p>הסעיף הצר מחדש את הסף. הוא יוצר <em>קריאה הדוקה</em>: כל חוט שמסומן כפולמוס יש לו נושא משותף ניתן לזיהוי. <em>קריאה רחבה משלימה</em> (מעורבות חוצת־עיתונים גם בלי יריב מפורש) — מוגדרת כדליבריבל פוסט־פיילוט: וריאנט פרומפט שני בעמודת <span class="mono">prompt_variant</span>.</p>
+  </div>
+</section>
+
+<!-- TOOL -->
+<section id="tool" class="full-bleed" style="background:var(--bg-dark);">
+  <div class="demo-frame-wrap">
+    <div class="demo-overlay">
+      <div class="label">הכלי</div>
+      <h2>מערכת ההערות החיה</h2>
+      <p>אפליקציית Streamlit לחקירה אינטראקטיבית של החוטים, הפסיקות של שלושת המודלים, מפת השחקנים, ומסמכי־הליבה של כל פולמוס.</p>
+    </div>
+    <a class="demo-open-link" href="https://0800ah-3vlzb68g5kkxsfhj3iyzw2.streamlit.app/" target="_blank">פתחו במסך מלא ↗</a>
+    <iframe src="https://0800ah-3vlzb68g5kkxsfhj3iyzw2.streamlit.app/?embed=true" loading="lazy" title="Polemicon Streamlit"></iframe>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section id="results">
+  <div class="reveal">
+    <div class="eyebrow">תוצאות</div>
+    <h2 class="big">המספרים, אחרי שלוש שכבות הכרעה</h2>
+    <p class="lead">188 חוטים עברו הכרעה במלואה (171 עיתונות + 17 אגרות). שלושה מודלים. במקרים של חוסר־הסכמה — בורר Opus.</p>
+  </div>
+  <div class="stat-grid reveal">
+    <div class="stat"><span class="stat-num" data-counter="75">0</span><span class="stat-label">פולמוס בהסכמה גורפת</span></div>
+    <div class="stat"><span class="stat-num" data-counter="53">0</span><span class="stat-label">לא־פולמוס בהסכמה</span></div>
+    <div class="stat"><span class="stat-num" data-counter="42">0</span><span class="stat-label">פיצול שהוכרע ע"י Opus</span></div>
+    <div class="stat"><span class="stat-num" data-counter="18">0</span><span class="stat-label">איתור של מודל יחיד</span></div>
+  </div>
+  <div class="reveal" style="margin-top:24px;">
+    <div class="callout">
+      <div class="label">דגל מתודי</div>
+      <h3><span class="mono">sub_thread_signal</span>: 56 מתוך 188 חוטים (30%)</h3>
+      <p>בכל המקרים האלה המודל הצהיר במפורש שהחוט כולל יותר מפולמוס אחד. דגל אמפירי שימושי: "כאן הפרומפט נמתח." במעבר לפוסט־פיילוט, ה־56 הללו הם המועמדים הראשונים לסאב־קלסטרינג.</p>
+    </div>
+  </div>
+</section>
+
+<!-- MEGA THREADS -->
+<section id="mega" style="background:var(--paper-2);">
+  <div class="reveal">
+    <div class="eyebrow">הכרעה מתודית · ב</div>
+    <h2 class="big">חוטי־ענק: ארבעה חריגים, החלטה אחת</h2>
+    <p class="lead">ארבעה חוטים גדולים בסדר־גודל מהחציון:</p>
+    <div class="stat-grid">
+      <div class="stat"><span class="stat-num">374</span><span class="stat-label">115 מסמכים</span></div>
+      <div class="stat"><span class="stat-num">412</span><span class="stat-label">89 מסמכים</span></div>
+      <div class="stat"><span class="stat-num">407</span><span class="stat-label">47 מסמכים</span></div>
+      <div class="stat"><span class="stat-num">141</span><span class="stat-label">41 מסמכים</span></div>
+    </div>
+    <p>בכל הארבעה <span class="mono">sub_thread_signal=true</span>. אפשרות א': לפצל אותם בגרף עצמו. <strong>אפשרות ג', שנבחרה:</strong> לשמור את חוט־הענק כיחידת ניתוח, לתעד אותו במפורש בדו"ח, ולדחות את שאלת־הפיצול לפוסט־פיילוט. הסיבה: "מהו גבול פולמוס?" היא עצמה שאלה מחקרית. החלטה גרף־תאורטית מקדימה אותה.</p>
+  </div>
+</section>
+
+<!-- LIMITATIONS -->
+<section id="limits">
+  <div class="reveal">
+    <div class="eyebrow">מגבלות, בכנות</div>
+    <h2 class="big">איפה הצינור עוד לא מספיק</h2>
+  </div>
+  <div class="limit-grid reveal">
+    <div class="limit-card">
+      <div class="big">38%</div>
+      <h4>בייסליין־אוצר־מילים</h4>
+      <p>שיטה לא־LLM (טף־איידיאף + סף) משחזרת רק 38% מהקלאסיפיקציות של ה־LLM. כלומר: ההכרעה הסמנטית נחוצה — אך גם המשמעות שאנחנו תלויים במודל.</p>
+    </div>
+    <div class="limit-card">
+      <div class="big">0 / 30</div>
+      <h4>בקרת מחקר משנית</h4>
+      <p>חיפוש בספרות המשנית (Q.B) מצא <strong>אפס</strong> מתוך 30 חוטים שעברו בדיקה — כלומר 30 מועמדי־ממצא חדשים שלא נחקרו בעבר. דורש סיבוב שני: RAMBI ועיון אנושי.</p>
+    </div>
+    <div class="limit-card">
+      <div class="big">6.7%</div>
+      <h4>זיהוי שחקנים (NER)</h4>
+      <p>recall של שמות סופרים. תיקון פרומפט עברי עזר; ההמשך — קישור לקבצי־סמכות (Wikidata, NLI authorities) כתשתית פוסט־פיילוט.</p>
+    </div>
+    <div class="limit-card">
+      <div class="big">137 → 3</div>
+      <h4>ציטוטים לא־מאומתים</h4>
+      <p>מתוך 137 ציטוטים שנוצרו ע"י LLM, רק 3 אומתו ב־Crossref. הציטוטים שמשמשים את המצגת הציבורית — חייבים סינון <span class="mono">status == "verified"</span> ועריכת RA.</p>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO 1 - thread 381 -->
+<section id="demo-381" class="full-bleed">
+  <div class="demo-frame-wrap" style="background:var(--paper);">
+    <div class="demo-overlay" style="background:linear-gradient(225deg, rgba(246,241,230,0.96), rgba(246,241,230,0)); color:var(--ink);">
+      <div class="label" style="color:var(--brick);">דמו · א</div>
+      <h2 style="color:var(--ink);">חוט 381: סוקולוב נגד בן־יהודה, 1879–1880</h2>
+      <p style="color:var(--ink-soft);">פולמוס פנימי מפורש (Opus 0.85), חוצה ארבעה עיתונים, 540 ימים, 25 מסמכים. שני מאמרים של סוקולוב כתובים בפירוש "לבן יהודה". זוהי הקריאה המלאה של ה־LLM, כפי שמופקת בצינור.</p>
+    </div>
+    <a class="demo-open-link" href="demo_polemic_thread_381.html" target="_blank">פתחו במסך מלא ↗</a>
+    <iframe src="demo_polemic_thread_381.html" loading="lazy" title="חוט 381"></iframe>
+  </div>
+</section>
+
+<!-- DEMO 2 - press browser -->
+<section id="demo-browser" class="full-bleed">
+  <div class="demo-frame-wrap">
+    <div class="demo-overlay">
+      <div class="label">דמו · ב</div>
+      <h2>דפדפן הפולמוס בעיתונות</h2>
+      <p>הצעת־ממשק לחקירה ציבורית: ציר־זמן, רשת עיתונים, ופירוט חוט. כל בלוק שהופק ע"י LLM נצבע כך שניתן לראות מה אנושי ומה אוטומטי.</p>
+    </div>
+    <a class="demo-open-link" href="demo_press_polemic_browser.html" target="_blank">פתחו במסך מלא ↗</a>
+    <iframe src="demo_press_polemic_browser.html" loading="lazy" title="דפדפן פולמוס"></iframe>
+  </div>
+</section>
+
+<!-- DEMO 3 - egeret -->
+<section id="demo-egeret" class="full-bleed">
+  <div class="demo-frame-wrap">
+    <div class="demo-overlay">
+      <div class="label">דמו · ג</div>
+      <h2>אגרת 3442 — דף־מכתב מוצע לפרויקט בן־יהודה</h2>
+      <p>גרסה מועשרת של אגרת גורדון מטעלז (≈אפריל 1870), בתשובה ליחיאל בריל. הפיצ'ר המרכזי: <strong>מתג שקיפות הצורה</strong> — לחיצה אחת מעמעמת את כל מה ש־AI הוסיף, כך שמה שאמין נראה במלוא חידודו.</p>
+    </div>
+    <a class="demo-open-link" href="demo_egeret_3442_bypage_mockup.html" target="_blank">פתחו במסך מלא ↗</a>
+    <iframe src="demo_egeret_3442_bypage_mockup.html" loading="lazy" title="אגרת 3442"></iframe>
+  </div>
+</section>
+
+<!-- FUTURE -->
+<section id="future" style="background:var(--paper-2);">
+  <div class="reveal">
+    <div class="eyebrow">ההמשך</div>
+    <h2 class="big">מה מחכה אחרי הפיילוט</h2>
+    <div class="stat-grid">
+      <div class="stat" style="border-top-color:var(--teal);">
+        <span class="stat-num" style="color:var(--teal); font-size:32px;">RAMBI</span>
+        <span class="stat-label">סיבוב שני על ספרות המשנה בעברית</span>
+      </div>
+      <div class="stat" style="border-top-color:var(--teal);">
+        <span class="stat-num" style="color:var(--teal); font-size:32px;">NER + קישור</span>
+        <span class="stat-label">תשתית authority files לשחקנים</span>
+      </div>
+      <div class="stat" style="border-top-color:var(--teal);">
+        <span class="stat-num" style="color:var(--teal); font-size:32px;">קריאה רחבה</span>
+        <span class="stat-label">וריאנט פרומפט שני, לצד הקריאה ההדוקה</span>
+      </div>
+      <div class="stat" style="border-top-color:var(--teal);">
+        <span class="stat-num" style="color:var(--teal); font-size:32px;">סאב־קלסטרינג</span>
+        <span class="stat-label">פיצול 56 החוטים הדגולים, על בסיס הדגל</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CLOSE -->
+<section id="close">
+  <div class="reveal">
+    <h2>תודה</h2>
+    <p style="opacity:0.8; max-width:680px; margin:24px auto;">
+      פולמיקון הוא ארכיטקטורה היברידית של גרף, מודלים, ועריכה אנושית. הפיילוט מראה שאפשר לאתר פולמוס באופן חישובי — וגם איפה ההכרעה הסופית עדיין שייכת לחוקר.
+    </p>
+    <div class="links">
+      <a href="https://0800ah-3vlzb68g5kkxsfhj3iyzw2.streamlit.app/" target="_blank">האפליקציה החיה</a>
+      <a href="demo_polemic_thread_381.html" target="_blank">חוט 381</a>
+      <a href="demo_press_polemic_browser.html" target="_blank">דפדפן</a>
+      <a href="demo_egeret_3442_bypage_mockup.html" target="_blank">אגרת 3442</a>
+    </div>
+    <div style="margin-top:60px; font-family:'IBM Plex Mono',monospace; font-size:12px; opacity:0.5; letter-spacing:0.1em;">
+      ↑ חזרה לראש
+    </div>
+  </div>
+</section>
+
+<script>
+const THREADS = [{"id":412,"n":89,"np":5,"span":631,"d0":"1881-11-15","d1":"1883-08-08","papers":["HLB","HMZ","HZF","HZT","MGD"],"pc":{"MGD":34,"HZT":6,"HMZ":41,"HLB":4,"HZF":4},"pol":true,"anypol":true,"score":0.9,"sub":true,"dir":"mixed","type":"explicit","scored":true},{"id":408,"n":31,"np":5,"span":420,"d0":"1881-06-08","d1":"1882-08-02","papers":["HLB","HMZ","HZF","HZT","MGD"],"pc":{"MGD":13,"HZF":4,"HLB":5,"HMZ":8,"HZT":1},"pol":true,"anypol":true,"score":0.9,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":406,"n":27,"np":5,"span":443,"d0":"1882-06-14","d1":"1883-08-31","papers":["HLB","HMZ","HZF","HZT","MGD"],"pc":{"HZF":13,"MGD":11,"HLB":1,"HMZ":1,"HZT":1},"pol":true,"anypol":true,"score":0.95,"sub":false,"dir":"external_defense","type":"explicit","scored":true},{"id":374,"n":115,"np":3,"span":1114,"d0":"1880-12-08","d1":"1883-12-27","papers":["HMZ","HZT","MGD"],"pc":{"MGD":107,"HMZ":6,"HZT":2},"pol":false,"anypol":true,"score":0.9,"sub":true,"dir":"mixed","type":"explicit","scored":true},{"id":373,"n":22,"np":5,"span":315,"d0":"1881-12-21","d1":"1882-11-01","papers":["HLB","HMZ","HZF","HZT","MGD"],"pc":{"HZF":11,"HLB":1,"MGD":8,"HMZ":1,"HZT":1},"pol":true,"anypol":true,"score":0.95,"sub":true,"dir":"internal","type":"implicit","scored":true},{"id":381,"n":25,"np":4,"span":540,"d0":"1879-06-03","d1":"1880-11-24","papers":["HMZ","HZF","HZT","MGD"],"pc":{"MGD":11,"HMZ":8,"HZF":2,"HZT":4},"pol":true,"anypol":true,"score":0.9,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":81,"n":19,"np":4,"span":331,"d0":"1882-11-28","d1":"1883-10-25","papers":["HMZ","HZF","HZT","MGD"],"pc":{"MGD":13,"HMZ":4,"HZT":1,"HZF":1},"pol":true,"anypol":true,"score":0.92,"sub":true,"dir":"mixed","type":"explicit","scored":true},{"id":395,"n":16,"np":4,"span":363,"d0":"1883-03-13","d1":"1884-03-10","papers":["HMZ","HZF","HZT","MGD"],"pc":{"HZF":6,"MGD":5,"HMZ":3,"HZT":2},"pol":false,"anypol":true,"score":0.85,"sub":true,"dir":"mixed","type":"explicit","scored":true},{"id":404,"n":23,"np":3,"span":504,"d0":"1878-05-08","d1":"1879-09-24","papers":["HMZ","HZF","MGD"],"pc":{"MGD":13,"HMZ":8,"HZF":2},"pol":true,"anypol":true,"score":0.88,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":433,"n":14,"np":4,"span":281,"d0":"1875-11-23","d1":"1876-08-30","papers":["HLB","HZF","HZT","MGD"],"pc":{"HZF":2,"HLB":6,"MGD":5,"HZT":1},"pol":false,"anypol":true,"score":0.35,"sub":true,"dir":"n/a","type":"explicit","scored":true},{"id":432,"n":25,"np":3,"span":581,"d0":"1874-01-28","d1":"1875-09-01","papers":["HLB","HZT","MGD"],"pc":{"HLB":16,"HZT":2,"MGD":7},"pol":true,"anypol":true,"score":0.88,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":186,"n":24,"np":3,"span":334,"d0":"1878-12-27","d1":"1879-11-26","papers":["HLB","HZF","MGD"],"pc":{"HLB":19,"HZF":4,"MGD":1},"pol":true,"anypol":true,"score":0.9,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":384,"n":14,"np":4,"span":343,"d0":"1874-02-27","d1":"1875-02-05","papers":["HLB","HZF","HZT","MGD"],"pc":{"HZT":10,"HLB":2,"HZF":1,"MGD":1},"pol":true,"anypol":true,"score":0.88,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":437,"n":14,"np":4,"span":399,"d0":"1874-01-14","d1":"1875-02-17","papers":["HLB","HZF","HZT","MGD"],"pc":{"MGD":1,"HLB":10,"HZT":2,"HZF":1},"pol":false,"anypol":true,"score":0.88,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":409,"n":13,"np":4,"span":309,"d0":"1881-10-06","d1":"1882-08-11","papers":["HLB","HZF","HZT","MGD"],"pc":{"HLB":4,"MGD":4,"HZF":3,"HZT":2},"pol":true,"anypol":true,"score":0.88,"sub":true,"dir":"internal","type":"implicit","scored":true},{"id":397,"n":13,"np":4,"span":173,"d0":"1880-10-15","d1":"1881-04-06","papers":["HLB","HMZ","HZF","MGD"],"pc":{"MGD":5,"HMZ":3,"HZF":4,"HLB":1},"pol":true,"anypol":true,"score":0.85,"sub":true,"dir":"mixed","type":"explicit","scored":true},{"id":54,"n":19,"np":3,"span":525,"d0":"1874-09-02","d1":"1876-02-09","papers":["HLB","HZF","MGD"],"pc":{"HLB":4,"MGD":6,"HZF":9},"pol":false,"anypol":false,"score":0.35,"sub":true,"dir":"n/a","type":"topical-only","scored":true},{"id":399,"n":12,"np":4,"span":315,"d0":"1879-11-28","d1":"1880-10-08","papers":["HLB","HMZ","HZF","MGD"],"pc":{"HLB":8,"HMZ":1,"HZF":2,"MGD":1},"pol":true,"anypol":true,"score":0.92,"sub":false,"dir":"internal","type":"explicit","scored":true},{"id":411,"n":11,"np":4,"span":92,"d0":"1881-06-22","d1":"1881-09-22","papers":["HLB","HMZ","HZT","MGD"],"pc":{"HMZ":2,"HLB":2,"MGD":5,"HZT":2},"pol":true,"anypol":true,"score":0.88,"sub":true,"dir":"mixed","type":"explicit","scored":true},{"id":392,"n":10,"np":4,"span":145,"d0":"1874-04-17","d1":"1874-09-09","papers":["HLB","HZF","HZT","MGD"],"pc":{"MGD":3,"HLB":3,"HZT":3,"HZF":1},"pol":false,"anypol":true,"score":0.78,"sub":true,"dir":"internal","type":"implicit","scored":true},{"id":407,"n":47,"np":2,"span":296,"d0":"1881-10-05","d1":"1882-07-28","papers":["HLB","HZT"],"pc":{"HZT":46,"HLB":1},"pol":true,"anypol":true,"score":1.0,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":426,"n":10,"np":4,"span":194,"d0":"1877-05-04","d1":"1877-11-14","papers":["HLB","HZF","HZT","MGD"],"pc":{"HLB":4,"HZT":1,"HZF":2,"MGD":3},"pol":true,"anypol":true,"score":0.92,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":377,"n":16,"np":3,"span":315,"d0":"1879-05-14","d1":"1880-03-24","papers":["HLB","HZT","MGD"],"pc":{"MGD":14,"HLB":1,"HZT":1},"pol":true,"anypol":true,"score":0.92,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":385,"n":10,"np":4,"span":357,"d0":"1882-07-18","d1":"1883-07-10","papers":["HMZ","HZF","HZT","MGD"],"pc":{"HZF":7,"HZT":1,"MGD":1,"HMZ":1},"pol":false,"anypol":true,"score":0.65,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":141,"n":41,"np":2,"span":764,"d0":"1881-11-02","d1":"1883-12-06","papers":["HZT","MGD"],"pc":{"MGD":40,"HZT":1},"pol":true,"anypol":true,"score":0.88,"sub":false,"dir":"internal","type":"explicit","scored":true},{"id":375,"n":15,"np":3,"span":320,"d0":"1879-11-15","d1":"1880-09-30","papers":["HMZ","HZT","MGD"],"pc":{"HZT":11,"MGD":3,"HMZ":1},"pol":true,"anypol":true,"score":0.95,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":193,"n":29,"np":2,"span":497,"d0":"1879-04-04","d1":"1880-08-13","papers":["HLB","HZT"],"pc":{"HZT":25,"HLB":4},"pol":true,"anypol":true,"score":0.95,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":376,"n":34,"np":2,"span":448,"d0":"1878-05-31","d1":"1879-08-22","papers":["HZF","HZT"],"pc":{"HZT":30,"HZF":4},"pol":true,"anypol":true,"score":0.95,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":418,"n":12,"np":3,"span":234,"d0":"1879-05-20","d1":"1880-01-09","papers":["HLB","HMZ","HZF"],"pc":{"HZF":8,"HMZ":1,"HLB":3},"pol":true,"anypol":true,"score":0.95,"sub":false,"dir":"internal","type":"explicit","scored":true},{"id":391,"n":11,"np":3,"span":287,"d0":"1874-11-04","d1":"1875-08-18","papers":["HZF","HZT","MGD"],"pc":{"MGD":3,"HZF":7,"HZT":1},"pol":true,"anypol":true,"score":0.95,"sub":false,"dir":"internal","type":"explicit","scored":true},{"id":386,"n":12,"np":3,"span":426,"d0":"1881-05-13","d1":"1882-07-13","papers":["HLB","HZF","MGD"],"pc":{"MGD":4,"HLB":6,"HZF":2},"pol":true,"anypol":true,"score":0.88,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":202,"n":8,"np":4,"span":316,"d0":"1878-01-03","d1":"1878-11-15","papers":["HLB","HMZ","HZF","HZT"],"pc":{"HZT":3,"HLB":1,"HZF":3,"HMZ":1},"pol":true,"anypol":true,"score":0.85,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":321,"n":12,"np":3,"span":175,"d0":"1874-11-04","d1":"1875-04-28","papers":["HLB","HZF","MGD"],"pc":{"HZF":6,"MGD":3,"HLB":3},"pol":true,"anypol":true,"score":0.85,"sub":false,"dir":"mixed","type":"explicit","scored":true},{"id":255,"n":23,"np":2,"span":420,"d0":"1877-10-03","d1":"1878-11-27","papers":["HZT","MGD"],"pc":{"MGD":22,"HZT":1},"pol":false,"anypol":true,"score":0.85,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":389,"n":21,"np":2,"span":217,"d0":"1880-08-31","d1":"1881-04-05","papers":["HLB","HZF"],"pc":{"HLB":5,"HZF":16},"pol":true,"anypol":true,"score":0.85,"sub":false,"dir":"external_defense","type":"explicit","scored":true},{"id":184,"n":10,"np":3,"span":201,"d0":"1880-01-30","d1":"1880-08-18","papers":["HLB","HMZ","MGD"],"pc":{"HLB":5,"MGD":4,"HMZ":1},"pol":true,"anypol":true,"score":0.85,"sub":false,"dir":"internal","type":"explicit","scored":true},{"id":326,"n":10,"np":3,"span":268,"d0":"1874-11-04","d1":"1875-07-30","papers":["HZF","HZT","MGD"],"pc":{"HZT":3,"MGD":4,"HZF":3},"pol":false,"anypol":true,"score":0.85,"sub":false,"dir":"external_defense","type":"explicit","scored":true},{"id":401,"n":23,"np":2,"span":519,"d0":"1878-07-23","d1":"1879-12-24","papers":["HMZ","MGD"],"pc":{"HMZ":22,"MGD":1},"pol":true,"anypol":true,"score":0.87,"sub":true,"dir":"external_defense","type":"explicit","scored":true},{"id":372,"n":21,"np":2,"span":379,"d0":"1882-09-05","d1":"1883-09-19","papers":["HMZ","MGD"],"pc":{"HMZ":11,"MGD":10},"pol":false,"anypol":true,"score":0.72,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":70,"n":19,"np":2,"span":168,"d0":"1881-06-07","d1":"1881-11-22","papers":["HZF","MGD"],"pc":{"HZF":18,"MGD":1},"pol":false,"anypol":true,"score":0.85,"sub":true,"dir":"external_defense","type":"explicit","scored":true},{"id":16,"n":17,"np":2,"span":385,"d0":"1881-06-07","d1":"1882-06-27","papers":["HLB","HMZ"],"pc":{"HMZ":16,"HLB":1},"pol":true,"anypol":true,"score":0.85,"sub":true,"dir":"mixed","type":"explicit","scored":true},{"id":383,"n":19,"np":2,"span":482,"d0":"1875-01-15","d1":"1876-05-11","papers":["HLB","HZT"],"pc":{"HZT":18,"HLB":1},"pol":true,"anypol":true,"score":0.95,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":257,"n":9,"np":3,"span":231,"d0":"1875-01-13","d1":"1875-09-01","papers":["HLB","HZT","MGD"],"pc":{"MGD":7,"HZT":1,"HLB":1},"pol":true,"anypol":true,"score":0.85,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":414,"n":9,"np":3,"span":518,"d0":"1880-07-02","d1":"1881-12-02","papers":["HLB","HMZ","HZT"],"pc":{"HLB":6,"HZT":1,"HMZ":2},"pol":true,"anypol":true,"score":0.85,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":402,"n":9,"np":3,"span":281,"d0":"1879-09-02","d1":"1880-06-09","papers":["HMZ","HZF","MGD"],"pc":{"HMZ":4,"MGD":3,"HZF":2},"pol":true,"anypol":true,"score":0.85,"sub":true,"dir":"mixed","type":"explicit","scored":true},{"id":206,"n":5,"np":4,"span":147,"d0":"1874-12-30","d1":"1875-05-26","papers":["HLB","HZF","HZT","MGD"],"pc":{"MGD":1,"HZT":1,"HLB":1,"HZF":2},"pol":false,"anypol":false,"score":0.2,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":208,"n":8,"np":3,"span":203,"d0":"1882-11-15","d1":"1883-06-06","papers":["HMZ","HZT","MGD"],"pc":{"MGD":6,"HMZ":1,"HZT":1},"pol":false,"anypol":true,"score":0.8,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":365,"n":8,"np":3,"span":70,"d0":"1877-06-01","d1":"1877-08-10","papers":["HLB","HZF","MGD"],"pc":{"HLB":5,"MGD":1,"HZF":2},"pol":true,"anypol":true,"score":0.9,"sub":false,"dir":"internal","type":"explicit","scored":true},{"id":430,"n":14,"np":2,"span":168,"d0":"1875-04-14","d1":"1875-09-29","papers":["HLB","MGD"],"pc":{"HLB":13,"MGD":1},"pol":true,"anypol":true,"score":0.95,"sub":false,"dir":"internal","type":"explicit","scored":true},{"id":421,"n":8,"np":3,"span":175,"d0":"1879-03-04","d1":"1879-08-26","papers":["HLB","HMZ","HZF"],"pc":{"HLB":2,"HMZ":4,"HZF":2},"pol":true,"anypol":true,"score":0.85,"sub":false,"dir":"internal","type":"explicit","scored":true},{"id":350,"n":63,"np":1,"span":707,"d0":"1886-10-13","d1":"1888-09-19","papers":["HZF"],"pc":{"HZF":63},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":405,"n":7,"np":3,"span":231,"d0":"1882-02-28","d1":"1882-10-17","papers":["HLB","HZF","MGD"],"pc":{"HZF":4,"MGD":2,"HLB":1},"pol":false,"anypol":true,"score":0.32,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":178,"n":7,"np":3,"span":187,"d0":"1881-11-08","d1":"1882-05-14","papers":["HMZ","HZF","HZT"],"pc":{"HZT":4,"HMZ":1,"HZF":2},"pol":false,"anypol":true,"score":0.85,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":403,"n":6,"np":3,"span":181,"d0":"1879-01-08","d1":"1879-07-08","papers":["HLB","HMZ","MGD"],"pc":{"HMZ":4,"HLB":1,"MGD":1},"pol":false,"anypol":true,"score":0.8,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":214,"n":5,"np":4,"span":182,"d0":"1883-02-23","d1":"1883-08-24","papers":["HMZ","HZF","HZT","MGD"],"pc":{"HZT":1,"HMZ":2,"MGD":1,"HZF":1},"pol":false,"anypol":true,"score":0.7,"sub":false,"dir":"internal","type":"explicit","scored":true},{"id":44,"n":6,"np":3,"span":84,"d0":"1878-11-19","d1":"1879-02-11","papers":["HLB","HMZ","HZF"],"pc":{"HMZ":3,"HZF":2,"HLB":1},"pol":false,"anypol":true,"score":0.85,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":378,"n":11,"np":2,"span":189,"d0":"1876-06-14","d1":"1876-12-20","papers":["HZF","MGD"],"pc":{"HZF":2,"MGD":9},"pol":true,"anypol":true,"score":1.0,"sub":false,"dir":"internal","type":"explicit","scored":true},{"id":398,"n":10,"np":2,"span":238,"d0":"1880-07-20","d1":"1881-03-15","papers":["HMZ","MGD"],"pc":{"HMZ":9,"MGD":1},"pol":true,"anypol":true,"score":0.88,"sub":false,"dir":"mixed","type":"explicit","scored":true},{"id":175,"n":7,"np":3,"span":196,"d0":"1879-03-14","d1":"1879-09-26","papers":["HLB","HZT","MGD"],"pc":{"HLB":5,"MGD":1,"HZT":1},"pol":true,"anypol":true,"score":0.85,"sub":true,"dir":"mixed","type":"explicit","scored":true},{"id":394,"n":10,"np":2,"span":131,"d0":"1883-05-18","d1":"1883-09-26","papers":["HMZ","MGD"],"pc":{"HMZ":7,"MGD":3},"pol":true,"anypol":true,"score":0.95,"sub":false,"dir":"internal","type":"explicit","scored":true},{"id":256,"n":10,"np":2,"span":280,"d0":"1876-08-16","d1":"1877-05-23","papers":["HZF","MGD"],"pc":{"MGD":9,"HZF":1},"pol":true,"anypol":true,"score":0.85,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":428,"n":10,"np":2,"span":132,"d0":"1876-11-08","d1":"1877-03-20","papers":["HLB","MGD"],"pc":{"HLB":8,"MGD":2},"pol":true,"anypol":true,"score":1.0,"sub":false,"dir":"internal","type":"explicit","scored":true},{"id":393,"n":10,"np":2,"span":367,"d0":"1882-12-05","d1":"1883-12-07","papers":["HMZ","MGD"],"pc":{"MGD":1,"HMZ":9},"pol":true,"anypol":true,"score":0.85,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":105,"n":6,"np":3,"span":150,"d0":"1878-10-29","d1":"1879-03-28","papers":["HLB","HZF","MGD"],"pc":{"MGD":3,"HZF":2,"HLB":1},"pol":false,"anypol":false,"score":0.2,"sub":true,"dir":"n/a","type":"topical-only","scored":true},{"id":419,"n":5,"np":3,"span":142,"d0":"1879-07-02","d1":"1879-11-21","papers":["HLB","HZT","MGD"],"pc":{"HLB":3,"HZT":1,"MGD":1},"pol":false,"anypol":true,"score":0.8,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":162,"n":9,"np":2,"span":136,"d0":"1881-01-04","d1":"1881-05-20","papers":["HLB","HMZ"],"pc":{"HLB":8,"HMZ":1},"pol":false,"anypol":true,"score":0.85,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":170,"n":42,"np":1,"span":672,"d0":"1878-12-20","d1":"1880-10-22","papers":["HZT"],"pc":{"HZT":42},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":37,"n":9,"np":2,"span":197,"d0":"1883-06-10","d1":"1883-12-24","papers":["HMZ","MGD"],"pc":{"MGD":2,"HMZ":7},"pol":true,"anypol":true,"score":0.9,"sub":false,"dir":"internal","type":"explicit","scored":true},{"id":424,"n":9,"np":2,"span":208,"d0":"1877-11-30","d1":"1878-06-26","papers":["HLB","MGD"],"pc":{"HLB":6,"MGD":3},"pol":false,"anypol":false,"score":0.25,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":204,"n":6,"np":3,"span":131,"d0":"1876-05-24","d1":"1876-10-02","papers":["HLB","HZF","HZT"],"pc":{"HZF":4,"HZT":1,"HLB":1},"pol":false,"anypol":false,"score":0.2,"sub":true,"dir":"n/a","type":"topical-only","scored":true},{"id":379,"n":9,"np":2,"span":182,"d0":"1875-12-08","d1":"1876-06-07","papers":["HZF","MGD"],"pc":{"MGD":3,"HZF":6},"pol":true,"anypol":true,"score":0.9,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":320,"n":5,"np":3,"span":108,"d0":"1879-03-04","d1":"1879-06-20","papers":["HLB","HMZ","HZF"],"pc":{"HLB":2,"HZF":2,"HMZ":1},"pol":false,"anypol":true,"score":0.85,"sub":false,"dir":"internal","type":"meta-polemic","scored":true},{"id":199,"n":8,"np":2,"span":139,"d0":"1880-10-20","d1":"1881-03-08","papers":["HMZ","MGD"],"pc":{"MGD":6,"HMZ":2},"pol":false,"anypol":true,"score":0.8,"sub":true,"dir":"n/a","type":"topical-only","scored":true},{"id":99,"n":33,"np":1,"span":469,"d0":"1887-06-13","d1":"1888-09-24","papers":["HZF"],"pc":{"HZF":33},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":315,"n":30,"np":1,"span":315,"d0":"1879-10-22","d1":"1880-09-01","papers":["MGD"],"pc":{"MGD":30},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":145,"n":8,"np":2,"span":154,"d0":"1880-10-27","d1":"1881-03-30","papers":["HLB","MGD"],"pc":{"HLB":1,"MGD":7},"pol":false,"anypol":true,"score":0.85,"sub":true,"dir":"external_defense","type":"explicit","scored":true},{"id":113,"n":5,"np":3,"span":110,"d0":"1880-06-18","d1":"1880-10-06","papers":["HMZ","HZT","MGD"],"pc":{"MGD":2,"HZT":1,"HMZ":2},"pol":false,"anypol":false,"score":0.3,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":1,"n":29,"np":1,"span":344,"d0":"1886-08-03","d1":"1887-07-13","papers":["HZF"],"pc":{"HZF":29},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":286,"n":9,"np":2,"span":217,"d0":"1875-08-18","d1":"1876-03-22","papers":["HLB","MGD"],"pc":{"HLB":1,"MGD":8},"pol":false,"anypol":true,"score":0.85,"sub":true,"dir":"external_defense","type":"explicit","scored":true},{"id":351,"n":28,"np":1,"span":464,"d0":"1886-05-04","d1":"1887-08-11","papers":["HZF"],"pc":{"HZF":28},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":287,"n":5,"np":3,"span":63,"d0":"1875-01-20","d1":"1875-03-24","papers":["HLB","HZF","MGD"],"pc":{"MGD":2,"HLB":1,"HZF":2},"pol":true,"anypol":true,"score":0.85,"sub":false,"dir":"external_defense","type":"explicit","scored":true},{"id":177,"n":26,"np":1,"span":379,"d0":"1887-07-27","d1":"1888-08-09","papers":["HZF"],"pc":{"HZF":26},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":160,"n":7,"np":2,"span":171,"d0":"1883-02-02","d1":"1883-07-23","papers":["HMZ","MGD"],"pc":{"HMZ":6,"MGD":1},"pol":true,"anypol":true,"score":0.9,"sub":false,"dir":"internal","type":"explicit","scored":true},{"id":325,"n":8,"np":2,"span":210,"d0":"1879-10-29","d1":"1880-05-26","papers":["HZT","MGD"],"pc":{"HZT":3,"MGD":5},"pol":false,"anypol":true,"score":0.78,"sub":true,"dir":"mixed","type":"explicit","scored":true},{"id":436,"n":5,"np":3,"span":399,"d0":"1874-01-28","d1":"1875-03-03","papers":["HLB","HZF","MGD"],"pc":{"HLB":3,"HZF":1,"MGD":1},"pol":true,"anypol":true,"score":0.82,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":56,"n":24,"np":1,"span":224,"d0":"1881-10-25","d1":"1882-06-06","papers":["HZF"],"pc":{"HZF":24},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":413,"n":8,"np":2,"span":98,"d0":"1880-10-26","d1":"1881-02-01","papers":["HLB","HZF"],"pc":{"HZF":7,"HLB":1},"pol":true,"anypol":true,"score":0.85,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":388,"n":8,"np":2,"span":198,"d0":"1881-07-05","d1":"1882-01-19","papers":["HMZ","HZF"],"pc":{"HMZ":2,"HZF":6},"pol":false,"anypol":true,"score":0.85,"sub":true,"dir":"external_defense","type":"explicit","scored":true},{"id":94,"n":8,"np":2,"span":314,"d0":"1883-09-12","d1":"1884-07-22","papers":["HZF","MGD"],"pc":{"HZF":7,"MGD":1},"pol":false,"anypol":true,"score":0.85,"sub":true,"dir":"mixed","type":"explicit","scored":true},{"id":228,"n":26,"np":1,"span":471,"d0":"1880-10-12","d1":"1882-01-26","papers":["HMZ"],"pc":{"HMZ":26},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":341,"n":7,"np":2,"span":141,"d0":"1878-05-09","d1":"1878-09-27","papers":["HLB","HZT"],"pc":{"HZT":5,"HLB":2},"pol":false,"anypol":true,"score":0.85,"sub":true,"dir":"mixed","type":"explicit","scored":true},{"id":188,"n":8,"np":2,"span":177,"d0":"1875-03-31","d1":"1875-09-24","papers":["HLB","HZT"],"pc":{"HLB":6,"HZT":2},"pol":false,"anypol":false,"score":0.2,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":359,"n":7,"np":2,"span":112,"d0":"1876-06-21","d1":"1876-10-11","papers":["HLB","MGD"],"pc":{"MGD":6,"HLB":1},"pol":true,"anypol":true,"score":0.85,"sub":false,"dir":"internal","type":"explicit","scored":true},{"id":11,"n":22,"np":1,"span":567,"d0":"1880-12-21","d1":"1882-07-11","papers":["HMZ"],"pc":{"HMZ":22},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":33,"n":7,"np":2,"span":98,"d0":"1874-11-18","d1":"1875-02-24","papers":["HZF","MGD"],"pc":{"MGD":2,"HZF":5},"pol":false,"anypol":false,"score":0.2,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":417,"n":7,"np":2,"span":129,"d0":"1880-01-06","d1":"1880-05-14","papers":["HLB","HZF"],"pc":{"HZF":5,"HLB":2},"pol":true,"anypol":true,"score":1.0,"sub":false,"dir":"internal","type":"explicit","scored":true},{"id":79,"n":7,"np":2,"span":182,"d0":"1879-04-01","d1":"1879-09-30","papers":["HMZ","HZT"],"pc":{"HMZ":6,"HZT":1},"pol":true,"anypol":true,"score":0.9,"sub":false,"dir":"internal","type":"explicit","scored":true},{"id":195,"n":4,"np":3,"span":84,"d0":"1875-07-14","d1":"1875-10-06","papers":["HLB","HZF","MGD"],"pc":{"MGD":1,"HZF":1,"HLB":2},"pol":false,"anypol":true,"score":0.85,"sub":true,"dir":"n/a","type":"topical-only","scored":true},{"id":427,"n":7,"np":2,"span":64,"d0":"1877-03-27","d1":"1877-05-30","papers":["HLB","MGD"],"pc":{"MGD":2,"HLB":5},"pol":true,"anypol":true,"score":0.85,"sub":false,"dir":"internal","type":"implicit","scored":true},{"id":157,"n":4,"np":3,"span":106,"d0":"1879-05-01","d1":"1879-08-15","papers":["HLB","HMZ","HZT"],"pc":{"HMZ":1,"HLB":2,"HZT":1},"pol":false,"anypol":true,"score":0.9,"sub":true,"dir":"n/a","type":"topical-only","scored":true},{"id":134,"n":20,"np":1,"span":434,"d0":"1881-01-19","d1":"1882-03-29","papers":["MGD"],"pc":{"MGD":20},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":122,"n":4,"np":3,"span":167,"d0":"1880-03-26","d1":"1880-09-09","papers":["HLB","HMZ","MGD"],"pc":{"HMZ":1,"MGD":2,"HLB":1},"pol":false,"anypol":false,"score":0.3,"sub":true,"dir":"n/a","type":"topical-only","scored":true},{"id":274,"n":6,"np":2,"span":118,"d0":"1876-05-31","d1":"1876-09-26","papers":["HZF","MGD"],"pc":{"HZF":5,"MGD":1},"pol":false,"anypol":false,"score":0.3,"sub":true,"dir":"n/a","type":"topical-only","scored":true},{"id":10,"n":15,"np":1,"span":255,"d0":"1883-04-13","d1":"1883-12-24","papers":["HMZ"],"pc":{"HMZ":15},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":4,"n":17,"np":1,"span":330,"d0":"1887-04-20","d1":"1888-03-15","papers":["HZF"],"pc":{"HZF":17},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":382,"n":4,"np":3,"span":282,"d0":"1875-07-28","d1":"1876-05-05","papers":["HLB","HZT","MGD"],"pc":{"HZT":1,"MGD":2,"HLB":1},"pol":false,"anypol":false,"score":0.2,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":425,"n":5,"np":2,"span":155,"d0":"1877-02-08","d1":"1877-07-13","papers":["HLB","HZT"],"pc":{"HLB":4,"HZT":1},"pol":true,"anypol":true,"score":0.85,"sub":false,"dir":"internal","type":"explicit","scored":true},{"id":227,"n":15,"np":1,"span":286,"d0":"1882-06-06","d1":"1883-03-19","papers":["HMZ"],"pc":{"HMZ":15},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":423,"n":4,"np":3,"span":236,"d0":"1878-06-21","d1":"1879-02-12","papers":["HLB","HZT","MGD"],"pc":{"HLB":1,"MGD":2,"HZT":1},"pol":false,"anypol":true,"score":0.42,"sub":true,"dir":"n/a","type":"topical-only","scored":true},{"id":101,"n":5,"np":2,"span":133,"d0":"1882-08-01","d1":"1882-12-12","papers":["HMZ","HZF"],"pc":{"HZF":4,"HMZ":1},"pol":false,"anypol":false,"score":0.2,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":435,"n":4,"np":3,"span":92,"d0":"1874-05-05","d1":"1874-08-05","papers":["HLB","HZF","MGD"],"pc":{"HZF":2,"MGD":1,"HLB":1},"pol":true,"anypol":true,"score":0.85,"sub":false,"dir":"mixed","type":"explicit","scored":true},{"id":3,"n":14,"np":1,"span":168,"d0":"1883-07-06","d1":"1883-12-21","papers":["HMZ"],"pc":{"HMZ":14},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":205,"n":4,"np":3,"span":91,"d0":"1875-11-24","d1":"1876-02-23","papers":["HLB","HZT","MGD"],"pc":{"MGD":1,"HLB":2,"HZT":1},"pol":false,"anypol":false,"score":0.15,"sub":true,"dir":"n/a","type":"topical-only","scored":true},{"id":314,"n":13,"np":1,"span":266,"d0":"1883-02-08","d1":"1883-11-01","papers":["HZT"],"pc":{"HZT":13},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":133,"n":14,"np":1,"span":308,"d0":"1882-06-07","d1":"1883-04-11","papers":["MGD"],"pc":{"MGD":14},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":342,"n":5,"np":2,"span":106,"d0":"1877-01-31","d1":"1877-05-17","papers":["HZT","MGD"],"pc":{"HZT":4,"MGD":1},"pol":false,"anypol":true,"score":0.95,"sub":false,"dir":"internal","type":"explicit","scored":true},{"id":366,"n":5,"np":2,"span":77,"d0":"1876-07-12","d1":"1876-09-27","papers":["HLB","MGD"],"pc":{"MGD":2,"HLB":3},"pol":true,"anypol":true,"score":0.95,"sub":false,"dir":"internal","type":"explicit","scored":true},{"id":333,"n":5,"np":2,"span":91,"d0":"1874-02-03","d1":"1874-05-05","papers":["HZT","MGD"],"pc":{"MGD":4,"HZT":1},"pol":false,"anypol":false,"score":0.3,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":234,"n":5,"np":2,"span":91,"d0":"1875-06-16","d1":"1875-09-15","papers":["HLB","MGD"],"pc":{"HLB":4,"MGD":1},"pol":true,"anypol":true,"score":0.85,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":336,"n":13,"np":1,"span":286,"d0":"1886-06-14","d1":"1887-03-27","papers":["HZF"],"pc":{"HZF":13},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":431,"n":5,"np":2,"span":196,"d0":"1874-07-15","d1":"1875-01-27","papers":["HLB","MGD"],"pc":{"MGD":1,"HLB":4},"pol":false,"anypol":true,"score":0.8,"sub":true,"dir":"mixed","type":"explicit","scored":true},{"id":371,"n":12,"np":1,"span":158,"d0":"1887-09-05","d1":"1888-02-10","papers":["HZF"],"pc":{"HZF":12},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":192,"n":5,"np":2,"span":133,"d0":"1881-03-30","d1":"1881-08-10","papers":["HLB","HZT"],"pc":{"HZT":4,"HLB":1},"pol":false,"anypol":false,"score":0.3,"sub":true,"dir":"n/a","type":"topical-only","scored":true},{"id":235,"n":5,"np":2,"span":128,"d0":"1874-07-01","d1":"1874-11-06","papers":["HZT","MGD"],"pc":{"HZT":4,"MGD":1},"pol":false,"anypol":true,"score":0.85,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":232,"n":6,"np":2,"span":33,"d0":"1876-08-16","d1":"1876-09-18","papers":["HLB","MGD"],"pc":{"HLB":5,"MGD":1},"pol":true,"anypol":true,"score":0.9,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":22,"n":13,"np":1,"span":469,"d0":"1881-05-24","d1":"1882-09-05","papers":["HMZ"],"pc":{"HMZ":13},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":298,"n":11,"np":1,"span":164,"d0":"1887-09-26","d1":"1888-03-08","papers":["HZF"],"pc":{"HZF":11},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":335,"n":11,"np":1,"span":239,"d0":"1887-07-04","d1":"1888-02-28","papers":["HZF"],"pc":{"HZF":11},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":127,"n":12,"np":1,"span":336,"d0":"1876-08-02","d1":"1877-07-04","papers":["MGD"],"pc":{"MGD":12},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":415,"n":5,"np":2,"span":187,"d0":"1880-07-09","d1":"1881-01-12","papers":["HLB","MGD"],"pc":{"MGD":3,"HLB":2},"pol":true,"anypol":true,"score":0.7,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":49,"n":3,"np":3,"span":88,"d0":"1881-05-13","d1":"1881-08-09","papers":["HLB","HMZ","MGD"],"pc":{"MGD":1,"HMZ":1,"HLB":1},"pol":false,"anypol":false,"score":0.2,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":62,"n":10,"np":1,"span":168,"d0":"1887-01-16","d1":"1887-07-03","papers":["HZF"],"pc":{"HZF":10},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":190,"n":11,"np":1,"span":91,"d0":"1874-04-29","d1":"1874-07-29","papers":["HLB"],"pc":{"HLB":11},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":258,"n":11,"np":1,"span":204,"d0":"1874-03-17","d1":"1874-10-07","papers":["MGD"],"pc":{"MGD":11},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":299,"n":11,"np":1,"span":299,"d0":"1886-08-12","d1":"1887-06-07","papers":["HZF"],"pc":{"HZF":11},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":121,"n":4,"np":2,"span":89,"d0":"1881-02-25","d1":"1881-05-25","papers":["HLB","HMZ"],"pc":{"HLB":3,"HMZ":1},"pol":true,"anypol":true,"score":0.8,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":176,"n":10,"np":1,"span":161,"d0":"1875-10-27","d1":"1876-04-05","papers":["HLB"],"pc":{"HLB":10},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":174,"n":5,"np":2,"span":126,"d0":"1882-03-10","d1":"1882-07-14","papers":["HLB","HZT"],"pc":{"HZT":3,"HLB":2},"pol":false,"anypol":true,"score":0.85,"sub":true,"dir":"n/a","type":"topical-only","scored":true},{"id":155,"n":11,"np":1,"span":151,"d0":"1883-07-23","d1":"1883-12-21","papers":["HMZ"],"pc":{"HMZ":11},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":295,"n":10,"np":1,"span":154,"d0":"1874-07-29","d1":"1874-12-30","papers":["HZF"],"pc":{"HZF":10},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":244,"n":9,"np":1,"span":192,"d0":"1882-11-14","d1":"1883-05-25","papers":["HMZ"],"pc":{"HMZ":9},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":104,"n":4,"np":2,"span":107,"d0":"1882-10-25","d1":"1883-02-09","papers":["HMZ","MGD"],"pc":{"MGD":3,"HMZ":1},"pol":true,"anypol":true,"score":0.75,"sub":false,"dir":"internal","type":"explicit","scored":true},{"id":100,"n":10,"np":1,"span":196,"d0":"1886-07-21","d1":"1887-02-02","papers":["HZF"],"pc":{"HZF":10},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":226,"n":4,"np":2,"span":98,"d0":"1881-09-13","d1":"1881-12-20","papers":["HMZ","HZF"],"pc":{"HZF":3,"HMZ":1},"pol":false,"anypol":true,"score":0.75,"sub":false,"dir":"internal","type":"implicit","scored":true},{"id":200,"n":4,"np":2,"span":153,"d0":"1880-02-04","d1":"1880-07-06","papers":["HMZ","MGD"],"pc":{"HMZ":3,"MGD":1},"pol":false,"anypol":true,"score":0.75,"sub":true,"dir":"n/a","type":"topical-only","scored":true},{"id":132,"n":8,"np":1,"span":155,"d0":"1883-07-11","d1":"1883-12-13","papers":["MGD"],"pc":{"MGD":8},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":53,"n":4,"np":2,"span":58,"d0":"1878-12-17","d1":"1879-02-13","papers":["HZF","HZT"],"pc":{"HZF":3,"HZT":1},"pol":false,"anypol":false,"score":0.2,"sub":true,"dir":"n/a","type":"topical-only","scored":true},{"id":112,"n":4,"np":2,"span":58,"d0":"1881-03-14","d1":"1881-05-11","papers":["HZT","MGD"],"pc":{"MGD":1,"HZT":3},"pol":false,"anypol":false,"score":0.1,"sub":true,"dir":"n/a","type":"topical-only","scored":true},{"id":400,"n":4,"np":2,"span":139,"d0":"1880-03-24","d1":"1880-08-10","papers":["HMZ","MGD"],"pc":{"HMZ":3,"MGD":1},"pol":true,"anypol":true,"score":0.9,"sub":false,"dir":"external_defense","type":"explicit","scored":true},{"id":290,"n":8,"np":1,"span":161,"d0":"1879-01-22","d1":"1879-07-02","papers":["MGD"],"pc":{"MGD":8},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":91,"n":3,"np":3,"span":103,"d0":"1876-06-07","d1":"1876-09-18","papers":["HLB","HZF","MGD"],"pc":{"HLB":1,"HZF":1,"MGD":1},"pol":true,"anypol":true,"score":0.85,"sub":false,"dir":"external_defense","type":"explicit","scored":true},{"id":203,"n":5,"np":2,"span":22,"d0":"1877-01-10","d1":"1877-02-01","papers":["HLB","HZT"],"pc":{"HLB":4,"HZT":1},"pol":true,"anypol":true,"score":0.9,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":269,"n":4,"np":2,"span":105,"d0":"1882-01-03","d1":"1882-04-18","papers":["HMZ","HZF"],"pc":{"HZF":3,"HMZ":1},"pol":false,"anypol":false,"score":0.1,"sub":true,"dir":"n/a","type":"topical-only","scored":true},{"id":434,"n":8,"np":1,"span":177,"d0":"1876-12-27","d1":"1877-06-22","papers":["HLB"],"pc":{"HLB":8},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":96,"n":4,"np":2,"span":101,"d0":"1881-03-29","d1":"1881-07-08","papers":["HZF","HZT"],"pc":{"HZF":3,"HZT":1},"pol":true,"anypol":true,"score":0.8,"sub":false,"dir":"external_defense","type":"explicit","scored":true},{"id":422,"n":4,"np":2,"span":98,"d0":"1879-01-24","d1":"1879-05-02","papers":["HLB","MGD"],"pc":{"HLB":3,"MGD":1},"pol":false,"anypol":false,"score":0.2,"sub":true,"dir":"n/a","type":"topical-only","scored":true},{"id":50,"n":4,"np":2,"span":92,"d0":"1880-09-09","d1":"1880-12-10","papers":["HLB","HZF"],"pc":{"HZF":2,"HLB":2},"pol":false,"anypol":false,"score":0.2,"sub":true,"dir":"n/a","type":"topical-only","scored":true},{"id":95,"n":8,"np":1,"span":119,"d0":"1883-02-06","d1":"1883-06-05","papers":["HZF"],"pc":{"HZF":8},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":12,"n":7,"np":1,"span":150,"d0":"1887-01-17","d1":"1887-06-16","papers":["HZF"],"pc":{"HZF":7},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":21,"n":7,"np":1,"span":206,"d0":"1883-01-09","d1":"1883-08-03","papers":["HMZ"],"pc":{"HMZ":7},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":334,"n":8,"np":1,"span":71,"d0":"1888-07-04","d1":"1888-09-13","papers":["HZF"],"pc":{"HZF":8},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":58,"n":8,"np":1,"span":70,"d0":"1882-08-22","d1":"1882-10-31","papers":["HZF"],"pc":{"HZF":8},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":306,"n":7,"np":1,"span":134,"d0":"1886-07-11","d1":"1886-11-22","papers":["HZF"],"pc":{"HZF":7},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":247,"n":7,"np":1,"span":84,"d0":"1876-09-13","d1":"1876-12-06","papers":["HLB"],"pc":{"HLB":7},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":46,"n":8,"np":1,"span":55,"d0":"1875-08-11","d1":"1875-10-05","papers":["HZF"],"pc":{"HZF":8},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":52,"n":4,"np":2,"span":31,"d0":"1879-05-27","d1":"1879-06-27","papers":["HLB","HZF"],"pc":{"HLB":2,"HZF":2},"pol":false,"anypol":true,"score":0.9,"sub":false,"dir":"internal","type":"meta-polemic","scored":true},{"id":348,"n":7,"np":1,"span":196,"d0":"1876-10-20","d1":"1877-05-04","papers":["HZT"],"pc":{"HZT":7},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":331,"n":7,"np":1,"span":265,"d0":"1875-06-03","d1":"1876-02-23","papers":["MGD"],"pc":{"MGD":7},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":390,"n":3,"np":2,"span":98,"d0":"1876-05-17","d1":"1876-08-23","papers":["HZF","MGD"],"pc":{"HZF":2,"MGD":1},"pol":true,"anypol":true,"score":0.85,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":88,"n":8,"np":1,"span":42,"d0":"1883-01-09","d1":"1883-02-20","papers":["HZF"],"pc":{"HZF":8},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":36,"n":6,"np":1,"span":118,"d0":"1887-04-20","d1":"1887-08-16","papers":["HZF"],"pc":{"HZF":6},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":80,"n":7,"np":1,"span":236,"d0":"1887-12-27","d1":"1888-08-19","papers":["HZF"],"pc":{"HZF":7},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":231,"n":6,"np":1,"span":133,"d0":"1877-10-10","d1":"1878-02-20","papers":["MGD"],"pc":{"MGD":6},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":238,"n":7,"np":1,"span":149,"d0":"1879-06-25","d1":"1879-11-21","papers":["HZT"],"pc":{"HZT":7},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":197,"n":7,"np":1,"span":277,"d0":"1887-08-08","d1":"1888-05-11","papers":["HZF"],"pc":{"HZF":7},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":172,"n":6,"np":1,"span":141,"d0":"1876-08-17","d1":"1877-01-05","papers":["HZT"],"pc":{"HZT":6},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":129,"n":6,"np":1,"span":91,"d0":"1877-04-18","d1":"1877-07-18","papers":["MGD"],"pc":{"MGD":6},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":86,"n":3,"np":2,"span":80,"d0":"1883-09-17","d1":"1883-12-06","papers":["HMZ","MGD"],"pc":{"HMZ":2,"MGD":1},"pol":false,"anypol":false,"score":0.2,"sub":true,"dir":"n/a","type":"topical-only","scored":true},{"id":152,"n":6,"np":1,"span":196,"d0":"1878-07-23","d1":"1879-02-04","papers":["HMZ"],"pc":{"HMZ":6},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":387,"n":3,"np":2,"span":78,"d0":"1882-04-25","d1":"1882-07-12","papers":["HZF","MGD"],"pc":{"HZF":2,"MGD":1},"pol":true,"anypol":true,"score":0.9,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":35,"n":6,"np":1,"span":97,"d0":"1888-05-07","d1":"1888-08-12","papers":["HZF"],"pc":{"HZF":6},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":410,"n":4,"np":2,"span":20,"d0":"1883-10-26","d1":"1883-11-15","papers":["HMZ","MGD"],"pc":{"MGD":2,"HMZ":2},"pol":true,"anypol":true,"score":0.85,"sub":false,"dir":"mixed","type":"explicit","scored":true},{"id":218,"n":6,"np":1,"span":91,"d0":"1878-12-20","d1":"1879-03-21","papers":["HLB"],"pc":{"HLB":6},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":183,"n":3,"np":2,"span":72,"d0":"1882-10-24","d1":"1883-01-04","papers":["HZF","MGD"],"pc":{"MGD":1,"HZF":2},"pol":false,"anypol":false,"score":0.3,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":215,"n":3,"np":2,"span":71,"d0":"1881-11-01","d1":"1882-01-11","papers":["HMZ","MGD"],"pc":{"HMZ":2,"MGD":1},"pol":false,"anypol":false,"score":0.2,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":146,"n":7,"np":1,"span":42,"d0":"1879-11-04","d1":"1879-12-16","papers":["HZF"],"pc":{"HZF":7},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":352,"n":7,"np":1,"span":42,"d0":"1875-02-03","d1":"1875-03-17","papers":["HLB"],"pc":{"HLB":7},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":15,"n":6,"np":1,"span":157,"d0":"1882-11-14","d1":"1883-04-20","papers":["HMZ"],"pc":{"HMZ":6},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":75,"n":6,"np":1,"span":153,"d0":"1879-01-01","d1":"1879-06-03","papers":["HMZ"],"pc":{"HMZ":6},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":42,"n":3,"np":2,"span":62,"d0":"1880-03-17","d1":"1880-05-18","papers":["HMZ","MGD"],"pc":{"HMZ":1,"MGD":2},"pol":false,"anypol":false,"score":0.1,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":168,"n":3,"np":2,"span":60,"d0":"1881-05-13","d1":"1881-07-12","papers":["HMZ","HZT"],"pc":{"HMZ":1,"HZT":2},"pol":false,"anypol":true,"score":0.85,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":28,"n":6,"np":1,"span":56,"d0":"1886-08-09","d1":"1886-10-04","papers":["HZF"],"pc":{"HZF":6},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":6,"n":6,"np":1,"span":56,"d0":"1880-07-20","d1":"1880-09-14","papers":["HMZ"],"pc":{"HMZ":6},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":115,"n":3,"np":2,"span":154,"d0":"1878-03-27","d1":"1878-08-28","papers":["HMZ","MGD"],"pc":{"MGD":2,"HMZ":1},"pol":false,"anypol":false,"score":0.2,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":32,"n":3,"np":2,"span":49,"d0":"1875-06-30","d1":"1875-08-18","papers":["HZF","MGD"],"pc":{"MGD":1,"HZF":2},"pol":false,"anypol":false,"score":0.2,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":158,"n":3,"np":2,"span":49,"d0":"1876-07-05","d1":"1876-08-23","papers":["HLB","HZF"],"pc":{"HZF":2,"HLB":1},"pol":false,"anypol":false,"score":0.2,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":416,"n":3,"np":2,"span":140,"d0":"1880-04-07","d1":"1880-08-25","papers":["HLB","MGD"],"pc":{"MGD":2,"HLB":1},"pol":false,"anypol":false,"score":0.2,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":171,"n":5,"np":1,"span":90,"d0":"1877-11-30","d1":"1878-02-28","papers":["HZT"],"pc":{"HZT":5},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":65,"n":6,"np":1,"span":105,"d0":"1883-05-15","d1":"1883-08-28","papers":["HZF"],"pc":{"HZF":6},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":364,"n":5,"np":1,"span":85,"d0":"1878-06-06","d1":"1878-08-30","papers":["HLB"],"pc":{"HLB":5},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":40,"n":5,"np":1,"span":84,"d0":"1880-12-07","d1":"1881-03-01","papers":["HMZ"],"pc":{"HMZ":5},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":116,"n":5,"np":1,"span":160,"d0":"1887-08-25","d1":"1888-02-01","papers":["HZF"],"pc":{"HZF":5},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":119,"n":3,"np":2,"span":43,"d0":"1880-08-11","d1":"1880-09-23","papers":["HMZ","MGD"],"pc":{"MGD":1,"HMZ":2},"pol":false,"anypol":false,"score":0.15,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":169,"n":5,"np":1,"span":119,"d0":"1878-05-31","d1":"1878-09-27","papers":["HZT"],"pc":{"HZT":5},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":72,"n":5,"np":1,"span":154,"d0":"1882-02-07","d1":"1882-07-11","papers":["HMZ"],"pc":{"HMZ":5},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":353,"n":5,"np":1,"span":77,"d0":"1874-08-05","d1":"1874-10-21","papers":["HLB"],"pc":{"HLB":5},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":347,"n":6,"np":1,"span":41,"d0":"1877-11-23","d1":"1878-01-03","papers":["HZT"],"pc":{"HZT":6},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":51,"n":3,"np":2,"span":41,"d0":"1879-10-01","d1":"1879-11-11","papers":["HLB","HZF"],"pc":{"HZF":2,"HLB":1},"pol":false,"anypol":false,"score":0.2,"sub":false,"dir":"n/a","type":"meta-polemic","scored":true},{"id":420,"n":3,"np":2,"span":107,"d0":"1879-07-09","d1":"1879-10-24","papers":["HLB","MGD"],"pc":{"MGD":1,"HLB":2},"pol":true,"anypol":true,"score":0.85,"sub":false,"dir":"external_defense","type":"explicit","scored":true},{"id":19,"n":3,"np":2,"span":105,"d0":"1881-03-22","d1":"1881-07-05","papers":["HLB","HMZ"],"pc":{"HLB":1,"HMZ":2},"pol":false,"anypol":false,"score":0.2,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":114,"n":3,"np":2,"span":103,"d0":"1879-11-14","d1":"1880-02-25","papers":["HLB","MGD"],"pc":{"MGD":2,"HLB":1},"pol":false,"anypol":false,"score":0.2,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":246,"n":3,"np":2,"span":35,"d0":"1881-03-30","d1":"1881-05-04","papers":["HLB","MGD"],"pc":{"HLB":2,"MGD":1},"pol":false,"anypol":true,"score":0.52,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":207,"n":3,"np":2,"span":33,"d0":"1883-11-25","d1":"1883-12-28","papers":["HMZ","HZT"],"pc":{"HZT":2,"HMZ":1},"pol":false,"anypol":false,"score":0.1,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":14,"n":5,"np":1,"span":143,"d0":"1883-08-10","d1":"1883-12-31","papers":["HMZ"],"pc":{"HMZ":5},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":73,"n":5,"np":1,"span":217,"d0":"1880-05-04","d1":"1880-12-07","papers":["HMZ"],"pc":{"HMZ":5},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":103,"n":5,"np":1,"span":53,"d0":"1887-10-02","d1":"1887-11-24","papers":["HZF"],"pc":{"HZF":5},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":236,"n":5,"np":1,"span":53,"d0":"1881-04-10","d1":"1881-06-02","papers":["HZT"],"pc":{"HZT":5},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":310,"n":5,"np":1,"span":53,"d0":"1887-11-04","d1":"1887-12-27","papers":["HZF"],"pc":{"HZF":5},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":276,"n":5,"np":1,"span":98,"d0":"1888-04-06","d1":"1888-07-13","papers":["HZF"],"pc":{"HZF":5},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":84,"n":3,"np":2,"span":28,"d0":"1875-05-26","d1":"1875-06-23","papers":["HZF","MGD"],"pc":{"HZF":2,"MGD":1},"pol":true,"anypol":true,"score":0.85,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":324,"n":3,"np":2,"span":26,"d0":"1881-02-18","d1":"1881-03-16","papers":["HZT","MGD"],"pc":{"MGD":2,"HZT":1},"pol":true,"anypol":true,"score":0.9,"sub":false,"dir":"external_defense","type":"explicit","scored":true},{"id":355,"n":5,"np":1,"span":259,"d0":"1879-07-09","d1":"1880-03-24","papers":["MGD"],"pc":{"MGD":5},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":83,"n":3,"np":2,"span":22,"d0":"1876-09-26","d1":"1876-10-18","papers":["HZF","HZT"],"pc":{"HZF":2,"HZT":1},"pol":false,"anypol":true,"score":0.72,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":9,"n":4,"np":1,"span":132,"d0":"1878-11-20","d1":"1879-04-01","papers":["HMZ"],"pc":{"HMZ":4},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":57,"n":6,"np":1,"span":21,"d0":"1883-08-21","d1":"1883-09-11","papers":["HZF"],"pc":{"HZF":6},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":239,"n":4,"np":1,"span":78,"d0":"1877-03-07","d1":"1877-05-24","papers":["HZT"],"pc":{"HZT":4},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":173,"n":5,"np":1,"span":196,"d0":"1874-01-30","d1":"1874-08-14","papers":["HZT"],"pc":{"HZT":5},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":338,"n":4,"np":1,"span":76,"d0":"1882-12-12","d1":"1883-02-26","papers":["HMZ"],"pc":{"HMZ":4},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":243,"n":4,"np":1,"span":94,"d0":"1886-09-02","d1":"1886-12-05","papers":["HZF"],"pc":{"HZF":4},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":117,"n":4,"np":1,"span":154,"d0":"1886-07-06","d1":"1886-12-07","papers":["HZF"],"pc":{"HZF":4},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":263,"n":4,"np":1,"span":91,"d0":"1876-08-09","d1":"1876-11-08","papers":["MGD"],"pc":{"MGD":4},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":297,"n":4,"np":1,"span":58,"d0":"1888-07-03","d1":"1888-08-30","papers":["HZF"],"pc":{"HZF":4},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":362,"n":4,"np":1,"span":139,"d0":"1887-08-25","d1":"1888-01-11","papers":["HZF"],"pc":{"HZF":4},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":303,"n":4,"np":1,"span":56,"d0":"1881-05-17","d1":"1881-07-12","papers":["HZF"],"pc":{"HZF":4},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":137,"n":4,"np":1,"span":56,"d0":"1880-01-14","d1":"1880-03-10","papers":["MGD"],"pc":{"MGD":4},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":318,"n":3,"np":2,"span":15,"d0":"1883-12-06","d1":"1883-12-21","papers":["HMZ","MGD"],"pc":{"HMZ":1,"MGD":2},"pol":false,"anypol":false,"score":0.3,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":13,"n":4,"np":1,"span":129,"d0":"1886-05-02","d1":"1886-09-08","papers":["HZF"],"pc":{"HZF":4},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":358,"n":4,"np":1,"span":119,"d0":"1877-05-09","d1":"1877-09-05","papers":["MGD"],"pc":{"MGD":4},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":149,"n":4,"np":1,"span":49,"d0":"1882-03-14","d1":"1882-05-02","papers":["HZF"],"pc":{"HZF":4},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":249,"n":4,"np":1,"span":49,"d0":"1874-03-04","d1":"1874-04-22","papers":["HLB"],"pc":{"HLB":4},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":279,"n":4,"np":1,"span":112,"d0":"1880-01-09","d1":"1880-04-30","papers":["HLB"],"pc":{"HLB":4},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":71,"n":4,"np":1,"span":104,"d0":"1882-12-26","d1":"1883-04-09","papers":["HMZ"],"pc":{"HMZ":4},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":308,"n":4,"np":1,"span":42,"d0":"1882-07-11","d1":"1882-08-22","papers":["HZF"],"pc":{"HZF":4},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":189,"n":4,"np":1,"span":35,"d0":"1874-10-28","d1":"1874-12-02","papers":["HLB"],"pc":{"HLB":4},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":250,"n":3,"np":2,"span":9,"d0":"1877-11-14","d1":"1877-11-23","papers":["HZT","MGD"],"pc":{"HZT":2,"MGD":1},"pol":false,"anypol":true,"score":0.75,"sub":true,"dir":"n/a","type":"topical-only","scored":true},{"id":55,"n":4,"np":1,"span":28,"d0":"1882-09-19","d1":"1882-10-17","papers":["HZF"],"pc":{"HZF":4},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":356,"n":4,"np":1,"span":28,"d0":"1878-06-19","d1":"1878-07-17","papers":["MGD"],"pc":{"MGD":4},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":380,"n":2,"np":2,"span":95,"d0":"1881-01-05","d1":"1881-04-10","papers":["HZT","MGD"],"pc":{"MGD":1,"HZT":1},"pol":false,"anypol":false,"score":0.2,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":61,"n":3,"np":1,"span":90,"d0":"1888-05-31","d1":"1888-08-29","papers":["HZF"],"pc":{"HZF":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":284,"n":3,"np":1,"span":85,"d0":"1878-06-21","d1":"1878-09-14","papers":["HLB"],"pc":{"HLB":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":360,"n":2,"np":2,"span":85,"d0":"1875-09-15","d1":"1875-12-09","papers":["HZT","MGD"],"pc":{"HZT":1,"MGD":1},"pol":false,"anypol":false,"score":0.2,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":237,"n":3,"np":1,"span":84,"d0":"1880-04-16","d1":"1880-07-09","papers":["HZT"],"pc":{"HZT":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":370,"n":3,"np":1,"span":83,"d0":"1879-01-08","d1":"1879-04-01","papers":["HMZ"],"pc":{"HMZ":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":217,"n":3,"np":1,"span":80,"d0":"1882-03-27","d1":"1882-06-15","papers":["HLB"],"pc":{"HLB":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":163,"n":3,"np":2,"span":7,"d0":"1880-09-23","d1":"1880-09-30","papers":["HMZ","HZF"],"pc":{"HMZ":1,"HZF":2},"pol":false,"anypol":false,"score":0.2,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":30,"n":3,"np":1,"span":78,"d0":"1878-07-17","d1":"1878-10-03","papers":["MGD"],"pc":{"MGD":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":182,"n":2,"np":2,"span":72,"d0":"1883-08-08","d1":"1883-10-19","papers":["HMZ","MGD"],"pc":{"HMZ":1,"MGD":1},"pol":false,"anypol":false,"score":0.2,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":296,"n":3,"np":1,"span":70,"d0":"1875-01-22","d1":"1875-04-02","papers":["HZT"],"pc":{"HZT":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":135,"n":3,"np":1,"span":70,"d0":"1882-07-05","d1":"1882-09-13","papers":["MGD"],"pc":{"MGD":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":165,"n":2,"np":2,"span":68,"d0":"1874-11-06","d1":"1875-01-13","papers":["HLB","HZT"],"pc":{"HLB":1,"HZT":1},"pol":false,"anypol":false,"score":0.3,"sub":true,"dir":"n/a","type":"topical-only","scored":true},{"id":125,"n":2,"np":2,"span":65,"d0":"1874-01-21","d1":"1874-03-27","papers":["HZT","MGD"],"pc":{"HZT":1,"MGD":1},"pol":false,"anypol":false,"score":0.1,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":25,"n":3,"np":1,"span":63,"d0":"1888-06-11","d1":"1888-08-13","papers":["HZF"],"pc":{"HZF":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":219,"n":3,"np":1,"span":57,"d0":"1876-04-25","d1":"1876-06-21","papers":["HLB"],"pc":{"HLB":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":76,"n":3,"np":1,"span":56,"d0":"1882-06-27","d1":"1882-08-22","papers":["HMZ"],"pc":{"HMZ":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":110,"n":3,"np":1,"span":56,"d0":"1880-04-27","d1":"1880-06-22","papers":["HMZ"],"pc":{"HMZ":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":253,"n":3,"np":1,"span":56,"d0":"1881-05-11","d1":"1881-07-06","papers":["MGD"],"pc":{"MGD":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":224,"n":3,"np":1,"span":161,"d0":"1887-01-03","d1":"1887-06-13","papers":["HZF"],"pc":{"HZF":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":332,"n":3,"np":1,"span":49,"d0":"1874-12-09","d1":"1875-01-27","papers":["MGD"],"pc":{"MGD":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":31,"n":2,"np":2,"span":49,"d0":"1875-11-17","d1":"1876-01-05","papers":["HLB","MGD"],"pc":{"MGD":1,"HLB":1},"pol":false,"anypol":false,"score":0.15,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":179,"n":3,"np":1,"span":49,"d0":"1881-03-09","d1":"1881-04-27","papers":["MGD"],"pc":{"MGD":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":29,"n":3,"np":1,"span":140,"d0":"1884-05-27","d1":"1884-10-14","papers":["HZF"],"pc":{"HZF":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":322,"n":2,"np":2,"span":47,"d0":"1882-09-01","d1":"1882-10-18","papers":["HZT","MGD"],"pc":{"HZT":1,"MGD":1},"pol":false,"anypol":true,"score":0.75,"sub":false,"dir":"external_defense","type":"explicit","scored":true},{"id":316,"n":3,"np":1,"span":121,"d0":"1887-09-02","d1":"1888-01-01","papers":["HZF"],"pc":{"HZF":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":262,"n":3,"np":1,"span":119,"d0":"1877-04-11","d1":"1877-08-08","papers":["MGD"],"pc":{"MGD":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":87,"n":3,"np":1,"span":118,"d0":"1878-10-09","d1":"1879-02-04","papers":["HMZ"],"pc":{"HMZ":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":268,"n":3,"np":1,"span":42,"d0":"1874-01-09","d1":"1874-02-20","papers":["HZT"],"pc":{"HZT":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":323,"n":3,"np":1,"span":112,"d0":"1881-11-02","d1":"1882-02-22","papers":["MGD"],"pc":{"MGD":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":131,"n":3,"np":1,"span":104,"d0":"1875-02-24","d1":"1875-06-08","papers":["MGD"],"pc":{"MGD":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":151,"n":2,"np":2,"span":36,"d0":"1879-11-04","d1":"1879-12-10","papers":["HMZ","MGD"],"pc":{"HMZ":1,"MGD":1},"pol":false,"anypol":false,"score":0.2,"sub":true,"dir":"n/a","type":"topical-only","scored":true},{"id":85,"n":3,"np":1,"span":35,"d0":"1874-12-16","d1":"1875-01-20","papers":["MGD"],"pc":{"MGD":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":198,"n":3,"np":1,"span":93,"d0":"1886-06-23","d1":"1886-09-24","papers":["HZF"],"pc":{"HZF":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":340,"n":3,"np":1,"span":91,"d0":"1879-06-10","d1":"1879-09-09","papers":["HMZ"],"pc":{"HMZ":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":194,"n":2,"np":2,"span":34,"d0":"1878-03-14","d1":"1878-04-17","papers":["HLB","HZT"],"pc":{"HLB":1,"HZT":1},"pol":false,"anypol":false,"score":0.1,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":241,"n":3,"np":1,"span":30,"d0":"1887-08-01","d1":"1887-08-31","papers":["HZF"],"pc":{"HZF":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":191,"n":2,"np":2,"span":28,"d0":"1883-05-18","d1":"1883-06-15","papers":["HMZ","HZT"],"pc":{"HMZ":1,"HZT":1},"pol":false,"anypol":false,"score":0.1,"sub":true,"dir":"n/a","type":"topical-only","scored":true},{"id":210,"n":3,"np":1,"span":28,"d0":"1885-07-28","d1":"1885-08-25","papers":["HZF"],"pc":{"HZF":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":97,"n":3,"np":1,"span":28,"d0":"1879-07-15","d1":"1879-08-12","papers":["HMZ"],"pc":{"HMZ":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":300,"n":3,"np":1,"span":27,"d0":"1887-12-30","d1":"1888-01-26","papers":["HZF"],"pc":{"HZF":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":344,"n":2,"np":2,"span":27,"d0":"1882-01-12","d1":"1882-02-08","papers":["HMZ","MGD"],"pc":{"HMZ":1,"MGD":1},"pol":false,"anypol":false,"score":0.2,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":396,"n":2,"np":2,"span":26,"d0":"1883-01-31","d1":"1883-02-26","papers":["HMZ","MGD"],"pc":{"HMZ":1,"MGD":1},"pol":false,"anypol":true,"score":0.85,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":148,"n":2,"np":2,"span":25,"d0":"1883-12-07","d1":"1884-01-01","papers":["HMZ","HZF"],"pc":{"HMZ":1,"HZF":1},"pol":false,"anypol":false,"score":0.2,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":240,"n":4,"np":1,"span":8,"d0":"1888-02-16","d1":"1888-02-24","papers":["HZF"],"pc":{"HZF":4},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":343,"n":2,"np":2,"span":23,"d0":"1876-03-15","d1":"1876-04-07","papers":["HZT","MGD"],"pc":{"HZT":1,"MGD":1},"pol":false,"anypol":false,"score":0.1,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":74,"n":3,"np":2,"span":3,"d0":"1879-09-02","d1":"1879-09-05","papers":["HLB","HMZ"],"pc":{"HMZ":2,"HLB":1},"pol":true,"anypol":true,"score":0.9,"sub":true,"dir":"internal","type":"explicit","scored":true},{"id":270,"n":3,"np":1,"span":21,"d0":"1881-07-19","d1":"1881-08-09","papers":["HZF"],"pc":{"HZF":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":47,"n":3,"np":1,"span":21,"d0":"1874-12-09","d1":"1874-12-30","papers":["HLB"],"pc":{"HLB":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":27,"n":3,"np":1,"span":21,"d0":"1887-05-12","d1":"1887-06-02","papers":["HZF"],"pc":{"HZF":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":281,"n":3,"np":1,"span":21,"d0":"1875-09-15","d1":"1875-10-06","papers":["HLB"],"pc":{"HLB":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":271,"n":4,"np":1,"span":7,"d0":"1881-01-11","d1":"1881-01-18","papers":["HZF"],"pc":{"HZF":4},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":307,"n":3,"np":1,"span":19,"d0":"1883-09-25","d1":"1883-10-14","papers":["HZF"],"pc":{"HZF":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":38,"n":2,"np":2,"span":16,"d0":"1882-07-18","d1":"1882-08-03","papers":["HLB","HMZ"],"pc":{"HLB":1,"HMZ":1},"pol":false,"anypol":false,"score":0.2,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":275,"n":2,"np":2,"span":16,"d0":"1874-07-29","d1":"1874-08-14","papers":["HZF","HZT"],"pc":{"HZF":1,"HZT":1},"pol":false,"anypol":false,"score":0.1,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":248,"n":3,"np":1,"span":15,"d0":"1875-06-08","d1":"1875-06-23","papers":["HLB"],"pc":{"HLB":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":337,"n":3,"np":1,"span":14,"d0":"1883-11-12","d1":"1883-11-26","papers":["HMZ"],"pc":{"HMZ":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":98,"n":3,"np":1,"span":14,"d0":"1878-11-06","d1":"1878-11-20","papers":["HMZ"],"pc":{"HMZ":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":230,"n":3,"np":1,"span":14,"d0":"1879-07-09","d1":"1879-07-23","papers":["MGD"],"pc":{"MGD":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":69,"n":3,"np":1,"span":14,"d0":"1882-08-01","d1":"1882-08-15","papers":["HZF"],"pc":{"HZF":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":130,"n":3,"np":1,"span":14,"d0":"1875-09-08","d1":"1875-09-22","papers":["MGD"],"pc":{"MGD":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":82,"n":3,"np":1,"span":14,"d0":"1879-05-20","d1":"1879-06-03","papers":["HMZ"],"pc":{"HMZ":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":59,"n":3,"np":1,"span":14,"d0":"1882-01-17","d1":"1882-01-31","papers":["HZF"],"pc":{"HZF":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":45,"n":2,"np":2,"span":13,"d0":"1876-08-31","d1":"1876-09-13","papers":["HLB","HZT"],"pc":{"HZT":1,"HLB":1},"pol":false,"anypol":false,"score":0.2,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":283,"n":2,"np":1,"span":89,"d0":"1881-03-25","d1":"1881-06-22","papers":["HLB"],"pc":{"HLB":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":328,"n":2,"np":1,"span":85,"d0":"1879-05-27","d1":"1879-08-20","papers":["MGD"],"pc":{"MGD":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":280,"n":2,"np":1,"span":84,"d0":"1878-11-01","d1":"1879-01-24","papers":["HLB"],"pc":{"HLB":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":225,"n":2,"np":1,"span":80,"d0":"1883-05-18","d1":"1883-08-06","papers":["HMZ"],"pc":{"HMZ":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":429,"n":2,"np":2,"span":7,"d0":"1876-06-28","d1":"1876-07-05","papers":["HLB","MGD"],"pc":{"HLB":1,"MGD":1},"pol":true,"anypol":true,"score":0.95,"sub":false,"dir":"internal","type":"explicit","scored":true},{"id":277,"n":2,"np":2,"span":7,"d0":"1876-01-26","d1":"1876-02-02","papers":["HLB","HZF"],"pc":{"HZF":1,"HLB":1},"pol":false,"anypol":false,"score":0.1,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":346,"n":2,"np":1,"span":78,"d0":"1878-05-16","d1":"1878-08-02","papers":["HZT"],"pc":{"HZT":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":167,"n":2,"np":1,"span":77,"d0":"1881-12-02","d1":"1882-02-17","papers":["HZT"],"pc":{"HZT":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":0,"n":2,"np":1,"span":76,"d0":"1887-11-21","d1":"1888-02-05","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":34,"n":2,"np":1,"span":71,"d0":"1874-05-12","d1":"1874-07-22","papers":["MGD"],"pc":{"MGD":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":107,"n":2,"np":1,"span":71,"d0":"1885-01-05","d1":"1885-03-17","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":17,"n":2,"np":1,"span":70,"d0":"1887-09-11","d1":"1887-11-20","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":140,"n":2,"np":1,"span":70,"d0":"1881-06-08","d1":"1881-08-17","papers":["MGD"],"pc":{"MGD":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":66,"n":2,"np":1,"span":67,"d0":"1886-11-07","d1":"1887-01-13","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":92,"n":2,"np":1,"span":66,"d0":"1888-01-24","d1":"1888-03-30","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":339,"n":2,"np":1,"span":65,"d0":"1880-09-05","d1":"1880-11-09","papers":["HMZ"],"pc":{"HMZ":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":106,"n":2,"np":1,"span":63,"d0":"1880-02-13","d1":"1880-04-16","papers":["HLB"],"pc":{"HLB":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":367,"n":2,"np":1,"span":63,"d0":"1883-05-11","d1":"1883-07-13","papers":["HMZ"],"pc":{"HMZ":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":317,"n":3,"np":1,"span":6,"d0":"1886-05-07","d1":"1886-05-13","papers":["HZF"],"pc":{"HZF":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":26,"n":2,"np":1,"span":61,"d0":"1887-09-06","d1":"1887-11-06","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":254,"n":2,"np":1,"span":58,"d0":"1880-07-20","d1":"1880-09-16","papers":["MGD"],"pc":{"MGD":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":144,"n":2,"np":1,"span":56,"d0":"1881-09-07","d1":"1881-11-02","papers":["MGD"],"pc":{"MGD":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":124,"n":2,"np":1,"span":56,"d0":"1876-05-10","d1":"1876-07-05","papers":["MGD"],"pc":{"MGD":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":329,"n":2,"np":1,"span":55,"d0":"1878-02-20","d1":"1878-04-16","papers":["MGD"],"pc":{"MGD":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":264,"n":2,"np":1,"span":54,"d0":"1886-07-07","d1":"1886-08-30","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":77,"n":2,"np":1,"span":49,"d0":"1881-01-11","d1":"1881-03-01","papers":["HMZ"],"pc":{"HMZ":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":369,"n":2,"np":1,"span":49,"d0":"1879-07-08","d1":"1879-08-26","papers":["HMZ"],"pc":{"HMZ":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":123,"n":2,"np":1,"span":49,"d0":"1878-08-21","d1":"1878-10-09","papers":["HMZ"],"pc":{"HMZ":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":43,"n":2,"np":1,"span":42,"d0":"1879-09-16","d1":"1879-10-28","papers":["HMZ"],"pc":{"HMZ":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":39,"n":2,"np":1,"span":42,"d0":"1882-01-10","d1":"1882-02-21","papers":["HMZ"],"pc":{"HMZ":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":220,"n":2,"np":1,"span":42,"d0":"1874-05-27","d1":"1874-07-08","papers":["HLB"],"pc":{"HLB":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":330,"n":2,"np":1,"span":42,"d0":"1876-09-13","d1":"1876-10-25","papers":["MGD"],"pc":{"MGD":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":265,"n":2,"np":1,"span":42,"d0":"1878-08-28","d1":"1878-10-09","papers":["MGD"],"pc":{"MGD":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":20,"n":2,"np":1,"span":38,"d0":"1883-11-02","d1":"1883-12-10","papers":["HMZ"],"pc":{"HMZ":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":261,"n":2,"np":1,"span":36,"d0":"1886-08-22","d1":"1886-09-27","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":282,"n":2,"np":1,"span":36,"d0":"1874-12-22","d1":"1875-01-27","papers":["HLB"],"pc":{"HLB":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":147,"n":2,"np":1,"span":35,"d0":"1886-11-12","d1":"1886-12-17","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":128,"n":2,"np":1,"span":35,"d0":"1879-08-06","d1":"1879-09-10","papers":["MGD"],"pc":{"MGD":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":291,"n":2,"np":1,"span":35,"d0":"1877-10-24","d1":"1877-11-28","papers":["MGD"],"pc":{"MGD":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":154,"n":2,"np":1,"span":34,"d0":"1888-08-02","d1":"1888-09-05","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":242,"n":3,"np":1,"span":4,"d0":"1887-03-24","d1":"1887-03-28","papers":["HZF"],"pc":{"HZF":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":292,"n":3,"np":1,"span":4,"d0":"1888-12-24","d1":"1888-12-28","papers":["HZF"],"pc":{"HZF":3},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":118,"n":2,"np":1,"span":29,"d0":"1882-04-03","d1":"1882-05-02","papers":["HMZ"],"pc":{"HMZ":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":260,"n":2,"np":1,"span":28,"d0":"1878-03-06","d1":"1878-04-03","papers":["MGD"],"pc":{"MGD":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":201,"n":2,"np":1,"span":28,"d0":"1879-07-16","d1":"1879-08-13","papers":["MGD"],"pc":{"MGD":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":233,"n":2,"np":1,"span":28,"d0":"1876-01-05","d1":"1876-02-02","papers":["MGD"],"pc":{"MGD":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":354,"n":2,"np":1,"span":28,"d0":"1886-07-04","d1":"1886-08-01","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":289,"n":2,"np":1,"span":28,"d0":"1879-10-01","d1":"1879-10-29","papers":["MGD"],"pc":{"MGD":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":108,"n":2,"np":1,"span":28,"d0":"1881-08-30","d1":"1881-09-27","papers":["HMZ"],"pc":{"HMZ":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":102,"n":2,"np":1,"span":25,"d0":"1888-02-05","d1":"1888-03-01","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":327,"n":2,"np":2,"span":3,"d0":"1874-06-09","d1":"1874-06-12","papers":["HZT","MGD"],"pc":{"MGD":1,"HZT":1},"pol":false,"anypol":true,"score":0.85,"sub":false,"dir":"n/a","type":"topical-only","scored":true},{"id":136,"n":2,"np":1,"span":21,"d0":"1880-12-08","d1":"1880-12-29","papers":["MGD"],"pc":{"MGD":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":138,"n":2,"np":1,"span":21,"d0":"1878-12-04","d1":"1878-12-25","papers":["MGD"],"pc":{"MGD":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":363,"n":2,"np":1,"span":21,"d0":"1879-10-31","d1":"1879-11-21","papers":["HLB"],"pc":{"HLB":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":7,"n":2,"np":1,"span":21,"d0":"1879-10-21","d1":"1879-11-11","papers":["HMZ"],"pc":{"HMZ":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":93,"n":2,"np":1,"span":21,"d0":"1884-12-23","d1":"1885-01-13","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":126,"n":2,"np":1,"span":21,"d0":"1879-07-23","d1":"1879-08-13","papers":["MGD"],"pc":{"MGD":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":143,"n":2,"np":1,"span":21,"d0":"1883-05-23","d1":"1883-06-13","papers":["MGD"],"pc":{"MGD":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":267,"n":2,"np":1,"span":20,"d0":"1878-02-08","d1":"1878-02-28","papers":["HZT"],"pc":{"HZT":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":288,"n":2,"np":1,"span":18,"d0":"1886-07-09","d1":"1886-07-27","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":311,"n":2,"np":1,"span":18,"d0":"1886-11-24","d1":"1886-12-12","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":5,"n":2,"np":1,"span":14,"d0":"1883-11-23","d1":"1883-12-07","papers":["HMZ"],"pc":{"HMZ":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":18,"n":2,"np":2,"span":2,"d0":"1883-08-22","d1":"1883-08-24","papers":["HMZ","MGD"],"pc":{"HMZ":1,"MGD":1},"pol":false,"anypol":true,"score":0.72,"sub":true,"dir":"n/a","type":"topical-only","scored":true},{"id":266,"n":2,"np":1,"span":14,"d0":"1874-12-02","d1":"1874-12-16","papers":["MGD"],"pc":{"MGD":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":67,"n":2,"np":1,"span":14,"d0":"1885-11-03","d1":"1885-11-17","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":139,"n":2,"np":1,"span":14,"d0":"1878-05-29","d1":"1878-06-12","papers":["MGD"],"pc":{"MGD":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":368,"n":2,"np":1,"span":14,"d0":"1881-02-15","d1":"1881-03-01","papers":["HMZ"],"pc":{"HMZ":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":166,"n":2,"np":1,"span":14,"d0":"1882-08-11","d1":"1882-08-25","papers":["HZT"],"pc":{"HZT":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":301,"n":2,"np":1,"span":14,"d0":"1885-09-22","d1":"1885-10-06","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":349,"n":2,"np":1,"span":14,"d0":"1888-12-14","d1":"1888-12-28","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":229,"n":2,"np":1,"span":14,"d0":"1880-05-25","d1":"1880-06-08","papers":["HMZ"],"pc":{"HMZ":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":63,"n":2,"np":1,"span":13,"d0":"1886-09-13","d1":"1886-09-26","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":245,"n":2,"np":1,"span":13,"d0":"1882-04-13","d1":"1882-04-26","papers":["MGD"],"pc":{"MGD":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":209,"n":2,"np":1,"span":10,"d0":"1886-07-15","d1":"1886-07-25","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":361,"n":2,"np":1,"span":8,"d0":"1874-01-13","d1":"1874-01-21","papers":["MGD"],"pc":{"MGD":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":64,"n":2,"np":1,"span":7,"d0":"1885-09-15","d1":"1885-09-22","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":278,"n":2,"np":1,"span":7,"d0":"1881-04-01","d1":"1881-04-08","papers":["HLB"],"pc":{"HLB":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":252,"n":2,"np":1,"span":7,"d0":"1883-12-14","d1":"1883-12-21","papers":["HZT"],"pc":{"HZT":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":8,"n":2,"np":1,"span":7,"d0":"1879-07-15","d1":"1879-07-22","papers":["HMZ"],"pc":{"HMZ":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":285,"n":2,"np":1,"span":7,"d0":"1877-09-07","d1":"1877-09-14","papers":["HLB"],"pc":{"HLB":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":90,"n":2,"np":1,"span":7,"d0":"1879-10-28","d1":"1879-11-04","papers":["HMZ"],"pc":{"HMZ":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":2,"n":2,"np":1,"span":7,"d0":"1883-05-28","d1":"1883-06-04","papers":["HMZ"],"pc":{"HMZ":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":180,"n":2,"np":1,"span":7,"d0":"1878-11-27","d1":"1878-12-04","papers":["HMZ"],"pc":{"HMZ":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":357,"n":2,"np":1,"span":7,"d0":"1877-12-12","d1":"1877-12-19","papers":["MGD"],"pc":{"MGD":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":164,"n":2,"np":1,"span":7,"d0":"1879-03-28","d1":"1879-04-04","papers":["HLB"],"pc":{"HLB":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":187,"n":2,"np":1,"span":7,"d0":"1878-08-02","d1":"1878-08-09","papers":["HLB"],"pc":{"HLB":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":142,"n":2,"np":1,"span":7,"d0":"1880-11-24","d1":"1880-12-01","papers":["MGD"],"pc":{"MGD":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":150,"n":2,"np":2,"span":1,"d0":"1880-11-02","d1":"1880-11-03","papers":["HMZ","MGD"],"pc":{"HMZ":1,"MGD":1},"pol":false,"anypol":false,"score":0.2,"sub":true,"dir":"n/a","type":"topical-only","scored":true},{"id":345,"n":2,"np":1,"span":6,"d0":"1879-03-29","d1":"1879-04-04","papers":["HZT"],"pc":{"HZT":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":259,"n":2,"np":1,"span":6,"d0":"1880-10-30","d1":"1880-11-05","papers":["HLB"],"pc":{"HLB":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":196,"n":2,"np":1,"span":6,"d0":"1888-09-13","d1":"1888-09-19","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":60,"n":2,"np":1,"span":5,"d0":"1888-12-11","d1":"1888-12-16","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":23,"n":2,"np":1,"span":5,"d0":"1880-08-31","d1":"1880-09-05","papers":["HMZ"],"pc":{"HMZ":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":251,"n":2,"np":1,"span":3,"d0":"1887-01-17","d1":"1887-01-20","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":48,"n":2,"np":1,"span":2,"d0":"1887-05-25","d1":"1887-05-27","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":213,"n":2,"np":1,"span":1,"d0":"1886-05-20","d1":"1886-05-21","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":309,"n":2,"np":1,"span":0,"d0":"1881-10-18","d1":"1881-10-18","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":312,"n":2,"np":1,"span":0,"d0":"1880-02-03","d1":"1880-02-03","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":109,"n":2,"np":1,"span":0,"d0":"1881-05-10","d1":"1881-05-10","papers":["HMZ"],"pc":{"HMZ":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":24,"n":2,"np":1,"span":0,"d0":"1879-07-30","d1":"1879-07-30","papers":["HMZ"],"pc":{"HMZ":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":272,"n":2,"np":1,"span":0,"d0":"1880-09-16","d1":"1880-09-16","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":313,"n":2,"np":1,"span":0,"d0":"1874-08-05","d1":"1874-08-05","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":223,"n":2,"np":1,"span":0,"d0":"1878-09-24","d1":"1878-09-24","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":222,"n":2,"np":1,"span":0,"d0":"1881-07-19","d1":"1881-07-19","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":211,"n":2,"np":1,"span":0,"d0":"1880-08-03","d1":"1880-08-03","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":212,"n":2,"np":1,"span":0,"d0":"1878-07-23","d1":"1878-07-23","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":221,"n":2,"np":1,"span":0,"d0":"1881-11-22","d1":"1881-11-22","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":319,"n":2,"np":1,"span":0,"d0":"1881-07-26","d1":"1881-07-26","papers":["HMZ"],"pc":{"HMZ":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":305,"n":2,"np":1,"span":0,"d0":"1875-03-10","d1":"1875-03-10","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":302,"n":2,"np":1,"span":0,"d0":"1883-03-20","d1":"1883-03-20","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":304,"n":2,"np":1,"span":0,"d0":"1878-10-09","d1":"1878-10-09","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":156,"n":2,"np":1,"span":0,"d0":"1880-12-14","d1":"1880-12-14","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":120,"n":2,"np":1,"span":0,"d0":"1879-09-30","d1":"1879-09-30","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":216,"n":2,"np":1,"span":0,"d0":"1878-10-23","d1":"1878-10-23","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":294,"n":2,"np":1,"span":0,"d0":"1875-04-14","d1":"1875-04-14","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":89,"n":2,"np":1,"span":0,"d0":"1882-03-07","d1":"1882-03-07","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":78,"n":2,"np":1,"span":0,"d0":"1880-08-17","d1":"1880-08-17","papers":["HMZ"],"pc":{"HMZ":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":153,"n":2,"np":1,"span":0,"d0":"1875-01-06","d1":"1875-01-06","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":159,"n":2,"np":1,"span":0,"d0":"1874-11-04","d1":"1874-11-04","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":41,"n":2,"np":1,"span":0,"d0":"1880-08-25","d1":"1880-08-25","papers":["MGD"],"pc":{"MGD":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":68,"n":2,"np":1,"span":0,"d0":"1883-11-06","d1":"1883-11-06","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":161,"n":2,"np":1,"span":0,"d0":"1881-08-30","d1":"1881-08-30","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":181,"n":2,"np":1,"span":0,"d0":"1877-10-03","d1":"1877-10-03","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":185,"n":2,"np":1,"span":0,"d0":"1875-10-05","d1":"1875-10-05","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":111,"n":2,"np":1,"span":0,"d0":"1878-01-16","d1":"1878-01-16","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":273,"n":2,"np":1,"span":0,"d0":"1878-04-02","d1":"1878-04-02","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false},{"id":293,"n":2,"np":1,"span":0,"d0":"1879-01-21","d1":"1879-01-21","papers":["HZF"],"pc":{"HZF":2},"pol":false,"anypol":false,"score":0.0,"sub":false,"dir":"n/a","type":"n/a","scored":false}];
+
+/* ---------- progress bar + nav ---------- */
+const prog = document.querySelector('#progress > div');
+const navLinks = document.querySelectorAll('#nav a');
+const sections = Array.from(document.querySelectorAll('section'));
+
+function onScroll() {
+  const h = document.documentElement;
+  const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+  prog.style.width = pct + '%';
+  // active nav
+  const mid = h.scrollTop + window.innerHeight * 0.4;
+  let active = sections[0];
+  for (const s of sections) {
+    if (s.offsetTop <= mid) active = s;
+  }
+  navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + active.id));
+}
+window.addEventListener('scroll', onScroll, { passive: true });
+
+/* ---------- reveal on scroll ---------- */
+const io = new IntersectionObserver((entries) => {
+  for (const e of entries) {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      io.unobserve(e.target);
+    }
+  }
+}, { threshold: 0.15 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* ---------- counters ---------- */
+const cio = new IntersectionObserver((entries) => {
+  for (const e of entries) {
+    if (e.isIntersecting) {
+      const el = e.target;
+      const target = +el.dataset.counter;
+      const dur = 1200;
+      const t0 = performance.now();
+      function step(t) {
+        const k = Math.min(1, (t - t0) / dur);
+        el.textContent = Math.round(target * (1 - Math.pow(1 - k, 3)));
+        if (k < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+      cio.unobserve(el);
+    }
+  }
+}, { threshold: 0.6 });
+document.querySelectorAll('[data-counter]').forEach(el => cio.observe(el));
+
+/* ---------- HERO viz: date stream ---------- */
+function dateToFrac(d, y0, y1) {
+  const [y,m,day] = d.split('-').map(Number);
+  const f = y + (m-1)/12 + (day-1)/365;
+  return (f - y0) / (y1 - y0);
+}
+function renderDateStream() {
+  const svg = document.getElementById('date-stream-svg');
+  const W = 1400, H = 740;
+  // wider left padding makes room for an on-side legend
+  const PAD_L = 200, PAD_R = 60, PAD_T = 184, PAD_B = 130;
+  const y0 = 1874, y1 = 1885; // cropped window — relevant decade
+
+  // Annotation table — peak-year disputes (manually curated)
+  const ANNOT = [
+    { yStart: 1875, yEnd: 1876, label: 'הלבנון מול המגיד', tid: 432 },
+    { yStart: 1879, yEnd: 1880, label: 'סוקולוב/בן־יהודה: לאומיות ולשון', tid: 381 },
+    { yStart: 1881, yEnd: 1882, label: 'ראשית חיבת־ציון בעיתונות', tid: 412 },
+    { yStart: 1882, yEnd: 1883, label: 'טיסה־אסלאר: עלילת הדם', tid: 406 },
+  ];
+
+  // Newspapers shown in a bottom strip
+  const PAPERS = [
+    { code: 'HZF', name: 'הצפירה',        d0: '1874-07-15', d1: '1888-12-28', color: '#8a2418' },
+    { code: 'MGD', name: 'המגיד',         d0: '1874-01-13', d1: '1883-12-27', color: '#1f3d6b' },
+    { code: 'HMZ', name: 'המליץ',         d0: '1878-07-23', d1: '1883-12-31', color: '#2d5a5a' },
+    { code: 'HZT', name: 'הצפירה־הצעירה', d0: '1874-01-09', d1: '1883-12-28', color: '#5a3a2a' },
+    { code: 'HLB', name: 'הלבנון',        d0: '1874-01-14', d1: '1882-09-21', color: '#4a2a5a' },
+  ];
+
+  // Filter to in-window threads
+  const ths = THREADS.filter(t => t.d0 && t.d1 && t.d1 >= '1874-01-01' && t.d0 < '1885-01-01');
+  // Sort: polemic first, then unscored last; within each, by start date
+  ths.sort((a,b) => {
+    const pa = a.pol ? 0 : (a.scored ? 1 : 2);
+    const pb = b.pol ? 0 : (b.scored ? 1 : 2);
+    if (pa !== pb) return pa - pb;
+    return a.d0.localeCompare(b.d0);
+  });
+  const N = ths.length;
+  const rowH = (H - PAD_T - PAD_B) / N;
+
+  const X = (d) => PAD_L + Math.max(0, Math.min(1, dateToFrac(d, y0, y1))) * (W - PAD_L - PAD_R);
+
+  // year-density (polemic threads active per year) for top histogram
+  const yearDensity = {};
+  for (let y = y0; y < y1; y++) yearDensity[y] = 0;
+  THREADS.filter(t => t.pol).forEach(t => {
+    const a = Math.max(y0, +t.d0.slice(0,4));
+    const b = Math.min(y1-1, +t.d1.slice(0,4));
+    for (let y = a; y <= b; y++) yearDensity[y]++;
+  });
+  const maxDens = Math.max(...Object.values(yearDensity), 1);
+
+  let out = '';
+
+  // ---- side legend (top-left margin, out of the way of the axis) ----
+  const LEG_X = 16, LEG_Y = 38;
+  out += `<g font-family="Heebo" font-size="13" fill="#3a3a3a">
+    <line x1="${LEG_X}" y1="${LEG_Y}" x2="${LEG_X+30}" y2="${LEG_Y}" stroke="#8a2418" stroke-width="3" stroke-linecap="round"/>
+    <text x="${LEG_X+38}" y="${LEG_Y+4}">פולמוס (קריאה הדוקה)</text>
+    <line x1="${LEG_X}" y1="${LEG_Y+24}" x2="${LEG_X+30}" y2="${LEG_Y+24}" stroke="#6b6354" stroke-width="1.6" opacity="0.5"/>
+    <text x="${LEG_X+38}" y="${LEG_Y+28}">לא־פולמוס</text>
+    <line x1="${LEG_X}" y1="${LEG_Y+48}" x2="${LEG_X+30}" y2="${LEG_Y+48}" stroke="#c9bfa6" stroke-width="1.6"/>
+    <text x="${LEG_X+38}" y="${LEG_Y+52}">לא־הוכרע</text>
+  </g>`;
+
+  // ---- dispute annotations (top, above histogram) ----
+  // Sort by mid-x so the alternation pattern is stable in time order.
+  // ANN_Y must leave headroom for the upper alternating row (labelY = ANN_Y - 40).
+  const ANN_Y = 62;
+  const sortedAnn = [...ANNOT].map(a => ({
+    a,
+    xs: X(`${a.yStart}-01-01`),
+    xe: X(`${a.yEnd+1}-01-01`),
+  })).sort((p,q) => (p.xs+p.xe)/2 - (q.xs+q.xe)/2);
+  // Alternate label y-level to avoid collisions when annotations are adjacent.
+  sortedAnn.forEach((it, i) => {
+    const { a, xs, xe } = it;
+    const xMid = (xs + xe) / 2;
+    const lvl = i % 2;           // 0 = upper line, 1 = lower line
+    const labelY = ANN_Y - 22 - lvl * 18;
+    const leaderTop = labelY + 4;
+    // leader line from label baseline down to bracket top
+    out += `<line x1="${xMid}" y1="${leaderTop}" x2="${xMid}" y2="${ANN_Y+4}" stroke="#8a2418" stroke-width="0.6" opacity="0.55" />`;
+    // bracket spanning the year range
+    out += `<path d="M ${xs} ${ANN_Y+12} L ${xs} ${ANN_Y+4} L ${xe} ${ANN_Y+4} L ${xe} ${ANN_Y+12}"
+      fill="none" stroke="#8a2418" stroke-width="1" />`;
+    // label
+    out += `<text x="${xMid}" y="${labelY}" font-family="Frank Ruhl Libre" font-size="15" font-weight="700" fill="#8a2418" text-anchor="middle">${a.label}</text>`;
+  });
+
+  // ---- density histogram ----
+  const HIST_H = 70;
+  const HIST_Y = 90;
+  for (let y = y0; y < y1; y++) {
+    const x0 = X(`${y}-01-01`);
+    const x1 = X(`${y+1}-01-01`);
+    const h = (yearDensity[y] / maxDens) * HIST_H;
+    out += `<rect x="${x0+1}" y="${HIST_Y + HIST_H - h}" width="${x1-x0-2}" height="${h}" fill="#8a2418" opacity="0.7" />`;
+    out += `<text x="${(x0+x1)/2}" y="${HIST_Y + HIST_H - h - 4}" font-family="IBM Plex Mono" font-size="13" fill="#6b6354" text-anchor="middle">${yearDensity[y]}</text>`;
+  }
+
+  // ---- year gridlines & labels ----
+  const AXIS_Y = H - PAD_B - 14; // axis label baseline
+  for (let y = y0; y <= y1; y++) {
+    const x = X(`${y}-01-01`);
+    out += `<line class="ds-year-tick" x1="${x}" y1="${PAD_T - 8}" x2="${x}" y2="${H - PAD_B - 4}" stroke-dasharray="2,3" />`;
+    if (y < y1) {
+      const xMid = (x + X(`${y+1}-01-01`)) / 2;
+      out += `<text class="ds-year-label" x="${xMid}" y="${AXIS_Y}" text-anchor="middle" font-size="14">${y}</text>`;
+    }
+  }
+
+  // section header for threads
+
+  // ---- threads as horizontal bars ----
+  ths.forEach((t, i) => {
+    const x0 = X(t.d0);
+    const x1 = X(t.d1);
+    const y = PAD_T + i * rowH + rowH / 2;
+    const cls = t.pol ? 'polemic' : (t.scored ? 'nonpol' : 'unscored');
+    const w = Math.max(3, x1 - x0);
+    const sw = t.pol ? Math.max(2.2, rowH * 0.7) : Math.max(1, rowH * 0.5);
+    out += `<line class="ds-thread ${cls}" x1="${x0}" y1="${y}" x2="${x0 + w}" y2="${y}" stroke-linecap="round" stroke-width="${sw}" />`;
+    if (t.pol) {
+      out += `<circle cx="${x0}" cy="${y}" r="${Math.max(1.6, sw*0.55)}" fill="#8a2418" />`;
+      out += `<circle cx="${x0 + w}" cy="${y}" r="${Math.max(1.4, sw*0.45)}" fill="#8a2418" opacity="0.7" />`;
+    }
+  });
+
+  // ---- newspaper presence strip (bottom) ----
+  const NS_Y0 = H - PAD_B + 18;
+  const NS_ROW = 16;
+  PAPERS.forEach((p, i) => {
+    const yy = NS_Y0 + i * NS_ROW;
+    const xa = X(p.d0 < `${y0}-01-01` ? `${y0}-01-01` : p.d0);
+    const xb = X(p.d1 > `${y1}-01-01` ? `${y1}-01-01` : p.d1);
+    out += `<rect x="${xa}" y="${yy-5}" width="${xb-xa}" height="9" fill="${p.color}" opacity="0.55" rx="2"/>`;
+    out += `<text x="${PAD_L - 12}" y="${yy+3}" font-family="Heebo" font-size="13" fill="#3a3a3a" text-anchor="end">${p.name}</text>`;
+  });
+
+  svg.innerHTML = out;
+}
+
+/* network viz removed — timeline-only hero */
+function _renderNetwork_removed() {
+  const svg = document.getElementById('network-svg');
+  const W = 1200, H = 480;
+  const PAPERS = ['HMZ','HZF','HZT','MGD','HLB'];
+  const PAPER_NAMES = {HMZ:'המליץ', HZF:'הצפירה', HZT:'הצפירה־הצעירה', MGD:'המגיד', HLB:'הלבנון'};
+  const COLOR = {HMZ:'#2d5a5a', HZF:'#8a2418', HZT:'#5a3a2a', MGD:'#1f3d6b', HLB:'#4a2a5a'};
+
+  // Count polemic threads connecting each pair of papers
+  const pairCount = {};
+  const nodeCount = {};
+  PAPERS.forEach(p => nodeCount[p] = 0);
+  THREADS.filter(t => t.pol).forEach(t => {
+    const ps = t.papers.filter(p => PAPERS.includes(p));
+    ps.forEach(p => nodeCount[p]++);
+    for (let i = 0; i < ps.length; i++) {
+      for (let j = i+1; j < ps.length; j++) {
+        const key = [ps[i],ps[j]].sort().join('|');
+        pairCount[key] = (pairCount[key] || 0) + 1;
+      }
+    }
+  });
+
+  // Positions: pentagon
+  const cx = W/2, cy = H/2 + 10, R = 170;
+  const pos = {};
+  PAPERS.forEach((p, i) => {
+    const a = -Math.PI/2 + i * (2*Math.PI/5);
+    pos[p] = { x: cx + R * Math.cos(a), y: cy + R * Math.sin(a) };
+  });
+
+  let out = '';
+  // edges
+  const maxC = Math.max(...Object.values(pairCount), 1);
+  Object.entries(pairCount).forEach(([key, c]) => {
+    const [a, b] = key.split('|');
+    const p1 = pos[a], p2 = pos[b];
+    const t = c / maxC;
+    const w = 1 + t * 9;
+    const cls = c > maxC * 0.5 ? 'net-edge' : (c > maxC * 0.2 ? 'net-edge-mid' : 'net-edge-low');
+    out += `<line class="${cls}" x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke-width="${w}" />`;
+    // label
+    const mx = (p1.x + p2.x)/2, my = (p1.y + p2.y)/2;
+    if (c >= 3) {
+      out += `<text x="${mx}" y="${my}" font-family="IBM Plex Mono" font-size="11" fill="#8a2418" text-anchor="middle" dy="-3">${c}</text>`;
+    }
+  });
+  // nodes
+  const maxN = Math.max(...Object.values(nodeCount), 1);
+  PAPERS.forEach(p => {
+    const { x, y } = pos[p];
+    const r = 22 + (nodeCount[p] / maxN) * 28;
+    out += `<g class="net-node">
+      <circle cx="${x}" cy="${y}" r="${r}" fill="${COLOR[p]}" />
+      <text x="${x}" y="${y - 4}" fill="#fff">${PAPER_NAMES[p]}</text>
+      <text x="${x}" y="${y + 14}" class="count" fill="#fff" opacity="0.85">${nodeCount[p]} חוטים</text>
+    </g>`;
+  });
+  // title
+  out += `<text x="${W/2}" y="30" text-anchor="middle" font-family="Heebo" font-size="13" fill="#3a3a3a">צמתים: מספר חוטים פולמיים שהעיתון מופיע בהם · קשתות: שיתופי־חוט בין שני עיתונים</text>`;
+  svg.innerHTML = out;
+}
+
+renderDateStream();
+onScroll();
+
+</script>
+</body>
+</html>
