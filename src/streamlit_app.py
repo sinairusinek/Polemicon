@@ -510,9 +510,14 @@ if view_mode == "Thread Browser":
                     warnings.append("📚 documented")
 
         with col.container(border=True):
-            st.markdown(f"### {emoji} Thread #{tid}")
             if topic:
-                st.markdown(f"<small>{topic}</small>", unsafe_allow_html=True)
+                st.markdown(f"### {emoji} {topic}")
+                st.markdown(
+                    f"<small style='color:#666;'>Thread #{tid}</small>",
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.markdown(f"### {emoji} Thread #{tid}")
             st.markdown(
                 f"<small style='color:#666;'>{n_docs} docs · {n_pap} papers · {span}d</small>",
                 unsafe_allow_html=True,
