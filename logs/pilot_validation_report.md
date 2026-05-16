@@ -382,3 +382,37 @@ Building the egeret_3442 demo to presentation-grade also surfaced three UX patte
 
 The pilot's "two projects" synthesis above argues that press-polemic and BY-enrichment are different downstream tasks. These three findings show that the *shared infrastructure layer* under both projects has more scope than just NER + reference extraction: it also needs (1) press-archive segmentation correction, (2) press-archive OCR quality control, and (3) cross-corpus pseudonym resolution. Each of the two projects can ship usefully without the full infrastructure, but the infrastructure investment is what compounds across both.
 
+## Findings surfaced during press-polemic demo construction (2026-05-16)
+
+*Working artifact: `logs/demos/demo_press_polemic_browser.html` — a 3-case browser presenting threads #381 (literature/language polemic, 1879–80), #395 (First Aliyah press dynamics, 1883–84), and #193 (Hebron rabbinate polemic, 1879–80).*
+
+The press-polemic demo is the sibling artifact to the egeret_3442 demo: same proposition (presentation-grade mockup as proposal-to-partner), different audience (press historians rather than BY editors), and a deliberately different visual identity (cream/ink-black newspaper masthead aesthetic, not BY burgundy). Building it surfaced a parallel set of findings about JPress data quality, plus several UX patterns the press project should carry forward.
+
+### 1. JPress URL strategy: issue-level is durable, article-level is not
+
+The corpus carries a `JPRESSlink` field for ~73% of articles (51/70 across the three case threads); the remaining 27% can be reconstructed from `article_id` (pattern `{paper}-{YYYY}-{MM}-{DD}-{page}_toc_{N}` → `https://www.nli.org.il/he/newspapers/{paper}/{Y}/{M}/{D}/{page}/article/{N}`). **However, direct verification on three articles showed that the article-level URLs frequently drift**: press_64962 and press_12970 land on the correct *issue page* but a different article number than ours; press_52706 returns a 404 on the article path entirely (the correct article turns out to be /article/7, not /article/13 as our segmentation says). The cause is the same as finding #1 of the egeret_3442 demo — JPress has re-segmented articles since 2021 and existing OLIVE article IDs no longer round-trip.
+
+**Decision for this demo.** Build links at the **issue level** (drop `/article/{N}`), so every link lands the reader on the correct newspaper-day-page from which they can scroll to find the article. The user-facing link is *"פתחו את הגליון באתר העיתונות היהודית ההיסטורית"* — explicitly an issue-level pointer, not an article one.
+
+**Post-pilot implication.** Same as finding #1 of the egeret demo: an article-boundary correction layer at OCR-box level is post-pilot infrastructure work. In the meantime, all cross-corpus links from the project should default to issue-level URLs.
+
+### 2. Per-doc lede generation from existing summaries — no new LLM call needed
+
+Each node in the diachronic-network visualization carries a one-to-two-sentence lede that surfaces as a pinned tooltip on click. Initial implementation used the first sentence of the cleaned text as the lede — mechanical and often unrepresentative. Final implementation reuses `data/thread_doc_summaries.parquet` (per-doc summaries already generated during the pilot, three models per doc), picks the best-available model output (Opus > Sonnet > Gemini Flash 3 fallback), and appends a sentence built mechanically from `rebuttal_edges` describing the doc's role in the thread (e.g., "משיב על 'מפני תקון העולם' (HMZ, 1883-06)"). No new LLM calls.
+
+The hierarchy-of-best-summary pattern is generalizable: any per-doc display in any future view (Streamlit, JSONL export, paper exhibit) should reuse `thread_doc_summaries.parquet` rather than re-generating.
+
+### 3. UX patterns proven by the press demo
+
+Building the 3-case demo to presentation grade exercised several UX patterns the production platform should adopt:
+
+- **AI verdict behind a button, with full narratives.** The collapsible *"איך מודלי הבינה המלאכותית קראו את החוט?"* button hides per-model scores by default and reveals, on click, each model's actual `narrative` text (Opus, Sonnet, Gemini) alongside score and Hebrew topic label. The dissenting model (when one model's score is ≥0.4 below the others) is auto-tagged "דעת מיעוט" in gold. This makes the COUNTERWEIGHT arbitration (live for case 395) legible to a humanities reader without imposing numeric judgment on them.
+- **Diachronic network as single primary visualization** (replacing separate timeline + network). Papers as horizontal swimlanes, time as x-axis, document size proportional to per-doc polemic intensity, rebuttal edges as arcs color-coded by type (responds / attacks / defends / cites). Renders cross-paper conversation as visible structure rather than table rows.
+- **Pinned tooltip with lede on node click** (vs. transient hover tooltip). Separates "what is this article?" (the lede, pinned) from "read it" (the reading panel below). Arrow keys and prev/next buttons move the pin along with the reading panel, so users can walk the thread chronologically while reading lede chains.
+- **Entity sidebar shows only ישויות בטקסט; modal מבט־על shows all-thread entities with back-links** to docs where they appear. Keeps the in-text sidebar uncluttered while preserving access to the full case-level cast.
+- **Uncertain places as both gold-dashed map pins and *הזמנה למחקר* cards.** Geocoding ambiguity (e.g., זאטישע — multiple 19th-century settlements of that name in the Pale) is surfaced as a research question rather than buried in a footnote. Same pattern as the BY demo's empty-bibliography handling: a gap is an invitation, not an absence.
+
+### 4. Visual identity choice: distinct palette per audience
+
+The press demo deliberately adopts a different visual identity from the BY demo — aged-newsprint cream background (`#f6f1e6`), ink-black headlines, brick-red accents, Frank Ruhl Libre + IBM Plex Mono — to signal that the press-polemic project and the BY-enrichment project are *different artifacts for different audiences*, even though they share design conventions (provenance toggle, invitation-to-research, mockup banner, RTL Hebrew throughout). This is consistent with the "two projects" framing in the pilot synthesis above: shared infrastructure, separable products.
+

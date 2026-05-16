@@ -1,0 +1,1862 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>דפדפן הפולמוס בעיתונות העברית — תצוגה־מוצעת</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700;800&family=Heebo:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<style>
+  :root {
+    /* press-archive palette — distinct from BY palette */
+    --ink:        #1a1a1a;
+    --paper:      #f6f1e6;     /* aged newsprint */
+    --paper-2:    #efe7d4;
+    --rule:       #c9bfa6;
+    --rule-2:     #a89c7e;
+    --brick:      #8a2418;     /* ink-red headline accent */
+    --brick-soft: #b04a3a;
+    --teal:       #2d5a5a;     /* cool secondary */
+    --gold:       #a0780f;
+    --muted:      #6b6354;
+    --soft:       #fbf7eb;
+    /* paper-swimlane colors */
+    --HMZ: #2d5a5a;
+    --HZF: #8a2418;
+    --HZT: #5a3a2a;
+    --MGD: #1f3d6b;
+    --HLB: #4a2a5a;
+    /* edge types */
+    --e-responds: #2d5a5a;
+    --e-attacks:  #8a2418;
+    --e-defends:  #a0780f;
+    --e-cites:    #6b6354;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Heebo', 'Arial Hebrew', Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  a { color: var(--brick); text-decoration: none; border-bottom: 1px dotted var(--brick); }
+  a:hover { color: var(--ink); }
+  h1, h2, h3, h4 { font-family: 'Frank Ruhl Libre', serif; font-weight: 700; line-height: 1.2; margin: 0 0 8px; }
+  code, .mono { font-family: 'IBM Plex Mono', monospace; font-size: 0.9em; }
+
+  /* mockup banner */
+  .mockup-banner {
+    background: #fff4cc; color: #5a4400;
+    border-bottom: 2px solid #d6b94a;
+    padding: 8px 24px; font-size: 13px; text-align: center; font-weight: 700;
+  }
+  .mockup-banner .small { font-weight: 400; opacity: 0.85; margin-inline-start: 12px; }
+
+  /* site header — masthead style */
+  header.masthead {
+    background: var(--paper);
+    border-bottom: 4px double var(--ink);
+    padding: 22px 32px 18px;
+  }
+  header.masthead .title-row { display: flex; align-items: baseline; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  header.masthead h1 {
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 38px; font-weight: 800;
+    color: var(--ink); margin: 0;
+    letter-spacing: -0.5px;
+  }
+  header.masthead .subtitle {
+    font-size: 14px; color: var(--muted); font-style: italic;
+    border-inline-start: 3px solid var(--brick);
+    padding-inline-start: 10px; margin-top: 4px;
+  }
+  header.masthead nav { font-size: 13px; color: var(--muted); display: flex; gap: 16px; }
+  header.masthead nav a { color: var(--muted); border: none; }
+  header.masthead nav a:hover { color: var(--brick); }
+  header.masthead .meta-line {
+    margin-top: 14px; font-size: 12px; color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    border-top: 1px solid var(--rule); padding-top: 8px;
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  }
+
+  /* intro */
+  .intro {
+    max-width: 1180px; margin: 0 auto;
+    padding: 22px 32px 0;
+    font-size: 15px; color: var(--ink);
+  }
+  .intro p { margin: 0 0 10px; }
+  .intro .lede { font-size: 17px; line-height: 1.55; font-family: 'Frank Ruhl Libre', serif; color: var(--ink); }
+
+  /* case tabs */
+  .tabs {
+    max-width: 1180px; margin: 22px auto 0;
+    padding: 0 32px;
+    display: flex; gap: 0; border-bottom: 2px solid var(--ink);
+  }
+  .tab {
+    background: none; border: none; cursor: pointer;
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 16px; font-weight: 700; color: var(--muted);
+    padding: 12px 18px;
+    border: 1px solid transparent;
+    border-bottom: none;
+    margin-inline-end: 4px;
+    transition: color 0.15s, background 0.15s;
+  }
+  .tab:hover { color: var(--ink); }
+  .tab.active {
+    color: var(--ink); background: var(--paper-2);
+    border-color: var(--ink);
+    border-bottom: 2px solid var(--paper-2);
+    margin-bottom: -2px;
+    position: relative;
+  }
+  .tab .case-num {
+    display: inline-block; background: var(--brick); color: #fff;
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600;
+    padding: 1px 6px; border-radius: 2px; margin-inline-end: 8px;
+    vertical-align: middle;
+  }
+  .tab.active .case-num { background: var(--ink); }
+
+  /* case panel */
+  .case-panel { display: none; max-width: 1180px; margin: 0 auto; padding: 24px 32px 60px; }
+  .case-panel.active { display: block; }
+
+  /* case header */
+  .case-head {
+    display: grid; grid-template-columns: 1fr 380px; gap: 28px;
+    padding-bottom: 20px; margin-bottom: 22px;
+    border-bottom: 1px solid var(--rule);
+  }
+  @media (max-width: 900px) { .case-head { grid-template-columns: 1fr; } }
+  .case-head h2 {
+    font-size: 26px; color: var(--ink);
+    border-inline-start: 5px solid var(--brick); padding-inline-start: 14px;
+    margin-bottom: 8px;
+  }
+  .case-head .case-sub { color: var(--muted); font-size: 14px; font-style: italic; margin-bottom: 12px; }
+  .case-head .case-blurb { font-family: 'Frank Ruhl Libre', serif; font-size: 16px; line-height: 1.6; }
+  .case-meta {
+    background: var(--soft);
+    border: 1px solid var(--rule);
+    padding: 14px 16px;
+    font-size: 13px;
+  }
+  .case-meta .row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dotted var(--rule); }
+  .case-meta .row:last-child { border-bottom: none; }
+  .case-meta .k { color: var(--muted); }
+  .case-meta .v { color: var(--ink); font-weight: 600; }
+
+  /* AI-models button (collapsible) */
+  .ai-readout { margin: 0 0 22px; }
+  .ai-readout summary {
+    list-style: none; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 10px;
+    background: #fff; border: 1px solid var(--brick);
+    color: var(--brick);
+    font-family: 'Heebo', sans-serif; font-size: 13px; font-weight: 600;
+    padding: 8px 14px; border-radius: 2px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .ai-readout summary::-webkit-details-marker { display: none; }
+  .ai-readout summary:hover { background: var(--brick); color: #fff; }
+  .ai-readout summary .chev { font-size: 11px; opacity: 0.7; }
+  .ai-readout[open] summary { background: var(--brick); color: #fff; }
+  .ai-readout summary .pill {
+    display: inline-block; background: var(--paper-2); color: var(--ink);
+    font-size: 11px; padding: 1px 7px; border-radius: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .ai-readout[open] summary .pill { background: rgba(255,255,255,0.18); color: #fff; }
+  .ai-readout .ai-readout-body {
+    margin-top: 12px;
+    background: var(--soft); border: 1px solid var(--rule);
+    padding: 14px 16px;
+  }
+  .ai-readout .ai-readout-body h4 {
+    font-size: 14px; margin: 0 0 10px; color: var(--muted);
+    font-family: 'Heebo', sans-serif; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .verdict-row { display: grid; grid-template-columns: repeat(3, 1fr) 1fr; gap: 12px; align-items: stretch; }
+  @media (max-width: 800px) { .verdict-row { grid-template-columns: 1fr 1fr; } }
+
+  /* per-model narrative cards */
+  .narr-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 10px; }
+  @media (max-width: 900px) { .narr-grid { grid-template-columns: 1fr; } }
+  .narr-card {
+    background: #fff; border: 1px solid var(--rule);
+    padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .narr-card.dissent { border-color: var(--gold); background: #fffaf0; }
+  .narr-card .narr-head {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+    border-bottom: 1px solid var(--rule); padding-bottom: 6px;
+  }
+  .narr-card .narr-model {
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; color: var(--ink);
+  }
+  .narr-card .narr-score {
+    font-family: 'Frank Ruhl Libre', serif; font-size: 22px; font-weight: 700; line-height: 1;
+  }
+  .narr-card .narr-score.high { color: var(--brick); }
+  .narr-card .narr-score.mid  { color: var(--gold); }
+  .narr-card .narr-score.low  { color: var(--muted); }
+  .narr-card .narr-tags {
+    display: flex; flex-wrap: wrap; gap: 4px; font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace; color: var(--muted);
+  }
+  .narr-card .narr-tags .tag {
+    background: var(--paper-2); padding: 1px 6px; border-radius: 2px; border: 1px solid var(--rule);
+  }
+  .narr-card .narr-tags .tag.dissent { background: var(--gold); color: #fff; border-color: var(--gold); }
+  .narr-card .narr-topic {
+    font-family: 'Frank Ruhl Libre', serif; font-size: 14px; font-weight: 600; color: var(--ink);
+    line-height: 1.35;
+  }
+  .narr-card .narr-text {
+    font-size: 12.5px; line-height: 1.55; color: var(--ink);
+    direction: ltr; text-align: left;
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    background: var(--soft); padding: 8px 10px; border-radius: 2px;
+    max-height: 200px; overflow-y: auto;
+  }
+  .narr-card .narr-text.he {
+    direction: rtl; text-align: right; font-family: 'Heebo', sans-serif;
+  }
+  .narr-lang-note { font-size: 11px; color: var(--muted); font-style: italic; margin-top: 6px; }
+  .vcard {
+    background: #fff; border: 1px solid var(--rule); padding: 10px 12px;
+    font-size: 13px;
+  }
+  .vcard .model { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .vcard .score { font-size: 22px; font-weight: 700; font-family: 'Frank Ruhl Libre', serif; }
+  .vcard .score.high { color: var(--brick); }
+  .vcard .score.mid  { color: var(--gold); }
+  .vcard .score.low  { color: var(--muted); }
+  .vcard .vtype { font-size: 12px; color: var(--ink); margin-top: 2px; }
+  .vcard .vdir  { font-size: 11px; color: var(--muted); margin-top: 2px; font-style: italic; }
+  .vcard.arb {
+    background: #fdf6e6; border: 1px solid var(--gold);
+  }
+  .vcard.arb .arb-tag {
+    display: inline-block; background: var(--gold); color: #fff;
+    font-size: 10px; font-family: 'IBM Plex Mono', monospace;
+    padding: 1px 5px; border-radius: 2px; margin-bottom: 4px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .vcard.arb .arb-text { font-size: 12px; color: var(--ink); line-height: 1.5; }
+
+  /* diachronic network viz container */
+  .viz-section {
+    margin: 0 0 26px;
+    background: #fff;
+    border: 1px solid var(--rule);
+  }
+  .viz-head {
+    background: var(--paper-2); padding: 10px 16px;
+    border-bottom: 1px solid var(--rule);
+    display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .viz-head h3 { font-size: 16px; margin: 0; color: var(--ink); }
+  .viz-head .legend { display: flex; gap: 14px; font-size: 11px; color: var(--muted); flex-wrap: wrap; }
+  .viz-head .legend .lk { display: inline-flex; align-items: center; gap: 5px; }
+  .viz-head .legend .swatch { width: 16px; height: 3px; display: inline-block; border-radius: 2px; }
+  .viz-head .legend .swatch.dot { width: 9px; height: 9px; border-radius: 50%; }
+
+  .viz-svg-wrap { position: relative; padding: 16px; overflow-x: auto; }
+  svg.diachro { display: block; width: 100%; min-width: 760px; height: auto; }
+  svg.diachro .lane-band { fill: var(--paper); }
+  svg.diachro .lane-band.alt { fill: var(--soft); }
+  svg.diachro .lane-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; fill: var(--ink); }
+  svg.diachro .lane-rule { stroke: var(--rule); stroke-width: 1; }
+  svg.diachro .axis-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; fill: var(--muted); }
+  svg.diachro .axis-tick { stroke: var(--rule-2); stroke-width: 1; }
+  svg.diachro .doc-node { cursor: pointer; transition: r 0.15s, stroke-width 0.15s; }
+  svg.diachro .doc-node:hover { stroke: var(--ink); stroke-width: 2.5px; }
+  svg.diachro .doc-node.selected { stroke: var(--ink); stroke-width: 3px; }
+  svg.diachro .edge { fill: none; stroke-width: 1.6; opacity: 0.7; transition: opacity 0.15s, stroke-width 0.15s; }
+  svg.diachro .edge:hover { opacity: 1; stroke-width: 3px; }
+  svg.diachro .edge.responds { stroke: var(--e-responds); }
+  svg.diachro .edge.attacks  { stroke: var(--e-attacks); stroke-dasharray: none; }
+  svg.diachro .edge.defends  { stroke: var(--e-defends); stroke-dasharray: 5 3; }
+  svg.diachro .edge.cites    { stroke: var(--e-cites); stroke-dasharray: 2 3; }
+
+  .viz-foot {
+    padding: 10px 16px; border-top: 1px solid var(--rule);
+    background: var(--soft); font-size: 12px; color: var(--muted);
+    display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  }
+
+  /* reading panel (below viz, swaps in via JS) */
+  .reading-panel {
+    margin: 0 0 26px;
+    background: #fff; border: 1px solid var(--rule);
+    padding: 0;
+  }
+  .reading-head {
+    background: var(--ink); color: var(--paper);
+    padding: 10px 16px;
+    display: flex; justify-content: space-between; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  .reading-head .nav-arrows { display: inline-flex; gap: 6px; align-items: center; }
+  .reading-head .nav-arrows button {
+    background: rgba(255,255,255,0.08); color: var(--paper);
+    border: 1px solid rgba(255,255,255,0.25);
+    font-family: 'Heebo', sans-serif; font-size: 13px;
+    padding: 4px 10px; border-radius: 2px; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .reading-head .nav-arrows button:hover:not(:disabled) { background: rgba(255,255,255,0.18); }
+  .reading-head .nav-arrows button:disabled { opacity: 0.35; cursor: default; }
+  .reading-head .nav-arrows .pos {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px; opacity: 0.7;
+    margin: 0 4px;
+  }
+  .reading-head .rh-main { flex: 1; min-width: 240px; }
+  .reading-head .doc-id { font-family: 'IBM Plex Mono', monospace; font-size: 12px; opacity: 0.75; }
+  .reading-head h4 { color: var(--paper); font-size: 18px; margin: 0; }
+  .reading-head .doc-meta { font-size: 12px; opacity: 0.85; font-family: 'IBM Plex Mono', monospace; }
+  .reading-body {
+    padding: 18px 22px;
+    font-family: 'Frank Ruhl Libre', serif; font-size: 17px; line-height: 1.85;
+    text-align: justify;
+    color: var(--ink);
+  }
+  .reading-body .ellipsis { color: var(--muted); font-style: italic; }
+  .reading-body .placeholder { color: var(--muted); font-style: italic; font-size: 14px; font-family: 'Heebo', sans-serif; }
+  .ent { padding: 0 2px; border-bottom: 1.5px solid; cursor: help; }
+  .ent.person   { color: var(--brick); border-color: var(--brick-soft); background: rgba(138,36,24,0.07); }
+  .ent.place    { color: var(--teal); border-color: var(--teal); background: rgba(45,90,90,0.07); }
+  .ent.paper    { color: var(--MGD); border-color: var(--MGD); background: rgba(31,61,107,0.07); }
+  .ent.work     { color: var(--gold); border-color: var(--gold); background: rgba(160,120,15,0.08); }
+
+  body.entities-hidden .ent { background: transparent !important; border-color: transparent !important; color: inherit !important; cursor: text !important; }
+
+  .reading-foot {
+    padding: 10px 16px; border-top: 1px solid var(--rule);
+    background: var(--paper-2); font-size: 12px; color: var(--muted);
+    display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  }
+  .reading-foot .ai-mark {
+    display: inline-block; background: var(--gold); color: #fff;
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    padding: 1px 5px; border-radius: 2px; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .reading-foot a { font-size: 12px; }
+
+  /* reader-grid: reading panel + sidebar (map + entities) */
+  .reader-grid { display: grid; grid-template-columns: 1fr 320px; gap: 22px; margin: 0 0 26px; }
+  @media (max-width: 1000px) { .reader-grid { grid-template-columns: 1fr; } }
+  .reader-grid .reading-panel { margin: 0; }
+
+  .sidebar { display: flex; flex-direction: column; gap: 16px; }
+  .sidebar .panel { margin: 0; }
+  .sidebar .panel-body { padding: 12px 14px; }
+
+  .map-wrap { padding: 0; }
+  .map-wrap .leaflet-container { height: 220px; width: 100%; border: none; font-family: 'Heebo', sans-serif; }
+  .map-wrap .map-note { padding: 8px 12px; font-size: 11px; color: var(--muted); background: var(--paper-2); border-top: 1px solid var(--rule); }
+
+  /* entities list */
+  .ent-list { display: flex; flex-direction: column; gap: 0; }
+  .ent-item {
+    display: grid; grid-template-columns: 18px 1fr; gap: 8px;
+    padding: 8px 10px; cursor: pointer;
+    border-bottom: 1px dotted var(--rule);
+    transition: background 0.12s;
+  }
+  .ent-item:last-child { border-bottom: none; }
+  .ent-item:hover { background: var(--soft); }
+  .ent-item.active { background: var(--paper-2); }
+  .ent-item .ent-swatch {
+    width: 14px; height: 14px; border-radius: 2px; margin-top: 2px;
+    border: 1.5px solid;
+  }
+  .ent-item .ent-swatch.person   { background: rgba(138,36,24,0.16); border-color: var(--brick-soft); }
+  .ent-item .ent-swatch.place    { background: rgba(45,90,90,0.14); border-color: var(--teal); }
+  .ent-item .ent-swatch.paper    { background: rgba(31,61,107,0.14); border-color: var(--MGD); }
+  .ent-item .ent-swatch.work     { background: rgba(160,120,15,0.14); border-color: var(--gold); }
+  .ent-item .ent-main { min-width: 0; }
+  .ent-item .ent-label { font-family: 'Frank Ruhl Libre', serif; font-size: 15px; color: var(--ink); font-weight: 600; line-height: 1.25; }
+  .ent-item .ent-type {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.5px; margin: 1px 0 3px;
+  }
+  .ent-item .ent-desc { font-size: 12px; color: var(--ink); line-height: 1.45; opacity: 0.92; display: none; }
+  .ent-item.active .ent-desc { display: block; }
+  .ent-item .ent-absent { font-size: 10px; color: var(--muted); font-style: italic; margin-inline-start: 6px; }
+
+  /* flash animation for text-side highlighting */
+  @keyframes entflash {
+    0%   { background: rgba(255, 244, 102, 0.95); box-shadow: 0 0 0 3px rgba(255,244,102,0.6); }
+    100% { background: var(--ent-flash-base, transparent); box-shadow: 0 0 0 0 transparent; }
+  }
+  .ent.flash { animation: entflash 1.6s ease-out; }
+
+  /* lede element kept in DOM but hidden — now surfaced via the pinned tooltip */
+  .reading-head .rh-lede { display: none; }
+
+  /* CTA box under map → thread-overview modal */
+  .map-cta {
+    background: var(--soft); border: 1px solid var(--rule); border-top: none;
+    padding: 10px 14px; font-size: 12px; color: var(--ink);
+    display: flex; gap: 10px; align-items: center; justify-content: space-between;
+  }
+  .map-cta .cta-text { flex: 1; line-height: 1.4; }
+  .map-cta button {
+    background: var(--ink); color: var(--paper); border: none;
+    font-family: 'Heebo', sans-serif; font-size: 12px; font-weight: 600;
+    padding: 6px 12px; border-radius: 2px; cursor: pointer;
+    white-space: nowrap;
+  }
+  .map-cta button:hover { background: var(--brick); }
+
+  /* uncertain pin marker (leaflet override via JS class) */
+  .leaflet-marker-uncertain {
+    filter: hue-rotate(40deg) saturate(0.8);
+  }
+
+  /* thread-overview modal */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(20,15,10,0.6);
+    z-index: 100; display: none; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-box {
+    background: var(--paper); color: var(--ink);
+    border: 2px solid var(--ink); border-radius: 3px;
+    width: 100%; max-width: 1100px; max-height: 92vh;
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .modal-head {
+    background: var(--ink); color: var(--paper);
+    padding: 12px 18px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .modal-head h2 { color: var(--paper); font-size: 20px; margin: 0; font-family: 'Frank Ruhl Libre', serif; }
+  .modal-head .close {
+    background: none; border: 1px solid rgba(255,255,255,0.4); color: var(--paper);
+    padding: 4px 12px; cursor: pointer; border-radius: 2px;
+    font-family: 'Heebo', sans-serif; font-size: 13px;
+  }
+  .modal-head .close:hover { background: rgba(255,255,255,0.12); }
+  .modal-body { padding: 20px; overflow-y: auto; display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+  @media (max-width: 900px) { .modal-body { grid-template-columns: 1fr; } }
+  .modal-body h3 { font-size: 16px; margin: 0 0 10px; color: var(--ink); }
+  .modal-body .modal-map { height: 380px; border: 1px solid var(--rule); }
+  .modal-body .modal-ents { max-height: 480px; overflow-y: auto; border: 1px solid var(--rule); }
+  .modal-body .modal-ents .ent-item { background: #fff; }
+  .modal-body .modal-ents .ent-item .ent-desc { display: block; }
+  .modal-body .modal-ents .mention-list {
+    display: flex; flex-wrap: wrap; gap: 4px 6px; margin-top: 6px;
+  }
+  .modal-body .modal-ents .mention-chip {
+    background: var(--soft); border: 1px solid var(--rule);
+    padding: 1px 7px; border-radius: 2px; font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--ink); cursor: pointer;
+  }
+  .modal-body .modal-ents .mention-chip:hover { background: var(--brick); color: #fff; border-color: var(--brick); }
+  .modal-body .modal-ents .mention-empty { font-size: 11px; color: var(--muted); font-style: italic; margin-top: 4px; }
+
+  /* uncertain-places research-invitation card */
+  .question.uncertain {
+    border-inline-start-color: var(--gold);
+  }
+  .question.uncertain .q-head { color: var(--gold); }
+
+  /* full-text expand */
+  .ft-toggle {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: none; border: 1px solid var(--ink); color: var(--ink);
+    font-family: 'Heebo', sans-serif; font-size: 12px;
+    padding: 3px 10px; border-radius: 2px; cursor: pointer;
+  }
+  .ft-toggle:hover { background: var(--ink); color: var(--paper); }
+
+  /* lower grid: lit-review + invitation */
+  .lower-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  @media (max-width: 900px) { .lower-grid { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: #fff; border: 1px solid var(--rule);
+    padding: 0;
+  }
+  .panel-head {
+    background: var(--paper-2); padding: 10px 16px; border-bottom: 1px solid var(--rule);
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  }
+  .panel-head h3 { font-size: 15px; margin: 0; color: var(--ink); font-family: 'Heebo', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+  .panel-body { padding: 14px 16px; font-size: 14px; }
+  .panel-body p { margin: 0 0 10px; }
+  .lit-status {
+    display: inline-block; padding: 2px 8px; border-radius: 2px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .lit-status.notfound { background: var(--brick); color: #fff; }
+  .lit-status.passing  { background: var(--gold); color: #fff; }
+  .lit-status.documented { background: var(--teal); color: #fff; }
+  .lit-canonical { font-size: 12px; color: var(--muted); font-style: italic; margin-inline-start: 8px; }
+
+  ul.sources { list-style: none; padding: 0; margin: 8px 0 0; font-size: 13px; }
+  ul.sources li { padding: 5px 0; border-bottom: 1px dotted var(--rule); }
+  ul.sources li:last-child { border-bottom: none; }
+  ul.sources .src-meta { font-size: 11px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; margin-top: 1px; }
+
+  .question {
+    background: var(--soft); border: 1px solid var(--rule);
+    border-inline-start: 4px solid var(--brick);
+    padding: 10px 14px; margin-bottom: 10px; font-size: 14px;
+  }
+  .question .q-head {
+    font-weight: 700; color: var(--brick); font-family: 'Frank Ruhl Libre', serif;
+    font-size: 15px; margin-bottom: 4px;
+  }
+  .explore-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 6px;
+    background: #fff; border: 1px solid var(--brick); color: var(--brick);
+    font-family: 'Heebo', sans-serif; font-size: 12px;
+    padding: 4px 10px; border-radius: 2px; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .explore-btn:hover { background: var(--brick); color: #fff; }
+
+  /* provenance toolbar (sticky-ish) */
+  .toolbar {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--ink); color: var(--paper);
+    padding: 8px 18px;
+    display: flex; gap: 18px; align-items: center; flex-wrap: wrap;
+    font-size: 13px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .toolbar .tb-group { display: inline-flex; gap: 8px; align-items: center; }
+  .toolbar label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+  .toolbar input[type=checkbox] { accent-color: var(--brick-soft); }
+  .toolbar .tb-hint { opacity: 0.7; font-style: italic; font-size: 12px; }
+
+  .ai-block { transition: opacity 0.2s, filter 0.2s; }
+  body.provenance-on .ai-block { opacity: 0.32; filter: grayscale(0.7); }
+  body.provenance-on .ai-block::after {
+    content: ''; /* noop — visual dimming is enough */
+  }
+  body.provenance-on .human-block { box-shadow: 0 0 0 2px var(--teal); position: relative; }
+  body.provenance-on .human-tag {
+    position: absolute; top: -10px; inset-inline-end: 8px;
+    background: var(--teal); color: #fff;
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    padding: 1px 6px; border-radius: 2px;
+    text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .human-tag { display: none; }
+  body.provenance-on .human-tag { display: inline-block; }
+
+  /* footer */
+  footer.site {
+    background: var(--ink); color: var(--paper);
+    padding: 18px 32px; margin-top: 40px;
+    font-size: 12px; line-height: 1.6;
+  }
+  footer.site a { color: var(--paper); border-color: var(--paper); }
+  footer.site .foot-grid { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+  @media (max-width: 800px) { footer.site .foot-grid { grid-template-columns: 1fr; } }
+
+  /* tooltip (hover variant — transient, compact) */
+  .tooltip {
+    position: fixed; z-index: 50;
+    background: var(--ink); color: var(--paper);
+    padding: 6px 10px; border-radius: 3px;
+    font-size: 12px; font-family: 'Heebo', sans-serif;
+    pointer-events: none; opacity: 0;
+    transition: opacity 0.1s;
+    max-width: 280px; line-height: 1.45;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+  .tooltip.on { opacity: 0.97; }
+  .tooltip .tt-id { font-family: 'IBM Plex Mono', monospace; font-size: 10px; opacity: 0.7; margin-bottom: 2px; }
+  .tooltip .tt-title { font-weight: 700; margin-bottom: 2px; }
+
+  /* pinned tooltip (click variant — sticky, larger, with lede) */
+  .tooltip.pinned {
+    pointer-events: auto;
+    background: var(--paper); color: var(--ink);
+    border: 1.5px solid var(--ink);
+    padding: 10px 14px 12px;
+    font-size: 13px;
+    max-width: 360px;
+    opacity: 1;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    border-radius: 3px;
+  }
+  .tooltip.pinned .tt-close {
+    position: absolute; top: 4px; left: 6px;
+    background: none; border: none; color: var(--muted);
+    font-size: 18px; line-height: 1; cursor: pointer; padding: 2px 6px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .tooltip.pinned .tt-close:hover { color: var(--brick); }
+  .tooltip.pinned .tt-id { color: var(--muted); }
+  .tooltip.pinned .tt-title {
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 16px; color: var(--ink); margin: 2px 0 4px;
+    line-height: 1.25;
+  }
+  .tooltip.pinned .tt-meta {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    color: var(--muted); margin-bottom: 8px;
+  }
+  .tooltip.pinned .tt-lede {
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 13.5px; line-height: 1.55; color: var(--ink);
+    border-inline-start: 2px solid var(--brick); padding-inline-start: 8px;
+    margin-top: 6px;
+  }
+  .tooltip.pinned .tt-arrow {
+    position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 8px solid transparent; border-right: 8px solid transparent;
+    border-top: 8px solid var(--ink);
+  }
+  .tooltip.pinned .tt-foot {
+    margin-top: 8px; padding-top: 6px;
+    border-top: 1px dotted var(--rule);
+    font-size: 11px; color: var(--muted);
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  }
+  .tooltip.pinned .tt-foot .tt-ai {
+    background: var(--gold); color: #fff; padding: 1px 5px; border-radius: 2px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="mockup-banner">
+  דמו מתודולוגי — תצוגה־מוצעת לדפדפן הפולמוס בעיתונות העברית 1879–1884.
+  <span class="small">שלוש מקרי־בוחן • נתונים אמתיים מהקורפוס • הוויזואליזציות הן מוקאפ</span>
+</div>
+
+<header class="masthead">
+  <div class="title-row">
+    <div>
+      <h1>דפדפן הפולמוס בעיתונות העברית</h1>
+      <div class="subtitle">מערכת לזיהוי, סיווג ותחקור מחלוקות חוצות־עיתונים בעיתונות העברית של המאה ה־19 — תצוגה־מוצעת בשלוש מקרי בוחן</div>
+    </div>
+    <nav>
+      <a href="#">אודות</a>
+      <a href="#">מתודולוגיה</a>
+      <a href="#">קורפוס</a>
+      <a href="#">צוות</a>
+    </nav>
+  </div>
+  <div class="meta-line">
+    <span>קורפוס: 188 חוטי פולמוס מסומנים · 3 מודלים · 55 חוטי בוררות</span>
+    <span>תצוגה: 2026-05-16 · מבוסס על pilot complete</span>
+  </div>
+</header>
+
+<div class="toolbar" id="toolbar">
+  <strong style="font-family: 'Frank Ruhl Libre', serif;">תצוגה:</strong>
+  <div class="tb-group">
+    <label><input type="checkbox" id="tg-provenance"> סימון מקור (אנושי / AI)</label>
+  </div>
+  <div class="tb-group">
+    <label><input type="checkbox" id="tg-entities"> הצג סימוני יישויות</label>
+  </div>
+  <span class="tb-hint">ההסבר, הסיכום, רשימת השחקנים, גרף הקשרים והספרות המוצעת — כולם פלט של מודלי שפה. הטקסט המקורי, התאריכים, שמות העיתונים — מהקורפוס המקור.</span>
+</div>
+
+<div class="intro">
+  <p class="lede">
+    מהי בדיוק "מחלוקת" בעיתונות העברית של המאה ה־19? היכן עוברים גבולותיה — בין עיתונים, על פני חודשים ושנים, בין כותבים, פסבדונימים ועורכים? מה ניתן לראות כאשר מאחזרים את החוט המלא של תגובות והפניות בין מאמרים, ולא רק את האירוע ההיסטורי שמאחוריו?
+  </p>
+  <p>
+    הדפדפן מציג חוטי פולמוס שזוהו אוטומטית בקורפוס בן ~3,000 פריטי עיתונות (HMZ, HZF, HZT, MGD, HLB) של 1879–1884, עברו ניקוד פולמוס בידי שלושה מודלים שונים, ובמקרים של חילוקי דעות — בוררות חוזרת. כל חוט קושר עצמו לעולם המחקרי הקיים: היכן הוא מתועד, היכן הוא מוזכר־בעקיפין, והיכן הוא מהווה <em>פתח לחקירה</em> — אירוע ארכיוני שהמחקר עוד לא הגיע אליו.
+  </p>
+  <p>
+    שלושת המקרים שלהלן נבחרו בכוונה: ויכוח אידאולוגי בין סופרי ההשכלה (1879–80); דינמיקה עיתונאית של ראשית ההתיישבות (1883–84); ופולמוס פנימי על רבנות חברון והיישוב הספרדי הישן (1879–80). שלושתם מציגים <strong>מסגור היסטוריוגרפי שונה</strong>, ובאחד מהם — מקרה ב' — אחד מהמודלים תייג את החוט כלא־פולמי. הבוררות הוכרעה לטובת "פולמוס מפורש"; המחלוקת בין המודלים עצמה היא חלק מהתצוגה.
+  </p>
+</div>
+
+<div class="tabs" id="case-tabs">
+  <button class="tab active" data-case="381"><span class="case-num">A</span> 381 · ספרות, לאומיות, לשון</button>
+  <button class="tab" data-case="395"><span class="case-num">B</span> 395 · התיישבות, מיסיון, מחלוקת</button>
+  <button class="tab" data-case="193"><span class="case-num">C</span> 193 · רבנות חברון, יישוב ספרדי</button>
+</div>
+
+<!-- ============== CASE A — 381 ============== -->
+<div class="case-panel active" id="case-381">
+
+  <div class="case-head">
+    <div>
+      <h2>פולמוס סופרים, ספרות, לאומיות ולשון עברית</h2>
+      <div class="case-sub">חוט #381 · יוני 1879 – נובמבר 1880 · מקרה־בוחן ל"פולמוס תרבותי קאנוני"</div>
+      <div class="case-blurb">
+        סדרה של מאמרי פולמוס שנפרסה על פני שנה וחצי בארבעה עיתונים, סביב שאלת ייעודה של הספרות העברית, מעמדה של הלשון העברית, ואתיקת הביקורת הספרותית. שתי הרשימות של נחום סוקולוב הממוענות במפורש <strong>"לבן יהודה"</strong> הן הצומת המוכר ביותר; הסדרות 'עזרת סופרים', 'קנאת סופרים' ו'עט-סופרים' פותחות חלון רחב יותר על הוויכוח הפנים־ספרותי שאיתו פתח דור הסופרים את שנות ה־80.
+      </div>
+    </div>
+    <div class="case-meta">
+      <div class="row"><span class="k">חלון זמן</span><span class="v">540 ימים</span></div>
+      <div class="row"><span class="k">מסמכים בחוט</span><span class="v">25</span></div>
+      <div class="row"><span class="k">עיתונים</span><span class="v">HMZ · HZF · HZT · MGD</span></div>
+      <div class="row"><span class="k">סוג חוט</span><span class="v">engaged · cross-paper</span></div>
+      <div class="row"><span class="k">קשרי תגובה (Opus)</span><span class="v">9 קשרים מפורשים</span></div>
+    </div>
+  </div>
+
+  <details class="ai-readout ai-block">
+    <summary>
+      <span>איך מודלי הבינה המלאכותית קראו את החוט?</span>
+      <span class="pill">3 מודלים · קונסנזוס</span>
+      <span class="chev">▼</span>
+    </summary>
+    <div class="ai-readout-body">
+      <h4>קריאה השוואתית — שלושה מודלים</h4>
+      <p style="margin:0 0 12px;font-size:13px;color:var(--ink);">
+        שלושת המודלים — Opus, Sonnet, Gemini — קראו את כל מסמכי החוט וזיהו פולמוס פנים־ספרותי. כל אחד בוחר במונחיו שלו ומדגיש צירים מעט שונים. להלן הסיכומים המלאים כפי שכתב אותם כל מודל.
+      </p>
+      <div class="narr-grid" id="narr-381"></div>
+      <p class="narr-lang-note">הסיכומים המלאים מופיעים באנגלית — שפת הפלט הברירת־מחדל של המודלים בהגדרת השיגור. כותרות־הנושא בעברית הן תוצר של פרומפט נפרד בעברית.</p>
+    </div>
+  </details>
+
+  <div class="viz-section">
+    <div class="viz-head">
+      <h3>הזרימה הדיאכרונית של החוט · עיתונים × זמן × קשרי תגובה</h3>
+      <div class="legend">
+        <span class="lk"><span class="swatch dot" style="background: var(--HMZ)"></span> HMZ</span>
+        <span class="lk"><span class="swatch dot" style="background: var(--HZF)"></span> HZF</span>
+        <span class="lk"><span class="swatch dot" style="background: var(--HZT)"></span> HZT</span>
+        <span class="lk"><span class="swatch dot" style="background: var(--MGD)"></span> MGD</span>
+        <span class="lk"><span class="swatch" style="background: var(--e-responds)"></span> משיב</span>
+        <span class="lk"><span class="swatch" style="background: var(--e-attacks)"></span> תוקף</span>
+        <span class="lk"><span class="swatch" style="background: var(--e-defends); border-bottom: 1px dashed var(--e-defends);"></span> מגן־מ</span>
+      </div>
+    </div>
+    <div class="viz-svg-wrap">
+      <svg class="diachro" id="svg-381" viewBox="0 0 1100 360"></svg>
+    </div>
+    <div class="viz-foot">
+      <span>גודל הצומת = יחסי לסיכון הפולמיות שניתן למסמך בודד; הקשרים — קשרי תגובה מפורשים מסיכום Opus.</span>
+      <span class="ai-block">לחיצה על צומת תפתח את חלון הקריאה למטה.</span>
+    </div>
+  </div>
+
+  <div class="reader-grid">
+    <div class="reading-panel" id="reading-381">
+      <div class="reading-head">
+        <div class="rh-main">
+          <h4 id="rp-381-title">בחרו צומת מהוויזואליזציה למעלה</h4>
+          <div class="rh-lede" id="rp-381-lede"></div>
+          <div class="doc-id" id="rp-381-id">— · —</div>
+        </div>
+        <div class="doc-meta" id="rp-381-meta">— · —</div>
+        <div class="nav-arrows" data-case="381">
+          <button class="rp-prev" title="המאמר הקודם">◀ הקודם</button>
+          <span class="pos" id="rp-381-pos">—</span>
+          <button class="rp-next" title="המאמר הבא">הבא ▶</button>
+        </div>
+      </div>
+      <div class="reading-body" data-case="381">
+        <p class="placeholder" id="rp-381-body">הקטע הראשון יוצג ברירת־מחדל לאחר טעינה.</p>
+      </div>
+      <div class="reading-foot">
+        <span><button class="ft-toggle" data-case="381">הציגו טקסט מלא</button></span>
+        <span><span class="ai-mark">AI</span> סימוני היישויות הם פלט מודל; הטקסט המקורי הוא מהקורפוס.</span>
+        <a class="jpress-link" id="jp-381" href="#" target="_blank" rel="noopener">פתחו את הגליון באתר העיתונות היהודית ההיסטורית →</a>
+      </div>
+    </div>
+    <aside class="sidebar ai-block">
+      <div class="panel map-wrap">
+        <div class="panel-head"><h3>מפת הזירה</h3></div>
+        <div class="leaflet-container" id="map-381"></div>
+        <div class="map-note">ערי הוצאה־לאור ומקומות שחקנים מרכזיים בחוט.</div>
+        <div class="map-cta">
+          <span class="cta-text">רוצים לראות את <strong>כל</strong> השחקנים והמקומות של חוט #381?</span>
+          <button data-overview="381">פתחו מבט־על</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>ישויות בטקסט</h3></div>
+        <div class="panel-body" style="padding: 0;">
+          <div class="ent-list" id="ents-381"></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="lower-grid">
+    <div class="panel ai-block">
+      <div class="panel-head"><h3>ספרות מחקרית קיימת</h3><span class="lit-status passing">מוזכר בעקיפין</span></div>
+      <div class="panel-body">
+        <p>
+          המחלוקת האידיאולוגית הרחבה — קריאת בן־יהודה וסמולנסקין ללאומיות ול"שאלות החיים" המעשיות במקום ההשכלה המופשטת — קאנונית בהיסטוריוגרפיה היהודית. אך הפולמוס החוצה־עיתונים הספציפי בין 'המגיד', 'הצפירה', 'המליץ' ו'השחר' (1879–1880), על שחקניו (סוקולוב, גארדאן, ברילל, חאשקעס, מרדכי בן הלל הכהן) <strong>כצומת עריכתי</strong> — <strong>לא הצלחנו לאתר</strong> דיון נפרד בו בספרות המחקרית הנגישה לחיפוש האוטומטי שלנו.
+          <span class="lit-canonical">אירוע קאנוני: כן · מקורות מאומתים: 0/6</span>
+        </p>
+        <ul class="sources">
+          <li>George Mandel, <em>Smolenskin, Ben-Yehuda, and the Jewish Education of the Future</em>
+            <div class="src-meta">דן בוויכוח 1879–1881 אך ממוקד באידיאולוגיה חינוכית · DOI 404</div>
+          </li>
+          <li>Ela Bauer, <em>Nahum Sokolow and Modern Hebrew Literature</em> (2015)
+            <div class="src-meta">דן במאמרי הפולמוס המוקדמים של סוקולוב, אך לא במחלוקת הספציפית</div>
+          </li>
+          <li>YIVO Encyclopedia: <em>Hebrew Literary Journals</em>
+            <div class="src-meta">ממסגר את העיתונים אך לא את האירוע</div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="panel ai-block">
+      <div class="panel-head"><h3>הזמנה למחקר</h3></div>
+      <div class="panel-body">
+        <div class="question">
+          <div class="q-head">⟶ סוקולוב פונה "לבן יהודה" במפורש בשתי רשימות. מה המעמד הביוגרפי המדויק של הפולמוס בעבודת בן־יהודה הצעיר?</div>
+          האם תגובה מצדו פורסמה ב'השחר' או ב'המליץ' ולא נכללה בחוט הזה?
+          <button class="explore-btn">🔍 חקרו עם AI</button>
+        </div>
+        <div class="question">
+          <div class="q-head">⟶ ההקבלה הפרטי־ציבורי: גורדון תוקף את ברילל באגרת פרטית ב־1870, באותו נימוק.</div>
+          חוט #381 הוא הציבור; אגרת 3442 היא הפרטי. מה ניתן לומר על הקשר ארוך־הטווח בין שני הרובדים?
+          <button class="explore-btn">🔍 חקרו עם AI</button>
+        </div>
+        <div class="question">
+          <div class="q-head">⟶ בדיקת RAMBI: שמות הסדרות — "עזרת סופרים", "קנאת סופרים", "עט-סופרים", "דגל הלאומיות" — הן יחידות פולמוס נושאיות.</div>
+          האם נעשה אינדוקס בעברית של אחת מהן?
+          <button class="explore-btn">🔍 חקרו עם AI</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== CASE B — 395 ============== -->
+<div class="case-panel" id="case-395">
+
+  <div class="case-head">
+    <div>
+      <h2>ראשית ההתיישבות: מיסיון, רמאות, פנאטיזם</h2>
+      <div class="case-sub">חוט #395 · מרץ 1883 – מרץ 1884 · מקרה־בוחן ל"אירוע קאנוני, פולמוס לא־מתועד"</div>
+      <div class="case-blurb">
+        חוט מצולב בין ארבעה עיתונים על פני שנה אחת, המתעד שלוש מחלוקות נפגשות בראשית ההתיישבות בארץ ישראל: התקפה חוזרת על מיסיונרים פרוטסטנטיים שניצלו פליטים רוסיים בירושלים; חשיפת רמאויות סוחרי קרקעות; וויכוח חריף סביב ניהולה החינוכי של מושבת זאטישע. <strong>זוהי דוגמה נקייה לאירוע היסטורי קאנוני</strong> — העלייה הראשונה, חובבי ציון, התרמת מונטיפיורי, פעילות בן־יהודה הצעיר — <strong>שדינמיקת העיתונות שלו לא נחקרה.</strong>
+      </div>
+    </div>
+    <div class="case-meta">
+      <div class="row"><span class="k">חלון זמן</span><span class="v">363 ימים</span></div>
+      <div class="row"><span class="k">מסמכים בחוט</span><span class="v">16</span></div>
+      <div class="row"><span class="k">עיתונים</span><span class="v">HMZ · HZF · HZT · MGD</span></div>
+      <div class="row"><span class="k">סוג חוט</span><span class="v">engaged · cross-paper</span></div>
+      <div class="row"><span class="k">קשרי תגובה (Opus)</span><span class="v">7 קשרים מפורשים</span></div>
+    </div>
+  </div>
+
+  <details class="ai-readout ai-block">
+    <summary>
+      <span>איך מודלי הבינה המלאכותית קראו את החוט?</span>
+      <span class="pill">מודלים נחלקו · נדרשה בוררות</span>
+      <span class="chev">▼</span>
+    </summary>
+    <div class="ai-readout-body">
+      <h4>קריאה השוואתית — מקרה של חילוקי דעות</h4>
+      <p style="margin:0 0 12px;font-size:13px;color:var(--ink);">
+        Opus וגם Gemini זיהו פולמוס מפורש בשלוש חזיתות נפגשות. Sonnet קרא זאת כ"נושאי בלבד" — אסופה נושאית של מאמרים על אותו עניין, ללא ויכוח מפורש. השוו בעצמכם בין שלוש הקריאות; בעקבות חילוקי הדעות נערכה <strong>בוררות אוטומטית</strong>, שהכריעה לטובת קריאת הפולמוס המפורש.
+      </p>
+      <div class="narr-grid" id="narr-395"></div>
+      <p class="narr-lang-note">הסיכומים המלאים מופיעים באנגלית — שפת הפלט הברירת־מחדל של המודלים בהגדרת השיגור. כותרות־הנושא בעברית הן תוצר של פרומפט נפרד בעברית.</p>
+    </div>
+  </details>
+
+  <div class="viz-section">
+    <div class="viz-head">
+      <h3>הזרימה הדיאכרונית של החוט · עיתונים × זמן × קשרי תגובה</h3>
+      <div class="legend">
+        <span class="lk"><span class="swatch dot" style="background: var(--HMZ)"></span> HMZ</span>
+        <span class="lk"><span class="swatch dot" style="background: var(--HZF)"></span> HZF</span>
+        <span class="lk"><span class="swatch dot" style="background: var(--HZT)"></span> HZT</span>
+        <span class="lk"><span class="swatch dot" style="background: var(--MGD)"></span> MGD</span>
+        <span class="lk"><span class="swatch" style="background: var(--e-responds)"></span> משיב</span>
+        <span class="lk"><span class="swatch" style="background: var(--e-attacks)"></span> תוקף</span>
+        <span class="lk"><span class="swatch" style="background: var(--e-cites); border-bottom: 1px dotted var(--e-cites);"></span> מצטט</span>
+      </div>
+    </div>
+    <div class="viz-svg-wrap">
+      <svg class="diachro" id="svg-395" viewBox="0 0 1100 360"></svg>
+    </div>
+    <div class="viz-foot">
+      <span>שימו לב לשלוש החזיתות הנפגשות: התקפת מיסיון (MGD), ניהול מושבת זאטישע (HZF), רמאויות בקרקע (HZT/HMZ).</span>
+      <span class="ai-block">לחיצה על צומת תפתח את חלון הקריאה למטה.</span>
+    </div>
+  </div>
+
+  <div class="reader-grid">
+    <div class="reading-panel" id="reading-395">
+      <div class="reading-head">
+        <div class="rh-main">
+          <h4 id="rp-395-title">בחרו צומת מהוויזואליזציה למעלה</h4>
+          <div class="rh-lede" id="rp-395-lede"></div>
+          <div class="doc-id" id="rp-395-id">— · —</div>
+        </div>
+        <div class="doc-meta" id="rp-395-meta">— · —</div>
+        <div class="nav-arrows" data-case="395">
+          <button class="rp-prev" title="המאמר הקודם">◀ הקודם</button>
+          <span class="pos" id="rp-395-pos">—</span>
+          <button class="rp-next" title="המאמר הבא">הבא ▶</button>
+        </div>
+      </div>
+      <div class="reading-body" data-case="395">
+        <p class="placeholder" id="rp-395-body">הקטע הראשון יוצג ברירת־מחדל לאחר טעינה.</p>
+      </div>
+      <div class="reading-foot">
+        <span><button class="ft-toggle" data-case="395">הציגו טקסט מלא</button></span>
+        <span><span class="ai-mark">AI</span> סימוני היישויות הם פלט מודל; הטקסט המקורי הוא מהקורפוס.</span>
+        <a class="jpress-link" id="jp-395" href="#" target="_blank" rel="noopener">פתחו את הגליון באתר העיתונות היהודית ההיסטורית →</a>
+      </div>
+    </div>
+    <aside class="sidebar ai-block">
+      <div class="panel map-wrap">
+        <div class="panel-head"><h3>מפת הזירה</h3></div>
+        <div class="leaflet-container" id="map-395"></div>
+        <div class="map-note">מקומות שחקנים, מושבות והאזורי־מקור של פליטי 1881.</div>
+        <div class="map-cta">
+          <span class="cta-text">רוצים לראות את <strong>כל</strong> השחקנים והמקומות של חוט #395?</span>
+          <button data-overview="395">פתחו מבט־על</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>ישויות בטקסט</h3></div>
+        <div class="panel-body" style="padding: 0;">
+          <div class="ent-list" id="ents-395"></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="lower-grid">
+    <div class="panel ai-block">
+      <div class="panel-head"><h3>ספרות מחקרית קיימת</h3><span class="lit-status notfound">לא אותר במחקר</span></div>
+      <div class="panel-body">
+        <p>
+          חיפוש אוטומטי באנגלית ובעברית — במסדי נתונים אקדמיים, באנציקלופדיות ובמאגרי כתבי־עת — <strong>לא הצליח לאתר</strong> מקור משני שמנתח את ההחלפה הפולמית הספציפית בין HMZ, HZF, HZT ו־MGD בין מרץ 1883 למרץ 1884 כאירוע־שיח נפרד. <strong>האירועים הבסיסיים</strong> — התקפת המיסיון על פליטים רוסיים, מתח יישוב ישן/חדש, תפקיד בן־יהודה, ויכוחים על ניהול המושבות, ותנועת חובבי ציון — <strong>קאנוניים בהיסטוריוגרפיה הציונית והשכלתית</strong>; אך כיסוי העיתונות עצמו ככלי שיח (כולל מסגור התרמת מונטיפיורי וביקורת "ויכוח עקר") נראה כפריט שלא נבדק עדיין במחקר שאיתרנו.
+          <span class="lit-canonical">אירוע קאנוני: כן · מקורות מאומתים: 0/—</span>
+        </p>
+        <p style="margin-top:12px;font-size:13px;color:var(--muted);">
+          חוקרי העיתונות העברית בתקופה זו (עבודות הבונות על מחקרי 'המגיד' ו'המליץ') הם הזירה הסבירה ביותר לתיעוד עתידי של פולמוס ספציפי זה.
+        </p>
+      </div>
+    </div>
+
+    <div class="panel ai-block">
+      <div class="panel-head"><h3>הזמנה למחקר</h3></div>
+      <div class="panel-body">
+        <div class="question">
+          <div class="q-head">⟶ זהות "המסית P." — מי זה הפריילנדר הזה?</div>
+          המקורות מזכירים אותו במפורש בשם פרטי P., כשליח של המיסיון האנגלי בלונדון ששב לארץ ישראל ב־1883. האם השם המלא ידוע במחקר על המיסיון הפרוטסטנטי?
+          <button class="explore-btn">🔍 חקרו עם AI</button>
+        </div>
+        <div class="question">
+          <div class="q-head">⟶ ויכוח זאטישע: מי הוא "ט׳ פ׳ לג", המנהיג הדתי האנונימי?</div>
+          המודלים מזהים אותו כחסם מערכי החקלאות במושבה. ראיון פרוסופוגרפי דורש בדיקה ברישומי מנדלשטם והפקידים בא"י.
+          <button class="explore-btn">🔍 חקרו עם AI</button>
+        </div>
+        <div class="question">
+          <div class="q-head">⟶ הפיצול בין הפליטים הרוסים: ר"מ ("רבינר משה") נגד "ג׳ וח׳" — סיעות פנימיות מתועדות?</div>
+          האם הפיצול הזה משתקף ברישומי הקהילה הירושלמית או בכתבי בן־יהודה הצעיר?
+          <button class="explore-btn">🔍 חקרו עם AI</button>
+        </div>
+        <div class="question">
+          <div class="q-head">⟶ "פתח תקוה" — חברת ההתיישבות מופיעה בחוט בפעם האחרונה (HZF, מרץ 1884).</div>
+          מה הקשר בין כתבת המסיים של החוט לבין מהלכי החברה כפי שהם ידועים מהיסטוריה של פתח תקוה הראשונה?
+          <button class="explore-btn">🔍 חקרו עם AI</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== CASE C — 193 ============== -->
+<div class="case-panel" id="case-193">
+
+  <div class="case-head">
+    <div>
+      <h2>פולמוס רבנות חברון — היישוב הספרדי הישן בעין־הסערה</h2>
+      <div class="case-sub">חוט #193 · אפריל 1879 – אוגוסט 1880 · מקרה־בוחן ל"שיח אזורי לא־מתועד"</div>
+      <div class="case-blurb">
+        מחלוקת פנים־ספרדית ממושכת בעיתון 'החבצלת' (עם הופעות חוזרות ב'הלבנון') על סמכות הרבנות בחברון, סביב הניסיון להדיח את הרב אליהו מאני. אברהם חיים פינסו תוקף קואליציה של מירקאדו רומאנו, רחמים פראנקו וחי גאגין — ומקבל מכתבי תמיכה מקהילות הפזורה (בומביי, כלכותה, תוניס, קונסטנטינופול), שאיימו לעצור את כספי החלוקה. <strong>שלושת המודלים מסכימים: זהו הפולמוס המפורש ביותר בקורפוס</strong> (0.82 / 0.84 / 0.95). ובמחקר העברי המודרני: לא נמצא מקור משני אחד שדן בו.
+      </div>
+    </div>
+    <div class="case-meta">
+      <div class="row"><span class="k">חלון זמן</span><span class="v">497 ימים</span></div>
+      <div class="row"><span class="k">מסמכים בחוט</span><span class="v">29</span></div>
+      <div class="row"><span class="k">עיתונים</span><span class="v">HZT · HLB</span></div>
+      <div class="row"><span class="k">סוג חוט</span><span class="v">engaged · same-paper-dominant</span></div>
+      <div class="row"><span class="k">קשרי תגובה (Opus)</span><span class="v">3 קשרים מפורשים</span></div>
+    </div>
+  </div>
+
+  <details class="ai-readout ai-block">
+    <summary>
+      <span>איך מודלי הבינה המלאכותית קראו את החוט?</span>
+      <span class="pill">3 מודלים · קונסנזוס מלא</span>
+      <span class="chev">▼</span>
+    </summary>
+    <div class="ai-readout-body">
+      <h4>קריאה השוואתית — קונסנזוס חזק</h4>
+      <p style="margin:0 0 12px;font-size:13px;color:var(--ink);">
+        שלושת המודלים זיהו כאן את הפולמוס המפורש ביותר בקורפוס. כולם תייגו "explicit · internal" עם ניקוד 0.82–0.95. שימו לב שכל אחד בוחר ציר־דיון מעט שונה — Opus מדגיש סמכות רבנית, Sonnet מדגיש את כספי החלוקה, Gemini את שני הצירים יחד.
+      </p>
+      <div class="narr-grid" id="narr-193"></div>
+      <p class="narr-lang-note">הסיכומים המלאים מופיעים באנגלית — שפת הפלט הברירת־מחדל של המודלים בהגדרת השיגור. כותרות־הנושא בעברית הן תוצר של פרומפט נפרד בעברית.</p>
+    </div>
+  </details>
+
+  <div class="viz-section">
+    <div class="viz-head">
+      <h3>הזרימה הדיאכרונית של החוט · עיתונים × זמן × קשרי תגובה</h3>
+      <div class="legend">
+        <span class="lk"><span class="swatch dot" style="background: var(--HZT)"></span> HZT</span>
+        <span class="lk"><span class="swatch dot" style="background: var(--HLB)"></span> HLB</span>
+        <span class="lk"><span class="swatch" style="background: var(--e-responds)"></span> משיב</span>
+        <span class="lk"><span class="swatch" style="background: var(--e-defends); border-bottom: 1px dashed var(--e-defends);"></span> מגן־מ</span>
+      </div>
+    </div>
+    <div class="viz-svg-wrap">
+      <svg class="diachro" id="svg-193" viewBox="0 0 1100 280"></svg>
+    </div>
+    <div class="viz-foot">
+      <span>החוט יושב כמעט כולו ב'החבצלת' — הופעות 'הלבנון' הן מערכי "שאלת ישוב ארץ ישראל" של בריל המחזירים אש על הביקורת הירושלמית.</span>
+      <span class="ai-block">לחיצה על צומת תפתח את חלון הקריאה למטה.</span>
+    </div>
+  </div>
+
+  <div class="reader-grid">
+    <div class="reading-panel" id="reading-193">
+      <div class="reading-head">
+        <div class="rh-main">
+          <h4 id="rp-193-title">בחרו צומת מהוויזואליזציה למעלה</h4>
+          <div class="rh-lede" id="rp-193-lede"></div>
+          <div class="doc-id" id="rp-193-id">— · —</div>
+        </div>
+        <div class="doc-meta" id="rp-193-meta">— · —</div>
+        <div class="nav-arrows" data-case="193">
+          <button class="rp-prev" title="המאמר הקודם">◀ הקודם</button>
+          <span class="pos" id="rp-193-pos">—</span>
+          <button class="rp-next" title="המאמר הבא">הבא ▶</button>
+        </div>
+      </div>
+      <div class="reading-body" data-case="193">
+        <p class="placeholder" id="rp-193-body">הקטע הראשון יוצג ברירת־מחדל לאחר טעינה.</p>
+      </div>
+      <div class="reading-foot">
+        <span><button class="ft-toggle" data-case="193">הציגו טקסט מלא</button></span>
+        <span><span class="ai-mark">AI</span> סימוני היישויות הם פלט מודל; הטקסט המקורי הוא מהקורפוס.</span>
+        <a class="jpress-link" id="jp-193" href="#" target="_blank" rel="noopener">פתחו את הגליון באתר העיתונות היהודית ההיסטורית →</a>
+      </div>
+    </div>
+    <aside class="sidebar ai-block">
+      <div class="panel map-wrap">
+        <div class="panel-head"><h3>מפת הזירה</h3></div>
+        <div class="leaflet-container" id="map-193"></div>
+        <div class="map-note">מקומות הוצאה־לאור (חברון, ירושלים, צפת) וקהילות התמיכה הדיאספוריות.</div>
+        <div class="map-cta">
+          <span class="cta-text">רוצים לראות את <strong>כל</strong> השחקנים והמקומות של חוט #193?</span>
+          <button data-overview="193">פתחו מבט־על</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>ישויות בטקסט</h3></div>
+        <div class="panel-body" style="padding: 0;">
+          <div class="ent-list" id="ents-193"></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="lower-grid">
+    <div class="panel ai-block">
+      <div class="panel-head"><h3>ספרות מחקרית קיימת</h3><span class="lit-status notfound">לא אותר במחקר</span></div>
+      <div class="panel-body">
+        <p>
+          סדרת חיפושים אוטומטיים באנגלית ובעברית <strong>לא הצליחה לאתר</strong> מקור משני שמנתח ספציפית את הפולמוס בעיתונות העברית 1879–1880. הרב אליהו מאני נזכר בכתיבה קהילתית פופולרית (אתר קהילת חברון, מקורות גנאלוגיים) כדמות מרכזית ביישוב הישן, ותפקידו של פרומקין/'החבצלת' בוויכוחי החלוקה מצוין במקורות ברמת ויקיפדיה — <strong>אך לא איתרנו ספר אקדמי, מאמר, פרק או ערך אנציקלופדי שדן בקונפליקט מאני–פראנקו–רומאנו, בחוברת "דמעת עשוקים" או בעיתון 'שערי ציון' באופן ספציפי</strong> (ייתכן שמחקר כזה קיים בעברית ולא נסרק).
+          <span class="lit-canonical">אירוע קאנוני: לא · מקורות מאומתים: 0/—</span>
+        </p>
+        <p style="margin-top:12px;font-size:13px;color:var(--muted);">
+          תרחיש סביר: האירוע מועמד לחקירה ארכיונית ראשונית באמצעות מקורות העיתונות (החבצלת, הלבנון, הצבי/הצפירה). אם נתקלתם במחקר שמדבר על הפולמוס הזה — נשמח להוסיף אותו.
+        </p>
+      </div>
+    </div>
+
+    <div class="panel ai-block">
+      <div class="panel-head"><h3>הזמנה למחקר</h3></div>
+      <div class="panel-body">
+        <div class="question">
+          <div class="q-head">⟶ "דמעת עשוקים" — חוברת או פמפלט?</div>
+          המקורות מציגים אותה כפרסום אנטי־מאני שגרם לתגובת ההגנה. האם הטקסט עצמו שרד? האם נסרק לאחת מהאוספים הדיגיטליים?
+          <button class="explore-btn">🔍 חקרו עם AI</button>
+        </div>
+        <div class="question">
+          <div class="q-head">⟶ עיתון 'שערי ציון' — היכן הופיעו גיליונות 25–26?</div>
+          פינסו תוקף הוקעות שפורסמו שם. האם 'שערי ציון' זמין בארכיון העיתונות הלאומית? אילו גיליונות שרדו?
+          <button class="explore-btn">🔍 חקרו עם AI</button>
+        </div>
+        <div class="question">
+          <div class="q-head">⟶ שרשרת התמיכה הדיאספורית: בומביי, כלכותה, תוניס, קונסטנטינופול.</div>
+          איזה מבנה תקשורתי איפשר תיאום מהיר כל־כך בין קהילות באוקיינוס ההודי וים התיכון? מה המעמד הביבליוגרפי של מכתבי התמיכה האלה?
+          <button class="explore-btn">🔍 חקרו עם AI</button>
+        </div>
+        <div class="question">
+          <div class="q-head">⟶ סדרת "שאלת ישוב ארץ ישראל" של בריל ב'הלבנון' — האם זו סוגה פולמית בפני עצמה?</div>
+          ארבעת גיליונות 'הלבנון' בחוט (מאי–יוני 1879) הם המשכים של אותה רשימה. האם היא נחקרה כיצירה מתועדת?
+          <button class="explore-btn">🔍 חקרו עם AI</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<!-- Thread-overview modal: bigger map + full entity list with mention back-links -->
+<div class="modal-backdrop" id="overview-modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2 id="ovr-title">מבט־על על שחקני ומקומות החוט</h2>
+      <button class="close" id="ovr-close">סגירה</button>
+    </div>
+    <div class="modal-body">
+      <div>
+        <h3>מפת הזירה — כל המקומות בחוט</h3>
+        <div class="modal-map" id="ovr-map"></div>
+        <p style="font-size:12px;color:var(--muted);margin-top:8px;">סמני זהב = מקום ששיוכו לא ודאי — מועמד לחקירה ארכיונית. סמני כחול־אדום = מקומות מתועדים.</p>
+      </div>
+      <div>
+        <h3>כל היישויות בחוט — והמאמרים בהם הן מופיעות</h3>
+        <div class="modal-ents" id="ovr-ents"></div>
+        <p style="font-size:12px;color:var(--muted);margin-top:8px;">לחיצה על מאמר תסגור את המבט־על ותפתח אותו בלוח הקריאה.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="site">
+  <div class="foot-grid">
+    <div>
+      <strong>על המוקאפ:</strong>
+      תצוגה־מוצעת אינטראקטיבית לדפדפן הפולמוס בעיתונות העברית 1879–1884.
+      הנתונים — חוטים, מסמכים, ניקודי מודל, סקירות ספרות מחקרית — מבוססים על pilot complete (2026-05-15):
+      188 חוטים, 3 מודלים, 55 חוטי בוררות.
+      הוויזואליזציות הדיאכרוניות, סימוני היישויות, וההזמנות למחקר הם מודולים מתוכננים.
+    </div>
+    <div>
+      <strong>קוד ונתונים:</strong><br>
+      <a href="#">README הפיילוט</a><br>
+      <a href="#">דמו אגרת בן־יהודה (3442)</a><br>
+      <a href="#">דפדפן הקורפוס המלא (Streamlit)</a>
+    </div>
+  </div>
+</footer>
+
+<script src="demo_press_polemic_browser_data.js"></script>
+<script src="demo_press_polemic_browser_entities.js"></script>
+<script>
+// ====== CHROME-ONLY DATA ======
+const LANES = ['HMZ','HZF','HZT','MGD','HLB'];
+const LANE_COLOR = {HMZ:'#2d5a5a', HZF:'#8a2418', HZT:'#5a3a2a', MGD:'#1f3d6b', HLB:'#4a2a5a'};
+
+
+// ====== TAB SWITCHING ======
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const c = btn.dataset.case;
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === btn));
+    document.querySelectorAll('.case-panel').forEach(p => p.classList.toggle('active', p.id === 'case-' + c));
+  });
+});
+
+// ====== TOOLBAR TOGGLES ======
+document.getElementById('tg-provenance').addEventListener('change', e => {
+  document.body.classList.toggle('provenance-on', e.target.checked);
+  // ensure human-tag spans exist on viz/lit/etc — add at runtime
+  if (e.target.checked) addHumanTags(); else removeHumanTags();
+});
+document.getElementById('tg-entities').addEventListener('change', e => {
+  document.body.classList.toggle('entities-hidden', !e.target.checked);
+});
+// default: entities visible
+document.getElementById('tg-entities').checked = true;
+
+function addHumanTags() {
+  // mark human-curated regions inside the case panels
+  document.querySelectorAll('.case-meta').forEach(el => {
+    if (!el.classList.contains('human-block')) {
+      el.classList.add('human-block');
+      const tag = document.createElement('span');
+      tag.className = 'human-tag';
+      tag.textContent = 'אנושי';
+      el.style.position = 'relative';
+      el.appendChild(tag);
+    }
+  });
+}
+function removeHumanTags() {
+  document.querySelectorAll('.human-block').forEach(el => {
+    el.classList.remove('human-block');
+    el.querySelectorAll('.human-tag').forEach(t => t.remove());
+  });
+}
+
+// ====== DIACHRONIC NETWORK RENDER ======
+function dateToX(dateStr, span, x0, x1) {
+  const t = new Date(dateStr).getTime();
+  const t0 = new Date(span[0]).getTime();
+  const t1 = new Date(span[1]).getTime();
+  return x0 + (t - t0) / (t1 - t0) * (x1 - x0);
+}
+
+function renderViz(caseId) {
+  const data = CASES[caseId];
+  const svg = document.getElementById('svg-' + caseId);
+  if (!svg) return;
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  const W = 1100;
+  const lanes = data.lanes;
+  const laneH = lanes.length <= 2 ? 80 : 60;
+  const topPad = 28, bottomPad = 36, leftPad = 70, rightPad = 30;
+  const H = topPad + laneH * lanes.length + bottomPad;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const x0 = leftPad, x1 = W - rightPad;
+
+  // lane bands + labels + center line
+  lanes.forEach((p, i) => {
+    const y = topPad + i * laneH;
+    const band = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    band.setAttribute('x', 0); band.setAttribute('y', y);
+    band.setAttribute('width', W); band.setAttribute('height', laneH);
+    band.setAttribute('class', 'lane-band' + (i % 2 ? ' alt' : ''));
+    svg.appendChild(band);
+
+    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    label.setAttribute('x', leftPad - 12); label.setAttribute('y', y + laneH/2 + 4);
+    label.setAttribute('text-anchor', 'end'); label.setAttribute('class', 'lane-label');
+    label.setAttribute('fill', LANE_COLOR[p]);
+    label.textContent = p;
+    svg.appendChild(label);
+
+    const cl = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    cl.setAttribute('x1', leftPad); cl.setAttribute('x2', W - rightPad);
+    cl.setAttribute('y1', y + laneH/2); cl.setAttribute('y2', y + laneH/2);
+    cl.setAttribute('class', 'lane-rule');
+    cl.setAttribute('stroke-dasharray', '2 4');
+    svg.appendChild(cl);
+  });
+
+  // x axis ticks: every ~2 months
+  const t0 = new Date(data.span[0]).getTime();
+  const t1 = new Date(data.span[1]).getTime();
+  const nMonths = Math.round((t1 - t0) / (30 * 24 * 3600 * 1000));
+  const tickStep = nMonths > 12 ? 3 : 2;
+  for (let m = 0; m <= nMonths; m += tickStep) {
+    const ts = new Date(data.span[0]); ts.setMonth(ts.getMonth() + m);
+    if (ts.getTime() > t1) break;
+    const tx = dateToX(ts.toISOString().slice(0,10), data.span, x0, x1);
+    const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    tick.setAttribute('x1', tx); tick.setAttribute('x2', tx);
+    tick.setAttribute('y1', topPad); tick.setAttribute('y2', H - bottomPad + 4);
+    tick.setAttribute('class', 'axis-tick');
+    svg.appendChild(tick);
+    const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    lbl.setAttribute('x', tx); lbl.setAttribute('y', H - bottomPad + 18);
+    lbl.setAttribute('text-anchor', 'middle'); lbl.setAttribute('class', 'axis-label');
+    lbl.textContent = ts.toISOString().slice(0,7);
+    svg.appendChild(lbl);
+  }
+
+  // edges first (so nodes are on top)
+  const docMap = {};
+  data.docs.forEach(d => {
+    const li = lanes.indexOf(d.paper);
+    if (li < 0) return;
+    d._x = dateToX(d.date, data.span, x0, x1);
+    d._y = topPad + li * laneH + laneH/2;
+    docMap[d.id] = d;
+  });
+  data.edges.forEach(([from, to, type]) => {
+    const a = docMap[from], b = docMap[to];
+    if (!a || !b) return;
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    // arc going below the higher lane (visually on top side in our SVG = lower y)
+    const midX = (a._x + b._x) / 2;
+    const dy = Math.abs(a._y - b._y);
+    const sameLane = a._y === b._y;
+    let d;
+    if (sameLane) {
+      // semicircle above the lane
+      const r = Math.abs(a._x - b._x) / 2;
+      d = `M ${a._x} ${a._y} A ${r} ${r * 0.8} 0 0 1 ${b._x} ${b._y}`;
+    } else {
+      const c1y = (a._y + b._y) / 2 - Math.max(20, dy * 0.3);
+      d = `M ${a._x} ${a._y} Q ${midX} ${c1y} ${b._x} ${b._y}`;
+    }
+    path.setAttribute('d', d);
+    path.setAttribute('class', 'edge ' + type);
+    svg.appendChild(path);
+  });
+
+  // nodes
+  data.docs.forEach(d => {
+    if (typeof d._x !== 'number') return;
+    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    c.setAttribute('cx', d._x); c.setAttribute('cy', d._y);
+    c.setAttribute('r', d.size || 6);
+    c.setAttribute('fill', LANE_COLOR[d.paper]);
+    c.setAttribute('stroke', '#fff'); c.setAttribute('stroke-width', '1.5');
+    c.setAttribute('class', 'doc-node');
+    c.dataset.docId = d.id;
+    c.addEventListener('mouseenter', e => showTooltip(e, d));
+    c.addEventListener('mousemove', moveTooltip);
+    c.addEventListener('mouseleave', hideTooltip);
+    c.addEventListener('click', e => {
+      svg.querySelectorAll('.doc-node').forEach(n => n.classList.remove('selected'));
+      c.classList.add('selected');
+      showInReader(caseId, d.id);
+      pinTooltip(c, caseId, d.id);
+      e.stopPropagation();
+    });
+    svg.appendChild(c);
+  });
+}
+
+// ====== TOOLTIP ======
+const tt = document.getElementById('tooltip');
+let _pinned = false;  // is the tooltip currently pinned (click mode)?
+function showTooltip(e, d) {
+  if (_pinned) return;  // don't interrupt a pinned tooltip with hover
+  tt.classList.remove('pinned');
+  tt.innerHTML = `<div class="tt-id">${d.id} · ${d.date} · ${d.paper}</div><div class="tt-title">${d.title}</div>${d.note ? `<div>${d.note}</div>` : ''}`;
+  tt.classList.add('on');
+  moveTooltip(e);
+}
+function moveTooltip(e) {
+  if (_pinned) return;
+  tt.style.left = (e.clientX + 14) + 'px';
+  tt.style.top = (e.clientY + 14) + 'px';
+}
+function hideTooltip() { if (!_pinned) tt.classList.remove('on'); }
+
+function pinTooltip(nodeEl, caseId, docId) {
+  const data = CASES[caseId];
+  const ex = data.excerpts[docId];
+  const d = data.docs.find(x => x.id === docId);
+  if (!ex && !d) return;
+  const title = (ex && ex.title) || (d && d.title) || '—';
+  const date  = (ex && ex.date)  || (d && d.date)  || '';
+  const paper = (ex && ex.paper) || (d && d.paper) || '';
+  const lede  = (ex && ex.lede)  || (d && d.lede)  || '';
+  tt.classList.add('pinned', 'on');
+  tt.innerHTML =
+    `<button class="tt-close" title="סגירה">×</button>` +
+    `<div class="tt-id">${docId}</div>` +
+    `<div class="tt-title">${escapeHtml(title)}</div>` +
+    `<div class="tt-meta">${date} · ${paper}</div>` +
+    (lede ? `<div class="tt-lede">${escapeHtml(lede)}</div>` : '') +
+    `<div class="tt-foot"><span class="tt-ai">AI</span><span>סיכום אוטומטי + תפקיד ברשת הקשרים</span></div>`;
+  // position above the node
+  const r = nodeEl.getBoundingClientRect();
+  const ttRect = tt.getBoundingClientRect();
+  let left = r.left + r.width/2 - ttRect.width/2;
+  let top  = r.top - ttRect.height - 14;
+  // keep on screen
+  left = Math.max(8, Math.min(left, window.innerWidth - ttRect.width - 8));
+  if (top < 8) top = r.bottom + 14; // flip below
+  tt.style.left = left + 'px';
+  tt.style.top  = top  + 'px';
+  _pinned = true;
+  tt.querySelector('.tt-close').addEventListener('click', unpinTooltip);
+}
+function unpinTooltip() {
+  _pinned = false;
+  tt.classList.remove('pinned','on');
+}
+// click anywhere outside a node closes the pinned tooltip
+document.addEventListener('click', e => {
+  if (!_pinned) return;
+  if (e.target.closest('.doc-node') || e.target.closest('.tooltip.pinned')) return;
+  unpinTooltip();
+});
+
+// ====== NER auto-wrap ======
+// For each case, build an ordered list of {regex, type, key} from ENTITIES.
+// Longer surface forms first → avoid wrapping partials.
+const _entIndex = {};
+function buildEntIndex(caseId) {
+  const e = (ENTITIES[caseId] || {}).entities || {};
+  const items = [];
+  Object.entries(e).forEach(([key, ent]) => {
+    (ent.surface || []).forEach(s => items.push({key, type: ent.type, surface: s}));
+  });
+  items.sort((a,b) => b.surface.length - a.surface.length);
+  _entIndex[caseId] = items;
+}
+
+function escRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+function wrapEntities(html, caseId) {
+  // html may already contain markup we wrote — but our snippets are now plain text
+  // We work on text by splitting on existing tags (none expected). Simpler: do replace on plain text.
+  const items = _entIndex[caseId] || [];
+  let text = html;
+  // Use a placeholder system to avoid double-wrapping (longer matches consume substring first)
+  const placeholders = [];
+  items.forEach(it => {
+    const re = new RegExp(escRe(it.surface), 'g');
+    text = text.replace(re, m => {
+      const i = placeholders.length;
+      placeholders.push(`<span class="ent ${it.type}" data-ent="${it.key}" data-case="${caseId}" title="${(ENTITIES[caseId].entities[it.key].label||'').replace(/"/g,'&quot;')}">${m}</span>`);
+      return `${i}`;
+    });
+  });
+  return text.replace(/(\d+)/g, (_, i) => placeholders[+i]);
+}
+
+// ====== READING PANEL ======
+const _currentDoc = {};   // caseId -> docId
+const _fullTextMode = {}; // caseId -> bool
+function showInReader(caseId, docId, opts = {}) {
+  const data = CASES[caseId];
+  const ex = data.excerpts[docId];
+  const titleEl = document.getElementById('rp-' + caseId + '-title');
+  const idEl = document.getElementById('rp-' + caseId + '-id');
+  const metaEl = document.getElementById('rp-' + caseId + '-meta');
+  const bodyEl = document.getElementById('rp-' + caseId + '-body');
+  const posEl  = document.getElementById('rp-' + caseId + '-pos');
+  const d = data.docs.find(x => x.id === docId);
+  // reset full-text mode on doc change unless overridden
+  if (!opts.keepMode) _fullTextMode[caseId] = false;
+  const showFull = _fullTextMode[caseId];
+  if (ex) {
+    titleEl.textContent = ex.title;
+    idEl.textContent = docId;
+    metaEl.textContent = ex.date + ' · ' + ex.paper;
+    bodyEl.classList.remove('placeholder');
+    const txt = showFull && ex.fullText ? ex.fullText : ex.text;
+    bodyEl.innerHTML = wrapEntities(txt, caseId);
+  } else if (d) {
+    titleEl.textContent = d.title;
+    idEl.textContent = docId;
+    metaEl.textContent = d.date + ' · ' + d.paper;
+    bodyEl.classList.add('placeholder');
+    bodyEl.innerHTML = '(טקסט לא נמצא בקורפוס המקומי)';
+  }
+  // update full-text toggle label
+  const tg = document.querySelector('.ft-toggle[data-case="' + caseId + '"]');
+  if (tg) tg.textContent = showFull ? 'הציגו תקציר בלבד' : 'הציגו טקסט מלא';
+  // update JPress link
+  const jp = document.getElementById('jp-' + caseId);
+  if (jp && ex && ex.jpress) jp.href = ex.jpress;
+  // entity sidebar — filter to only those present in the current text
+  refreshEntityPresence(caseId);
+  // lede under title
+  const ledeEl = document.getElementById('rp-' + caseId + '-lede');
+  if (ledeEl) ledeEl.textContent = (ex && ex.lede) ? ex.lede : '';
+  // position indicator + arrow state
+  const idx = data.docs.findIndex(x => x.id === docId);
+  if (posEl && idx >= 0) posEl.textContent = (idx+1) + ' / ' + data.docs.length;
+  _currentDoc[caseId] = docId;
+  // sync node highlight in viz
+  const svg = document.getElementById('svg-' + caseId);
+  if (svg) {
+    svg.querySelectorAll('.doc-node').forEach(n => {
+      n.classList.toggle('selected', n.dataset.docId === docId);
+    });
+  }
+  // disable arrows at edges
+  const navWrap = document.querySelector('.nav-arrows[data-case="' + caseId + '"]');
+  if (navWrap) {
+    navWrap.querySelector('.rp-prev').disabled = (idx <= 0);
+    navWrap.querySelector('.rp-next').disabled = (idx >= data.docs.length - 1);
+  }
+}
+
+function stepDoc(caseId, delta) {
+  const data = CASES[caseId];
+  const cur = _currentDoc[caseId] || data.defaultDoc;
+  const idx = data.docs.findIndex(x => x.id === cur);
+  const next = data.docs[idx + delta];
+  if (!next) return;
+  showInReader(caseId, next.id);
+  // also pin the tooltip on the newly-selected node, mirroring a click
+  const svg = document.getElementById('svg-' + caseId);
+  const nodeEl = svg && svg.querySelector(`.doc-node[data-doc-id="${next.id}"]`);
+  if (nodeEl) pinTooltip(nodeEl, caseId, next.id);
+}
+
+document.querySelectorAll('.nav-arrows').forEach(wrap => {
+  const c = wrap.dataset.case;
+  wrap.querySelector('.rp-prev').addEventListener('click', () => stepDoc(c, -1));
+  wrap.querySelector('.rp-next').addEventListener('click', () => stepDoc(c, +1));
+});
+
+// keyboard nav: arrow keys move within the currently-active case
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  const activeTab = document.querySelector('.tab.active');
+  if (!activeTab) return;
+  const c = activeTab.dataset.case;
+  if (e.key === 'ArrowLeft')      stepDoc(c, +1);  // RTL: left = next
+  else if (e.key === 'ArrowRight') stepDoc(c, -1); // RTL: right = previous
+});
+
+// ====== ENTITY SIDEBAR ======
+function renderEntityList(caseId) {
+  const wrap = document.getElementById('ents-' + caseId);
+  if (!wrap) return;
+  const ents = (ENTITIES[caseId] || {}).entities || {};
+  wrap.innerHTML = '';
+  Object.entries(ents).forEach(([key, ent]) => {
+    const row = document.createElement('div');
+    row.className = 'ent-item';
+    row.dataset.entKey = key;
+    row.innerHTML =
+      `<div class="ent-swatch ${ent.type}"></div>` +
+      `<div class="ent-main">` +
+        `<div class="ent-label">${ent.label}<span class="ent-absent" data-absent="1" style="display:none">לא בקטע הנוכחי</span></div>` +
+        `<div class="ent-type">${ent.type}</div>` +
+        `<div class="ent-desc">${ent.desc || ''}</div>` +
+      `</div>`;
+    row.addEventListener('click', () => {
+      // toggle expanded view + flash text-side spans
+      wrap.querySelectorAll('.ent-item').forEach(r => r.classList.toggle('active', r === row));
+      flashEntityInText(caseId, key);
+    });
+    wrap.appendChild(row);
+  });
+  refreshEntityPresence(caseId);
+}
+
+function refreshEntityPresence(caseId) {
+  const body = document.querySelector('.reading-body[data-case="' + caseId + '"]');
+  if (!body) return;
+  const present = new Set();
+  body.querySelectorAll('.ent[data-ent]').forEach(s => present.add(s.dataset.ent));
+  const wrap = document.getElementById('ents-' + caseId);
+  if (!wrap) return;
+  let nVisible = 0;
+  wrap.querySelectorAll('.ent-item').forEach(row => {
+    const isPresent = present.has(row.dataset.entKey);
+    row.style.display = isPresent ? '' : 'none';
+    if (isPresent) nVisible++;
+  });
+  // empty-state hint
+  let hint = wrap.querySelector('.ent-empty');
+  if (!nVisible) {
+    if (!hint) {
+      hint = document.createElement('div');
+      hint.className = 'ent-empty';
+      hint.style.cssText = 'padding:14px 14px;font-size:12px;color:var(--muted);font-style:italic;text-align:center;';
+      hint.textContent = 'אין יישויות מתויגות בקטע הנוכחי. פתחו "מבט־על" לראות את כל היישויות של החוט.';
+      wrap.appendChild(hint);
+    }
+  } else if (hint) {
+    hint.remove();
+  }
+}
+
+function flashEntityInText(caseId, key) {
+  const body = document.querySelector('.reading-body[data-case="' + caseId + '"]');
+  if (!body) return;
+  const matches = body.querySelectorAll(`.ent[data-ent="${key}"]`);
+  if (!matches.length) return;
+  matches.forEach(el => { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); });
+  // scroll first match into view
+  matches[0].scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+// ====== MAP ======
+const _maps = {};
+function renderMap(caseId) {
+  const el = document.getElementById('map-' + caseId);
+  if (!el || _maps[caseId]) return;
+  const places = (ENTITIES[caseId] || {}).places || [];
+  if (!places.length) return;
+  // fit bounds to all places
+  const lats = places.map(p => p.coords[0]);
+  const lngs = places.map(p => p.coords[1]);
+  const minLat = Math.min(...lats), maxLat = Math.max(...lats);
+  const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
+  const map = L.map(el, {scrollWheelZoom: false, attributionControl: true});
+  _maps[caseId] = map;
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap', maxZoom: 12,
+  }).addTo(map);
+  places.forEach(p => {
+    const m = L.circleMarker(p.coords, {
+      radius: 7, color: '#8a2418', weight: 2, fillColor: '#b04a3a', fillOpacity: 0.85,
+    }).addTo(map);
+    m.bindTooltip(p.label, {permanent: false, direction: 'top', className: 'leaf-tip'});
+    m.bindPopup(`<strong>${p.label}</strong><br><span style="font-size:12px;color:#555;">${p.pop || ''}</span>`);
+  });
+  map.fitBounds([[minLat, minLng],[maxLat, maxLng]], {padding: [18, 18]});
+}
+
+// ====== FULL-TEXT TOGGLE ======
+document.querySelectorAll('.ft-toggle').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const c = btn.dataset.case;
+    _fullTextMode[c] = !_fullTextMode[c];
+    showInReader(c, _currentDoc[c] || CASES[c].defaultDoc, {keepMode: true});
+  });
+});
+
+// ====== MODEL NARRATIVE CARDS ======
+function renderNarratives(caseId) {
+  const wrap = document.getElementById('narr-' + caseId);
+  if (!wrap) return;
+  const narrs = (CASES[caseId] || {}).narratives || [];
+  if (!narrs.length) return;
+  // detect the "dissent" model (lowest score, far from the others)
+  let dissentIdx = -1;
+  if (narrs.length >= 2) {
+    const scores = narrs.map(n => n.score);
+    const mn = Math.min(...scores), mx = Math.max(...scores);
+    if (mx - mn >= 0.4) dissentIdx = scores.indexOf(mn);
+  }
+  wrap.innerHTML = '';
+  narrs.forEach((n, i) => {
+    const card = document.createElement('div');
+    card.className = 'narr-card' + (i === dissentIdx ? ' dissent' : '');
+    const scoreCls = n.score >= 0.6 ? 'high' : (n.score >= 0.4 ? 'mid' : 'low');
+    const tags = [];
+    if (n.type) tags.push(`<span class="tag">${n.type}</span>`);
+    if (n.direction && n.direction !== 'n/a') tags.push(`<span class="tag">${n.direction}</span>`);
+    if (i === dissentIdx) tags.push(`<span class="tag dissent">דעת מיעוט</span>`);
+    // narrative may be English (LTR) or Hebrew (RTL) — detect with a heuristic
+    const isHe = /[֐-׿]/.test(n.narrative.slice(0, 50));
+    card.innerHTML =
+      `<div class="narr-head">` +
+        `<span class="narr-model">${n.model}</span>` +
+        `<span class="narr-score ${scoreCls}">${n.score.toFixed(2)}</span>` +
+      `</div>` +
+      (n.topicHe ? `<div class="narr-topic">${n.topicHe}</div>` : '') +
+      (tags.length ? `<div class="narr-tags">${tags.join('')}</div>` : '') +
+      `<div class="narr-text${isHe ? ' he' : ''}">${escapeHtml(n.narrative)}</div>`;
+    wrap.appendChild(card);
+  });
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ====== INIT ======
+['381','395','193'].forEach(c => {
+  buildEntIndex(c);
+  renderEntityList(c);
+  renderViz(c);
+  renderNarratives(c);
+  showInReader(c, CASES[c].defaultDoc);
+});
+
+// render maps lazily on tab activation (Leaflet needs visible container)
+function ensureMap(caseId) { renderMap(caseId); if (_maps[caseId]) setTimeout(() => _maps[caseId].invalidateSize(), 50); }
+ensureMap('381');  // active tab on load
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => ensureMap(btn.dataset.case));
+});
+
+// ====== ENTITY → MENTIONING DOCS INDEX ======
+// For each case + entity, list the docs whose fullText contains any of its surface forms.
+const _mentionIdx = {};
+function buildMentionIndex(caseId) {
+  const ents = (ENTITIES[caseId] || {}).entities || {};
+  const docs = CASES[caseId].docs;
+  const excerpts = CASES[caseId].excerpts;
+  const idx = {};
+  Object.entries(ents).forEach(([key, ent]) => {
+    const surfaces = ent.surface || [];
+    const found = [];
+    docs.forEach(d => {
+      const full = (excerpts[d.id] && excerpts[d.id].fullText) || '';
+      if (surfaces.some(s => full.indexOf(s) !== -1)) {
+        found.push(d);
+      }
+    });
+    idx[key] = found;
+  });
+  _mentionIdx[caseId] = idx;
+}
+
+// ====== THREAD-OVERVIEW MODAL ======
+const modal = document.getElementById('overview-modal');
+const modalClose = document.getElementById('ovr-close');
+let _modalMap = null;
+
+function openOverview(caseId) {
+  document.getElementById('ovr-title').textContent =
+    'מבט־על: כל השחקנים והמקומות של חוט #' + caseId;
+  // entity list
+  const ovrEnts = document.getElementById('ovr-ents');
+  ovrEnts.innerHTML = '';
+  const ents = (ENTITIES[caseId] || {}).entities || {};
+  const mentions = _mentionIdx[caseId] || {};
+  Object.entries(ents).forEach(([key, ent]) => {
+    const docs = mentions[key] || [];
+    const row = document.createElement('div');
+    row.className = 'ent-item';
+    let chips = '';
+    if (docs.length) {
+      chips = '<div class="mention-list">' + docs.map(d =>
+        `<span class="mention-chip" data-case="${caseId}" data-doc="${d.id}" title="${d.title.replace(/"/g,'&quot;')}">${d.date} · ${d.paper}</span>`
+      ).join('') + '</div>';
+    } else {
+      chips = '<div class="mention-empty">אין התאמת surface form בקטעים שנדגמו.</div>';
+    }
+    row.innerHTML =
+      `<div class="ent-swatch ${ent.type}"></div>` +
+      `<div class="ent-main">` +
+        `<div class="ent-label">${ent.label}</div>` +
+        `<div class="ent-type">${ent.type} · ${docs.length} מאמרים</div>` +
+        `<div class="ent-desc">${ent.desc || ''}</div>` +
+        chips +
+      `</div>`;
+    ovrEnts.appendChild(row);
+  });
+  // chip clicks → close + navigate
+  ovrEnts.querySelectorAll('.mention-chip').forEach(c => {
+    c.addEventListener('click', () => {
+      closeOverview();
+      // ensure correct tab is active
+      document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.case === c.dataset.case));
+      document.querySelectorAll('.case-panel').forEach(p => p.classList.toggle('active', p.id === 'case-' + c.dataset.case));
+      ensureMap(c.dataset.case);
+      showInReader(c.dataset.case, c.dataset.doc);
+      // scroll the reading panel into view
+      const panel = document.querySelector('#case-' + c.dataset.case + ' .reading-panel');
+      if (panel) panel.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  });
+  modal.classList.add('open');
+  // build the map (re-create each open so it sizes correctly)
+  setTimeout(() => renderOverviewMap(caseId), 30);
+}
+
+function renderOverviewMap(caseId) {
+  const el = document.getElementById('ovr-map');
+  el.innerHTML = '';
+  if (_modalMap) { _modalMap.remove(); _modalMap = null; }
+  const places = (ENTITIES[caseId] || {}).places || [];
+  if (!places.length) return;
+  const lats = places.map(p => p.coords[0]);
+  const lngs = places.map(p => p.coords[1]);
+  _modalMap = L.map(el, {scrollWheelZoom: true});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap', maxZoom: 12,
+  }).addTo(_modalMap);
+  places.forEach(p => {
+    const isUncertain = !!p.uncertain;
+    const m = L.circleMarker(p.coords, {
+      radius: 9,
+      color: isUncertain ? '#a0780f' : '#8a2418',
+      weight: isUncertain ? 2 : 2,
+      dashArray: isUncertain ? '4 3' : null,
+      fillColor: isUncertain ? '#fff4cc' : '#b04a3a',
+      fillOpacity: isUncertain ? 0.7 : 0.85,
+    }).addTo(_modalMap);
+    const popHtml = `<strong>${p.label}</strong>${isUncertain ? ' <em style="color:#a0780f;">(זיהוי לא ודאי)</em>' : ''}<br><span style="font-size:12px;color:#555;">${p.pop || ''}</span>` +
+      (isUncertain && p.question ? `<br><br><em style="font-size:11px;color:#a0780f;">${p.question}</em>` : '');
+    m.bindPopup(popHtml);
+    m.bindTooltip(p.label, {direction: 'top'});
+  });
+  _modalMap.fitBounds([[Math.min(...lats), Math.min(...lngs)],[Math.max(...lats), Math.max(...lngs)]], {padding:[24,24]});
+}
+
+function closeOverview() {
+  modal.classList.remove('open');
+  if (_modalMap) { _modalMap.remove(); _modalMap = null; }
+}
+
+modalClose.addEventListener('click', closeOverview);
+modal.addEventListener('click', e => { if (e.target === modal) closeOverview(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.classList.contains('open')) closeOverview(); });
+document.querySelectorAll('[data-overview]').forEach(btn => {
+  btn.addEventListener('click', () => openOverview(btn.dataset.overview));
+});
+
+// ====== APPLY UNCERTAIN STYLING TO SIDEBAR MAPS ======
+// also patch the sidebar renderMap to flag uncertain pins
+const _origRenderMap = renderMap;
+renderMap = function(caseId) {
+  const el = document.getElementById('map-' + caseId);
+  if (!el || _maps[caseId]) return;
+  const places = (ENTITIES[caseId] || {}).places || [];
+  if (!places.length) return;
+  const lats = places.map(p => p.coords[0]);
+  const lngs = places.map(p => p.coords[1]);
+  const map = L.map(el, {scrollWheelZoom: false, attributionControl: true});
+  _maps[caseId] = map;
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap', maxZoom: 12,
+  }).addTo(map);
+  places.forEach(p => {
+    const isUncertain = !!p.uncertain;
+    const m = L.circleMarker(p.coords, {
+      radius: 7,
+      color: isUncertain ? '#a0780f' : '#8a2418',
+      weight: 2,
+      dashArray: isUncertain ? '4 3' : null,
+      fillColor: isUncertain ? '#fff4cc' : '#b04a3a',
+      fillOpacity: isUncertain ? 0.7 : 0.85,
+    }).addTo(map);
+    const popHtml = `<strong>${p.label}</strong>${isUncertain ? ' <em style="color:#a0780f;">(זיהוי לא ודאי)</em>' : ''}<br><span style="font-size:12px;color:#555;">${p.pop || ''}</span>`;
+    m.bindTooltip(p.label, {permanent: false, direction: 'top'});
+    m.bindPopup(popHtml);
+  });
+  map.fitBounds([[Math.min(...lats), Math.min(...lngs)],[Math.max(...lats), Math.max(...lngs)]], {padding:[18,18]});
+};
+// also build mention indices
+['381','395','193'].forEach(buildMentionIndex);
+
+// ====== APPEND UNCERTAIN PLACES TO RESEARCH-INVITATION ======
+function appendUncertainPlaceQuestions() {
+  ['381','395','193'].forEach(caseId => {
+    const places = (ENTITIES[caseId] || {}).places || [];
+    const uncertain = places.filter(p => p.uncertain);
+    if (!uncertain.length) return;
+    // find the panel-body of הזמנה למחקר for this case
+    const casePanel = document.getElementById('case-' + caseId);
+    if (!casePanel) return;
+    const allPanels = casePanel.querySelectorAll('.panel');
+    let invitationBody = null;
+    allPanels.forEach(p => {
+      const h = p.querySelector('.panel-head h3');
+      if (h && h.textContent.trim().indexOf('הזמנה') !== -1) {
+        invitationBody = p.querySelector('.panel-body');
+      }
+    });
+    if (!invitationBody) return;
+    uncertain.forEach(p => {
+      const q = document.createElement('div');
+      q.className = 'question uncertain';
+      q.innerHTML =
+        `<div class="q-head">⟶ זיהוי גאוגרפי: ${p.label} — איזה יישוב בדיוק?</div>` +
+        `<p style="margin:4px 0 0;font-size:13px;">${p.question || 'הזיהוי המדויק על המפה אינו ודאי; נדרשת בדיקה ארכיונית.'}</p>` +
+        `<button class="explore-btn">🔍 חקרו עם AI</button>`;
+      invitationBody.appendChild(q);
+    });
+  });
+}
+appendUncertainPlaceQuestions();
+</script>
+
+</body>
+</html>
