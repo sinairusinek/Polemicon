@@ -36,6 +36,28 @@ def load_clusters():
 
 
 @st.cache_data
+def load_doc_texts():
+    """Doc-id → text lookup. Prefers the slim committed corpus (Streamlit Cloud);
+    falls back to the full ungitted corpus.parquet for local use."""
+    cols = ["doc_id", "text"]
+    slim = os.path.join(DATA_DIR, "thread_browser_corpus.parquet")
+    full = os.path.join(DATA_DIR, "..", "corpus.parquet")
+    frames = []
+    for path in (slim, full):
+        if os.path.exists(path):
+            try:
+                df = pd.read_parquet(path, columns=cols)
+                df["doc_id"] = df["doc_id"].astype(str)
+                frames.append(df)
+            except Exception:
+                pass
+    if not frames:
+        return None
+    combined = pd.concat(frames, ignore_index=True).drop_duplicates("doc_id", keep="first")
+    return combined.set_index("doc_id")["text"]
+
+
+@st.cache_data
 def load_threads():
     threads_path = os.path.join(DATA_DIR, "egeret_threads.parquet")
     summaries_path = os.path.join(DATA_DIR, "thread_llm_summaries.parquet")
@@ -51,6 +73,41 @@ def load_threads():
 
 docs, labels = load_clusters()
 threads, thread_summaries = load_threads()
+doc_texts = load_doc_texts()
+
+
+def render_doc_text(doc_id: str, meta_row=None):
+    """Render an Egeret/press doc's text inline, RTL, with final-form restoration."""
+    doc_id = str(doc_id)
+    header_bits = [f"**{doc_id}**"]
+    if meta_row is not None:
+        for k in ("author", "title", "newspaper", "year"):
+            v = meta_row.get(k) if hasattr(meta_row, "get") else None
+            if pd.notna(v) and v not in ("", None):
+                header_bits.append(str(v))
+    st.markdown(" · ".join(header_bits))
+    if doc_texts is None or doc_id not in doc_texts.index:
+        st.info(
+            "Text not available in the deployed corpus slice. "
+            "(Full text lives in the ungitted `corpus.parquet`.)"
+        )
+        return
+    text_val = str(doc_texts.loc[doc_id] or "")
+    limit = 4000
+    preview = restore_final_forms(text_val[:limit])
+    st.markdown(
+        f'<div dir="rtl" style="text-align:right;font-size:15px;line-height:1.8;'
+        f'background:#fafafa;border:1px solid #e0e0e0;border-radius:4px;padding:10px;">'
+        f'{preview}{"…" if len(text_val) > limit else ""}</div>',
+        unsafe_allow_html=True,
+    )
+    if len(text_val) > limit:
+        with st.expander("Full text"):
+            st.markdown(
+                f'<div dir="rtl" style="text-align:right;font-size:14px;line-height:1.7;">'
+                f'{restore_final_forms(text_val[:12000])}</div>',
+                unsafe_allow_html=True,
+            )
 
 
 def render_labels_table(lbl: pd.DataFrame) -> pd.DataFrame:
@@ -93,8 +150,21 @@ def render_cluster_detail(cid: int):
         "doc_id", "source", "author", "year", "title", "newspaper",
         "predicted_label", "confidence",
     ]
-    table = sub[cols_to_show].sort_values(["source", "year"], na_position="last")
-    st.dataframe(table, use_container_width=True, height=420)
+    table = sub[cols_to_show].sort_values(["source", "year"], na_position="last").reset_index(drop=True)
+    st.caption("Click a row to open that document's text below.")
+    _doc_event = st.dataframe(
+        table,
+        use_container_width=True,
+        height=420,
+        on_select="rerun",
+        selection_mode="single-row",
+        key=f"cluster_{cid}_docs_select",
+    )
+    _sel = getattr(getattr(_doc_event, "selection", None), "rows", None) or []
+    if _sel:
+        _row = table.iloc[_sel[0]]
+        st.markdown("---")
+        render_doc_text(_row["doc_id"], meta_row=_row)
 
 
 def render_tab(subset_labels: pd.DataFrame, default_sort: str, key_prefix: str):
@@ -118,12 +188,35 @@ def render_tab(subset_labels: pd.DataFrame, default_sort: str, key_prefix: str):
     col, asc = sort_options[sort_choice]
     sorted_lbl = subset_labels.sort_values(col, ascending=asc).reset_index(drop=True)
 
-    st.dataframe(render_labels_table(sorted_lbl), use_container_width=True, height=300)
+    _labels_view = render_labels_table(sorted_lbl)
+    st.caption("Click a row to open that cluster below, or use the selector.")
+    _lbl_event = st.dataframe(
+        _labels_view,
+        use_container_width=True,
+        height=300,
+        on_select="rerun",
+        selection_mode="single-row",
+        key=f"{key_prefix}_table_select",
+    )
+
+    pick_options = ["None"] + [
+        f"{int(r.cluster_id)} (n={r.n_docs}, egeret={r.n_egeret})"
+        for r in sorted_lbl.itertuples()
+    ]
+
+    _sel_rows = getattr(getattr(_lbl_event, "selection", None), "rows", None) or []
+    if _sel_rows:
+        _picked_cid = int(_labels_view.iloc[_sel_rows[0]]["cluster_id"])
+        _label_for_pick = next(
+            (opt for opt in pick_options if opt.startswith(f"{_picked_cid} ")),
+            None,
+        )
+        if _label_for_pick and st.session_state.get(f"{key_prefix}_pick") != _label_for_pick:
+            st.session_state[f"{key_prefix}_pick"] = _label_for_pick
 
     cluster_pick = st.selectbox(
         "Inspect cluster",
-        ["None"] + [f"{int(r.cluster_id)} (n={r.n_docs}, egeret={r.n_egeret})"
-                    for r in sorted_lbl.itertuples()],
+        pick_options,
         key=f"{key_prefix}_pick",
     )
     if cluster_pick != "None":
@@ -198,14 +291,34 @@ def render_threads_tab():
 
     sort_col = "polemic_score" if "polemic_score" in tbl.columns else "n_docs"
     tbl = tbl.sort_values(sort_col, ascending=False, na_position="last").reset_index(drop=True)
-    st.dataframe(tbl, use_container_width=True, height=350)
+    st.caption("Click a row to open that thread below, or use the selector.")
+    _thr_event = st.dataframe(
+        tbl,
+        use_container_width=True,
+        height=350,
+        on_select="rerun",
+        selection_mode="single-row",
+        key="threads_table_select",
+    )
+
+    pick_options = ["None"] + [
+        f"{int(r.thread_id)} — {(r.topic_label if 'topic_label' in tbl.columns and pd.notna(r.topic_label) else 'no verdict')}"
+        for r in tbl.itertuples()
+    ]
+
+    _sel_rows = getattr(getattr(_thr_event, "selection", None), "rows", None) or []
+    if _sel_rows:
+        _picked_tid = int(tbl.iloc[_sel_rows[0]]["thread_id"])
+        _label_for_pick = next(
+            (opt for opt in pick_options if opt.startswith(f"{_picked_tid} ")),
+            None,
+        )
+        if _label_for_pick and st.session_state.get("thread_pick") != _label_for_pick:
+            st.session_state["thread_pick"] = _label_for_pick
 
     pick = st.selectbox(
         "Inspect thread",
-        ["None"] + [
-            f"{int(r.thread_id)} — {(r.topic_label if 'topic_label' in tbl.columns and pd.notna(r.topic_label) else 'no verdict')}"
-            for r in tbl.itertuples()
-        ],
+        pick_options,
         key="thread_pick",
     )
     if pick == "None":
@@ -244,12 +357,25 @@ def render_threads_tab():
     doc_ids = [d.strip() for d in str(trow["doc_ids"]).split(",") if d.strip()]
     thread_docs = docs[docs["doc_id"].isin(doc_ids)].copy()
     st.markdown(f"**Letters in thread ({len(thread_docs)}):**")
-    st.dataframe(
+    letters_tbl = (
         thread_docs[["doc_id", "author", "year", "title", "predicted_label", "confidence"]]
-        .sort_values(["year", "author"], na_position="last"),
+        .sort_values(["year", "author"], na_position="last")
+        .reset_index(drop=True)
+    )
+    st.caption("Click a row to open the letter text below.")
+    _letter_event = st.dataframe(
+        letters_tbl,
         use_container_width=True,
         height=300,
+        on_select="rerun",
+        selection_mode="single-row",
+        key=f"thread_{tid}_letters_select",
     )
+    _lsel = getattr(getattr(_letter_event, "selection", None), "rows", None) or []
+    if _lsel:
+        _row = letters_tbl.iloc[_lsel[0]]
+        st.markdown("---")
+        render_doc_text(_row["doc_id"], meta_row=_row)
 
 
 with tab4:

@@ -602,7 +602,22 @@ if view_mode == "Thread Browser":
                 else "" if t in lit_idx.index else "—"
             )
         with st.expander("Full table", expanded=True):
-            st.dataframe(top_table, use_container_width=True, height=280)
+            st.caption("Click a row to load it in the detail panel below.")
+            _tbl_event = st.dataframe(
+                top_table,
+                use_container_width=True,
+                height=280,
+                on_select="rerun",
+                selection_mode="single-row",
+                key="top_table_select",
+            )
+            _sel_rows = getattr(getattr(_tbl_event, "selection", None), "rows", None) or []
+            if _sel_rows:
+                _picked_tid = int(top_table.iloc[_sel_rows[0]]["thread_id"])
+                if st.session_state.get("selected_thread_id") != _picked_tid:
+                    st.session_state["selected_thread_id"] = _picked_tid
+                    st.session_state["scroll_to_detail"] = True
+                    st.rerun()
 
     # ---- Resolve the selected thread for the detail panel ----
     thread_id_sel = st.session_state.get("selected_thread_id")
