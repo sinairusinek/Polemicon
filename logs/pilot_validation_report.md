@@ -1,5 +1,5 @@
 # Pilot validation report — Questions A and B
-*2026-05-14*
+*2026-05-14, revised 2026-05-16 with Q.B re-run results (see "Q.B re-run — finding inverted" section below).*
 
 Two tests run against the top-30 engaged threads from C.2 to validate the threading + LLM pipeline:
 
@@ -37,7 +37,7 @@ Four configurations × 30 threads = 120 evaluation runs. Output: [`data/vocab_ba
 
 1. **Best vocab-only baseline recovers 38% of a thread on average.** The remaining 62% is what the threading pipeline (reference edges + interleave + semantic similarity + heuristic clustering) adds.
 
-2. **Actor-name baselines essentially fail (~4-5%) — but for a fixable reason.** The LLM returned actors in English/transliterated form (e.g. `"BILU members"`, `"Ha-Maggid"`, `"Dr. Lehmann"`) that don't substring-match the Hebrew text. If we ask the Stage B prompt for actors *in their original Hebrew form*, this baseline should rise substantially (estimated to 30-50%, possibly the strongest baseline).
+2. **Actor-name baselines essentially fail (~4-5%) — initially blamed on script, but the cause is deeper.** The original hypothesis was that the LLM returned actors in English/transliterated form (`"BILU members"`, `"Ha-Maggid"`) and that switching the Stage B prompt to require original Hebrew form would lift the baseline to 30–50%. **This was tested on 2026-05-16 and falsified** — see "Q.B re-run — finding inverted" below. The bottleneck is Hebrew morphology (prefix-attachment ה/ב/ל/מ glued to nouns defeats substring matching of names), not script choice.
 
 3. **Per-thread variance is large** (12% – 75%). Hypothesis: high-recall threads are vocabulary-driven (named-entity disputes, specific terms), low-recall are reference/semantic-driven (thematic exchanges, varied terminology). The lowest-recall threads are the ones where the threading pipeline adds the most:
     - Thread 432 (12%): Inter-Press Rivalry HaLevanon vs HaMagid
@@ -120,20 +120,42 @@ Web-search-grounded LLMs over-index on English-language scholarship indexed by G
 
 ## What's still pending
 
-1. **10 unreviewed threads** (Q.A): 407, 426, 377, 385, 141, 375, 193, 376, 418, 391. Options:
-   - **Recommended**: switch to Gemini 2.5 Flash with grounding (~$0.50 total for all 10) — same web-search capability, ~10× cheaper. Some loss in citation reliability but acceptable for a "second pass."
-   - Top up Anthropic credits and continue with Sonnet (~$4.50 for remaining 10).
-   - Stop at 20 — we already have strong signal.
+1. ~~**10 unreviewed threads** (Q.A)~~ — **decision 2026-05-16: dropped from pilot scope.** The point of Q.A in the pilot is not to produce a perfect bibliography but to expose what web-search-grounded LLM bibliographies can and cannot do. The documented limitations (English-Google bias, ~10% misattribution rate, no Hebrew-source coverage) already make that case. Polishing the existing 30-thread run further would obscure rather than sharpen the pilot's finding, and motivates the post-pilot RAMBI/NLI infrastructure instead.
 
 2. ~~**Citation reliability spot-check**~~ — done 2026-05-14, see "URL spot-check" section above. Flag rate ~10% (1 misattributed author + 2 minor role/year errors out of 10 sampled). Two-stage curation workflow defined.
 
-3. **Improved actor baseline** — re-run Q.B with Hebrew-form actor names in `actors` field of the LLM summary. Likely lifts that baseline from 5% to 30-50%, narrowing the pipeline's value-add headline.
+3. ~~**Improved actor baseline**~~ — done 2026-05-16. See "Q.B re-run (2026-05-16) — finding inverted" below. The hypothesis was falsified.
 
 4. **Streamlit integration**: surface the literature review verdict + sources panel next to the LLM verdict in the Thread Browser. ~30 LOC.
 
+## Q.B re-run (2026-05-16) — finding inverted
+
+The Stage B prompt was updated to require Hebrew-form actor names; by 2026-05-16, 425 of 431 rows in `thread_llm_summaries.parquet` carried Hebrew actors. `vocab_baseline.py --top 30` was re-run against this corrected data. Backup of the prior eval at [`data/vocab_baseline_eval.pre_hebrew_actors.parquet`](../data/vocab_baseline_eval.pre_hebrew_actors.parquet).
+
+### Result, recall@n_thread (the natural metric)
+
+| strategy / engine            | OLD (mixed-language) | NEW (Hebrew) | Δ      |
+|------------------------------|----------------------|--------------|--------|
+| `actor_names` × `substring`  | 0.008                | 0.004        | −0.004 |
+| `actor_names` × `tfidf_cos`  | 0.094                | 0.084        | −0.010 |
+| `tfidf_terms` × `substring`  | 0.006                | 0.006        |  0.000 |
+| `tfidf_terms` × `tfidf_cos`  | 0.376                | 0.376        |  0.000 |
+
+### The original prediction was wrong — and the corrected diagnosis is more useful
+
+The pilot predicted "actor baselines should lift from ~5% to 30–50% once names are in Hebrew form." They did not. The actor baselines stayed flat (or marginally dropped, within noise).
+
+The reason matters: **the bottleneck is Hebrew morphology, not script choice.** Hebrew names attach prefixes (ה/ב/ל/מ/ש/כ) directly to the noun without whitespace, which defeats substring matching whether the name is in Hebrew or transliteration. TF-IDF cosine over actor names is too sparse to recover much either. Switching `"BILU members"` → `"בני בי״לו"` does not fix this.
+
+### Implication for pilot framing
+
+The headline pipeline value-add stands at recall@n_thread = **37.6%** for the strongest baseline (`tfidf_terms × tfidf_cos`); the C.2 + LLM pipeline accounts for the remaining ~62%. But the explanation behind that 62% should be revised. It is **not** primarily "the pipeline catches what a Hebrew-actor-name baseline would have caught"; it is "the pipeline catches what no simple lexical baseline catches in this morphology." The right post-pilot lever for closing the actor-baseline gap is **lemmatization or character-n-gram matching against an authority file** (DictaBERT morphological analyzer; RAMBI/Kressel pseudonym tables), not a prompt tweak.
+
+This falsified prediction is a more interesting result than the original hypothesis because it concretely identifies the next infrastructure investment.
+
 ## Recommended next move
 
-Switch to Gemini Flash to finish the remaining 10 reviews (~$0.50). Then spot-check ~10 sources. Then take the combined result back to the user for what to write up / publish first — the "not-found" threads are the strongest research bid.
+The two Q-pending items have collapsed: Q.A's open work is reframed as post-pilot scholarship-retrieval infrastructure (RAMBI/NLI), and Q.B's prediction was tested and falsified. The pilot's Q-section is closed. Forward focus: post-pilot infrastructure (NER + entity linking, Hebrew-morphology baseline, RAMBI integration) and the demo series.
 
 ---
 

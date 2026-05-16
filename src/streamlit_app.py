@@ -602,7 +602,15 @@ if view_mode == "Thread Browser":
                 else "" if t in lit_idx.index else "—"
             )
         with st.expander("Full table", expanded=True):
-            st.caption("Click a row to load it in the detail panel below.")
+            _cap = "Click a row to load it in the detail panel below."
+            if lit_review is not None and not lit_review.empty:
+                _cap += (
+                    "  ·  **lit_status**: Q.A verdict (`well-documented` / `mentioned-in-passing` / `not-found`); "
+                    "`—` = not in top-30 pilot review set.  ·  **lit_canonical**: `✓` if the underlying event "
+                    "is canonical in scholarship even when the press dynamics aren't analyzed; blank = not canonical; "
+                    "`—` = not in review set."
+                )
+            st.caption(_cap)
             _tbl_event = st.dataframe(
                 top_table,
                 use_container_width=True,
@@ -845,6 +853,13 @@ if view_mode == "Thread Browser":
     # --- Secondary literature panel ---
     if lit_review is not None:
         lit_rows = lit_review[lit_review["thread_id"] == int(thread_id_sel)]
+        if lit_rows.empty:
+            with st.container(border=True):
+                st.markdown("**Secondary literature**")
+                st.caption(
+                    "Not in pilot review set — Q.A scored only the top-30 engaged threads. "
+                    "Post-pilot work will expand coverage via RAMBI/NLI scholarship retrieval."
+                )
         if not lit_rows.empty:
             lit = lit_rows.iloc[0]
             doc_status = lit.get("is_documented")
