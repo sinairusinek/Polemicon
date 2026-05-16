@@ -38,9 +38,22 @@ ROOT = Path(__file__).resolve().parent.parent
 os.chdir(ROOT)
 load_dotenv(ROOT / ".env")
 
+sys.path.insert(0, str(ROOT / "src"))
+from cleaning import restore_final_forms  # noqa: E402
+
 DATA = ROOT / "data"
 DOC_SUMMARIES_PATH = DATA / "thread_doc_summaries.parquet"
 THREAD_SUMMARIES_PATH = DATA / "thread_llm_summaries.parquet"
+
+
+def _fix_actors(items) -> list[str]:
+    """Apply restore_final_forms to each actor name. LLMs echo names from
+    normalized corpus text (medial letters at word-ends); restore final forms."""
+    out = []
+    for a in (items or []):
+        s = str(a)
+        out.append(restore_final_forms(s))
+    return out
 
 # --- Model configs ---
 
@@ -231,7 +244,7 @@ async def stage_a_gemini(doc_rows: pd.DataFrame, model_id: str) -> list[dict]:
                 "doc_id": row["doc_id"],
                 "summary_he": parsed.get("summary_he", ""),
                 "is_polemical": bool(parsed.get("is_polemical", False)),
-                "key_actors": json.dumps(parsed.get("key_actors", []), ensure_ascii=False),
+                "key_actors": json.dumps(_fix_actors(parsed.get("key_actors", [])), ensure_ascii=False),
                 "stance_marker": parsed.get("stance_marker", ""),
                 "_input_tokens": in_tok,
                 "_output_tokens": out_tok,
@@ -293,7 +306,7 @@ def stage_a_cli(doc_rows: pd.DataFrame, model_id: str) -> list[dict]:
                 "doc_id": row["doc_id"],
                 "summary_he": parsed.get("summary_he", ""),
                 "is_polemical": bool(parsed.get("is_polemical", False)),
-                "key_actors": json.dumps(parsed.get("key_actors", []), ensure_ascii=False),
+                "key_actors": json.dumps(_fix_actors(parsed.get("key_actors", [])), ensure_ascii=False),
                 "stance_marker": parsed.get("stance_marker", ""),
                 "_input_tokens": r["in_tok"], "_output_tokens": r["out_tok"],
                 "_wall_seconds": time.time() - t0, "_error": None,
@@ -400,7 +413,7 @@ async def stage_b_gemini(prompts: list[tuple[int, str]], model_id: str) -> list[
                                               "is_polemic_thread", "polemic_score",
                                               "polemic_type", "polemic_direction", "evidence")},
                 "sub_thread_signal": bool(parsed.get("sub_thread_signal", False)),
-                "actors": json.dumps(parsed.get("actors", []), ensure_ascii=False),
+                "actors": json.dumps(_fix_actors(parsed.get("actors", [])), ensure_ascii=False),
                 "rebuttal_edges": json.dumps(parsed.get("rebuttal_edges", []), ensure_ascii=False),
                 "outlier_docs": json.dumps(parsed.get("outlier_docs", []), ensure_ascii=False),
                 "_input_tokens": getattr(usage, "prompt_token_count", 0) if usage else 0,
@@ -429,7 +442,7 @@ def stage_b_cli(prompts: list[tuple[int, str]], model_id: str) -> list[dict]:
                                               "is_polemic_thread", "polemic_score",
                                               "polemic_type", "polemic_direction", "evidence")},
                 "sub_thread_signal": bool(parsed.get("sub_thread_signal", False)),
-                "actors": json.dumps(parsed.get("actors", []), ensure_ascii=False),
+                "actors": json.dumps(_fix_actors(parsed.get("actors", [])), ensure_ascii=False),
                 "rebuttal_edges": json.dumps(parsed.get("rebuttal_edges", []), ensure_ascii=False),
                 "outlier_docs": json.dumps(parsed.get("outlier_docs", []), ensure_ascii=False),
                 "_input_tokens": r["in_tok"], "_output_tokens": r["out_tok"],

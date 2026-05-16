@@ -802,7 +802,7 @@ if view_mode == "Thread Browser":
                         import json as _json
                         actors_list = _json.loads(actors_raw) if isinstance(actors_raw, str) else list(actors_raw)
                         if actors_list:
-                            st.markdown("**Actors:** " + ", ".join(restore_final_forms(str(a)) for a in actors_list))
+                            st.markdown("**Actors:** " + ", ".join(str(a) for a in actors_list))
                     except Exception:
                         pass
 
