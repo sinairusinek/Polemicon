@@ -527,13 +527,11 @@
 <nav id="nav">
   <a href="#hero" data-label="פתיחה"></a>
   <a href="#toc" data-label="תוכן עניינים"></a>
-  <a href="#findings" data-label="הפולמוסים שמצאנו"></a>
   <a href="#question" data-label="השאלה"></a>
   <a href="#workflow" data-label="תהליך העבודה"></a>
-  <a href="#deliverables" data-label="תוצרים צפויים"></a>
   <a href="#lessons" data-label="מה לא הצלחנו"></a>
-  <a href="#directions" data-label="כיוונים חדשים"></a>
-  <a href="#options" data-label="אפשרויות להמשך"></a>
+  <a href="#options" data-label="הדגמות"></a>
+  <a href="#findings" data-label="Polemicon — Annotation & Keyword Discovery"></a>
   <a href="#close" data-label="סיום"></a>
 </nav>
 
@@ -561,17 +559,8 @@
   </div>
   <ol class="goals-list compact reveal" style="margin-top:16px;">
     <li>
-      <a href="#findings" style="display:flex; gap:18px; align-items:baseline; text-decoration:none; color:inherit;">
-        <span class="goal-ord">1</span>
-        <div class="goal-body">
-          <span class="goal-title">נתחיל מהסוף: הפולמוסים שמצאנו</span>
-          <span class="goal-sub">דפדפן הפתילים החי — 188 פתילים שהוכרעו, 75 פולמוסים בהסכמה גורפת.</span>
-        </div>
-      </a>
-    </li>
-    <li>
       <a href="#question" style="display:flex; gap:18px; align-items:baseline; text-decoration:none; color:inherit;">
-        <span class="goal-ord">2</span>
+        <span class="goal-ord">1</span>
         <div class="goal-body">
           <span class="goal-title">השאלה ושלושת היעדים</span>
           <span class="goal-sub">האם אפשר לאתר פולמוס באופן חישובי — ומה ביקשנו להשיג.</span>
@@ -580,7 +569,7 @@
     </li>
     <li>
       <a href="#workflow" style="display:flex; gap:18px; align-items:baseline; text-decoration:none; color:inherit;">
-        <span class="goal-ord">3</span>
+        <span class="goal-ord">2</span>
         <div class="goal-body">
           <span class="goal-title">תהליך העבודה</span>
           <span class="goal-sub">מקורפוס רחב, דרך אוצר־מילים פולמוסי וקישור לפתילים, אל עבודת LLM וכיול.</span>
@@ -588,17 +577,8 @@
       </a>
     </li>
     <li>
-      <a href="#deliverables" style="display:flex; gap:18px; align-items:baseline; text-decoration:none; color:inherit;">
-        <span class="goal-ord">4</span>
-        <div class="goal-body">
-          <span class="goal-title">תוצרים צפויים</span>
-          <span class="goal-sub">מה הבטחנו בהצעת העבודה — ומה כבר עומד לרשותכם.</span>
-        </div>
-      </a>
-    </li>
-    <li>
       <a href="#lessons" style="display:flex; gap:18px; align-items:baseline; text-decoration:none; color:inherit;">
-        <span class="goal-ord">5</span>
+        <span class="goal-ord">3</span>
         <div class="goal-body">
           <span class="goal-title">מה לא הצלחנו ומה נסיק מכך</span>
           <span class="goal-sub">compact memory, ופולמוס וקשרים עם ובתוך פרויקט בן־יהודה.</span>
@@ -606,37 +586,24 @@
       </a>
     </li>
     <li>
-      <a href="#directions" style="display:flex; gap:18px; align-items:baseline; text-decoration:none; color:inherit;">
-        <span class="goal-ord">6</span>
+      <a href="#options" style="display:flex; gap:18px; align-items:baseline; text-decoration:none; color:inherit;">
+        <span class="goal-ord">4</span>
         <div class="goal-body">
-          <span class="goal-title">כיוונים חדשים</span>
-          <span class="goal-sub">לאן זה יכול להמשיך — שאלה פתוחה.</span>
+          <span class="goal-title">הדגמות</span>
+          <span class="goal-sub">שתי הצעות־ממשק ציבוריות: דפדפן הפולמוס בעיתונות ודף־האגרת המועשר.</span>
         </div>
       </a>
     </li>
     <li>
-      <a href="#options" style="display:flex; gap:18px; align-items:baseline; text-decoration:none; color:inherit;">
-        <span class="goal-ord">7</span>
+      <a href="#findings" style="display:flex; gap:18px; align-items:baseline; text-decoration:none; color:inherit;">
+        <span class="goal-ord">5</span>
         <div class="goal-body">
-          <span class="goal-title">אפשרויות להמשך</span>
-          <span class="goal-sub">שתי הצעות־ממשק: דפדפן הפולמוס בעיתונות, ודף־האגרת המועשר.</span>
+          <span class="goal-title">Polemicon — Annotation &amp; Keyword Discovery</span>
+          <span class="goal-sub">האפליקציה החיה: 188 פתילים שהוכרעו, 75 פולמוסים בהסכמה גורפת.</span>
         </div>
       </a>
     </li>
   </ol>
-</section>
-
-<!-- FINDINGS (Streamlit thread browser) -->
-<section id="findings" class="full-bleed" style="background:var(--bg-dark);">
-  <div class="demo-frame-wrap">
-    <div class="demo-overlay">
-      <div class="label">נתחיל מהסוף</div>
-      <h2>הפולמוסים שמצאנו</h2>
-      <a class="demo-open-link" href="https://0800ah-3vlzb68g5kkxsfhj3iyzw2.streamlit.app/" target="_blank">פתחו במסך מלא ↗</a>
-      <p>לפני השיטה — הממצא. 188 פתילים עברו הכרעה מלאה, 75 מהם פולמוס בהסכמה גורפת של שלושת המודלים. דפדפן הפתילים החי מציג כל פתיל, את פסיקות שלושת המודלים, מפת השחקנים ומסמכי־הליבה. גללו בתוכו, או פתחו במסך מלא.</p>
-    </div>
-    <iframe src="https://0800ah-3vlzb68g5kkxsfhj3iyzw2.streamlit.app/?embed=true" loading="lazy" title="Polemicon Thread Browser"></iframe>
-  </div>
 </section>
 
 <!-- QUESTION -->
@@ -734,45 +701,6 @@
   </div>
 </section>
 
-<!-- DELIVERABLES -->
-<section id="deliverables" style="background:var(--paper-2);">
-  <div class="reveal">
-    <div class="eyebrow">תוצרים צפויים</div>
-    <h2 class="big">מה הבטחנו בהצעת העבודה</h2>
-    <p class="lead">ארבעת התוצרים שהוגדרו בהצעת ה־DH-Dev — ומולם, מה כבר עומד לרשותכם בפיילוט.</p>
-  </div>
-  <ol class="goals-list reveal" style="margin-top:32px;">
-    <li>
-      <span class="goal-ord">א׳</span>
-      <div class="goal-body">
-        <span class="goal-title">רשימת התייחסויות מובנית</span>
-        <span class="goal-sub">מאגר של התייחסויות בין טקסטים, מאוחדות לכדי מראי מקום.</span>
-      </div>
-    </li>
-    <li>
-      <span class="goal-ord">ב׳</span>
-      <div class="goal-body">
-        <span class="goal-title">מיפוי פולמוסים לדוגמה</span>
-        <span class="goal-sub">2–3 פולמוסים ממופים במלואם כמקרי בחן.</span>
-      </div>
-    </li>
-    <li>
-      <span class="goal-ord">ג׳</span>
-      <div class="goal-body">
-        <span class="goal-title">הערכת צרכים, אפשרויות ואתגרים לפרוייקט המלא</span>
-        <span class="goal-sub">מה דרוש כדי להרחיב את הפיילוט לכדי פרויקט מלא.</span>
-      </div>
-    </li>
-    <li>
-      <span class="goal-ord">ד׳</span>
-      <div class="goal-body">
-        <span class="goal-title">אפיון פלטפורמה</span>
-        <span class="goal-sub">מסמך אפיון מפורט עם תרשימי הדגמה.</span>
-      </div>
-    </li>
-  </ol>
-</section>
-
 <!-- LESSONS -->
 <section id="lessons">
   <div class="reveal">
@@ -782,38 +710,45 @@
   </div>
 </section>
 
-<!-- DIRECTIONS -->
-<section id="directions" style="background:var(--paper-2);">
-  <div class="reveal">
-    <div class="eyebrow">כיוונים חדשים</div>
-    <h2 class="big">לאן זה יכול להמשיך</h2>
-  </div>
-</section>
-
 <!-- OPTIONS -->
 <section id="options">
   <div class="reveal">
-    <div class="eyebrow">אפשרויות להמשך</div>
+    <div class="eyebrow">הדגמות</div>
     <h2 class="big">שתי הצעות־ממשק ציבוריות</h2>
-    <p class="lead">שתי דרכים מוחשיות שבהן הממצאים יכולים להגיע לקהל — שתיהן בנויות כך שניתן לראות מה אנושי ומה אוטומטי.</p>
+    <p class="lead">שתי דרכים מוחשיות שבהן הממצאים יכולים להגיע לקהל — שתיהן בנויות כך שניתן לראות מה אנושי ומה אוטומטי. ההדגמות פתוחות במסך מלא.</p>
   </div>
-  <div class="demo-frame-wrap full-bleed" style="margin-top:24px;">
+  <ol class="goals-list reveal" style="margin-top:32px;">
+    <li>
+      <a href="demo_press_polemic_browser.html" target="_blank" style="display:flex; gap:18px; align-items:baseline; text-decoration:none; color:inherit;">
+        <span class="goal-ord">א</span>
+        <div class="goal-body">
+          <span class="goal-title">דפדפן הפולמוס בעיתונות ↗</span>
+          <span class="goal-sub">ציר־זמן, רשת עיתונים, ופירוט פתיל. כל בלוק שהופק ע"י LLM נצבע כך שניתן לראות מה אנושי ומה אוטומטי.</span>
+        </div>
+      </a>
+    </li>
+    <li>
+      <a href="demo_egeret_3442_bypage_mockup.html" target="_blank" style="display:flex; gap:18px; align-items:baseline; text-decoration:none; color:inherit;">
+        <span class="goal-ord">ב</span>
+        <div class="goal-body">
+          <span class="goal-title">אגרת 3442 — דף־מכתב מועשר לפרויקט בן־יהודה ↗</span>
+          <span class="goal-sub">גרסה מועשרת של אגרת גורדון מטעלז, עם מתג שקיפות הצורה — מודל לאופן שבו פולמוס מאותר מוחזר אל המקור.</span>
+        </div>
+      </a>
+    </li>
+  </ol>
+</section>
+
+<!-- FINDINGS / Polemicon Annotation & Keyword Discovery (closer) -->
+<section id="findings" class="full-bleed" style="background:var(--bg-dark);">
+  <div class="demo-frame-wrap">
     <div class="demo-overlay">
-      <div class="label">אפשרות · א</div>
-      <h2>דפדפן הפולמוס בעיתונות</h2>
-      <a class="demo-open-link" href="demo_press_polemic_browser.html" target="_blank">פתחו במסך מלא ↗</a>
-      <p>ציר־זמן, רשת עיתונים, ופירוט פתיל. כל בלוק שהופק ע"י LLM נצבע כך שניתן לראות מה אנושי ומה אוטומטי.</p>
+      <div class="label">האפליקציה החיה</div>
+      <h2>Polemicon — Annotation &amp; Keyword Discovery</h2>
+      <a class="demo-open-link" href="https://0800ah-3vlzb68g5kkxsfhj3iyzw2.streamlit.app/" target="_blank">פתחו במסך מלא ↗</a>
+      <p>סביבת הסימון וחקר מילות־המפתח של הפולמיקון. 188 פתילים עברו הכרעה מלאה, 75 מהם פולמוס בהסכמה גורפת של שלושת המודלים. דפדפן הפתילים החי מציג כל פתיל, את פסיקות שלושת המודלים, מפת השחקנים ומסמכי־הליבה.</p>
     </div>
-    <iframe src="demo_press_polemic_browser.html" loading="lazy" title="דפדפן פולמוס בעיתונות"></iframe>
-  </div>
-  <div class="demo-frame-wrap full-bleed" style="margin-top:48px;">
-    <div class="demo-overlay">
-      <div class="label">אפשרות · ב</div>
-      <h2>אגרת 3442 — דף־מכתב מועשר לפרויקט בן־יהודה</h2>
-      <a class="demo-open-link" href="demo_egeret_3442_bypage_mockup.html" target="_blank">פתחו במסך מלא ↗</a>
-      <p>גרסה מועשרת של אגרת גורדון מטעלז, עם מתג שקיפות הצורה — מודל לאופן שבו פולמוס מאותר מוחזר אל המקור.</p>
-    </div>
-    <iframe src="demo_egeret_3442_bypage_mockup.html" loading="lazy" title="אגרת 3442 — אפשרות להמשך"></iframe>
+    <iframe src="https://0800ah-3vlzb68g5kkxsfhj3iyzw2.streamlit.app/?embed=true" loading="lazy" title="Polemicon — Annotation & Keyword Discovery"></iframe>
   </div>
 </section>
 
