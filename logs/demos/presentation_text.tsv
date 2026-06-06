@@ -1,0 +1,87 @@
+section	role	text
+<head>	title	הפולמיקון — מצגת הפיילוט
+nav	data-label[#hero]	פתיחה
+nav	data-label[#toc]	תוכן עניינים
+nav	data-label[#question]	השאלה
+nav	data-label[#workflow]	תהליך העבודה
+nav	data-label[#lessons]	תוצאות והצעות להמשך
+nav	data-label[#findings]	Polemicon — Annotation & Keyword Discovery
+nav	data-label[#close]	סיום
+hero	hero-eyebrow	פיילוט · 2026
+hero	hero-title	הַפּוֹלֶמִיקוֹן
+hero	hero-sub	איתור פולמוסים בעיתונות העברית, 1874–1884: צינור חישובי, הכרעות מתודיות, וממצאים ראשונים.
+hero	hero-meta	5 עיתונים · 188 פתילים שעברו הכרעה · 75 פולמוסים בהסכמה גורפת
+hero	hero-scroll-hint	↓ גלגל למטה
+toc	eyebrow	מפת המצגת
+toc	h2	תוכן עניינים
+toc	goal[1].title	השאלה ושלושת היעדים
+toc	goal[1].sub	האם אפשר לאתר פולמוס באופן חישובי — ומה ביקשנו להשיג.
+toc	goal[2].title	תהליך העבודה
+toc	goal[2].sub	מקורפוס רחב, דרך אוצר־מילים פולמוסי וקישור לפתילים, אל עבודת LLM וכיול.
+toc	goal[3].title	תוצאות והצעות להמשך
+toc	goal[3].sub	מה לא הצלחנו ומה נסיק מכך, ושתי הצעות־ממשק ציבוריות: דפדפן הפולמוס בעיתונות ודף־האגרת המועשר.
+toc	goal[4].title	Polemicon — Annotation & Keyword Discovery
+toc	goal[4].sub	האפליקציה החיה: 188 פתילים שהוכרעו, 75 פולמוסים בהסכמה גורפת.
+question	eyebrow	השאלה
+question	h2	האם אפשר לאתר פולמוס באופן חישובי?
+question	lead	פולמוס אינו רק טון פולמוסי — הוא חליפה של טענות סביב נושא משותף, עם מענה ומענה־שכנגד. הפיילוט בודק האם צינור חישובי, בעזרת מודלים גדולים, יכול לזהות את החליפות הללו ולהבחין בין פולמוס של ממש לבין דיון לוהט אך חד־צדדי.
+question	h3	שלושת היעדים
+question	goal[א׳].title	לבנות צינור איתור הניתן לרפלקציה
+question	goal[א׳].sub	כל שלב גלוי, כל הכרעה ניתנת לערעור, כל קוד וקריטריון פתוחים לבדיקה חוזרת.
+question	goal[ב׳].title	להעריך מתודות־הכרעה
+question	goal[ב׳].sub	קריאה הדוקה (פולמוס מוגדר־נושא) מול קריאה רחבה (מעורבות חוצת־עיתונים) — והכרעה איזו עונה על איזו שאלה מחקרית.
+question	goal[ג׳].title	לחשוף מועמדי־ממצא חדשים
+question	goal[ג׳].sub	לאתר פתילים שלא תועדו במחקר הקיים על העיתונות העברית — לא להחליף את החוקר, להאיר עבורו פינות.
+workflow	eyebrow	תהליך העבודה
+workflow	h2	מ־26,200 מסמכים ל־188 פסקי־דין
+workflow	lead	צינור היברידי בשישה שלבים. כל שלב מצמצם את הגוף ומשאיר עקבות גלויות — מהקורפוס הרחב, דרך זיהוי אוצר־מילים פולמוסי וקישור לפתילים, אל עבודת ה־LLM, הערכה אנושית, וכיול.
+workflow	funnel[0].label	שלב 0 · מקור
+workflow	funnel[0].num	~26,200
+workflow	funnel[0].unit	מסמכים גולמיים
+workflow	funnel[0].name	קורפוס רחב
+workflow	funnel[0].text	שלושה ז'אנרים בגוף־מקור אחד: עיתונות עברית (ארכיון JPress), אגרות פרטיות (פרויקט בן־יהודה), וספרי זיכרון מקוצרים (compact memory). כל ז'אנר נכנס עם המבנה שלו — תאריך, מחבר, נמען, עיתון.
+workflow	funnel[1].label	שלב 1 · ייצוג
+workflow	funnel[1].num	7,457
+workflow	funnel[1].unit	מועמדים פולמוסיים
+workflow	funnel[1].name	אוצר־מילים פולמוסי
+workflow	funnel[1].text	הטמעות (DictaBERT) + סינון לפי קרבה לטופוי פולמוסיים. רוב החדשות והמודעות נושרות; נשארים קטעי דעה ומאמרים מסומני־מחבר.
+workflow	funnel[2].label	שלב 2 · קישור
+workflow	funnel[2].num	438
+workflow	funnel[2].unit	פתילים מועמדים
+workflow	funnel[2].name	קישור לפתילים · clustering
+workflow	funnel[2].text	3,110 מסמכים מתאגדים לפתילים על־פי הפניות מפורשות, שזירה כרונולוגית, וקרבה סמנטית. מגבלת־מסמכים מונעת איחוד־יתר.
+workflow	funnel[3].label	שלב 3 · הכרעה
+workflow	funnel[3].num	188
+workflow	funnel[3].unit	פתילים שהוכרעו
+workflow	funnel[3].name	עבודת LLM
+workflow	funnel[3].text	שלושה מודלים — Gemini Flash, Sonnet, ו־Opus כבורר — קוראים את כל מסמכי הפתיל ומחזירים סוג, כיוון, ועוצמה.
+workflow	funnel[4].label	שלב 4 · אדם בלולאה
+workflow	funnel[4].num	↺
+workflow	funnel[4].unit	הערכה ותיקון
+workflow	funnel[4].name	הערכה אנושית · אפליקציית פולמיקון
+workflow	funnel[4].text	חוקרים בדקו את פסיקות המודלים באפליקציית פולמיקון, סימנו טעויות וקצוות, והזינו את התובנות חזרה אל הפרומפט — לולאת־כיול אנושית שעיצבה את ההכרעה (למשל סעיף ה־COUNTERWEIGHT, שצמצם איחוד־יתר של פתילים נושאיים).
+workflow	funnel[5].label	שלב 5 · כיול
+workflow	funnel[5].num	3×
+workflow	funnel[5].unit	שכבות אימות
+workflow	funnel[5].name	כיול · calibration
+workflow	funnel[5].text	הסכמה בין־מודלית, הכרעת Opus כבורר במקרי מחלוקת, ובקרת בייסליין לא־LLM שמודדת כמה ההכרעה הסמנטית באמת נחוצה.
+lessons	eyebrow	תוצאות והצעות להמשך
+lessons	h2	תוצאות והצעות להמשך
+lessons	h3.lessons	מה לא הצלחנו ומה נסיק מכך
+lessons	lead.lessons	שלושה תחומים שבהם הצינור עוד לא נסגר: הפולמוס שבקורפוס ה־compact memory, הפולמוס הפנימי בתוך פרויקט בן־יהודה, והקשרים בין פרויקט בן־יהודה לעיתונות.
+lessons	h3.options	שתי הצעות־ממשק ציבוריות
+lessons	lead.options	שתי דרכים מוחשיות שבהן הממצאים יכולים להגיע לקהל — שתיהן בנויות כך שניתן לראות מה אנושי ומה אוטומטי. ההדגמות פתוחות במסך מלא.
+lessons	goal[א].title	דפדפן הפולמוס בעיתונות ↗
+lessons	goal[א].sub	ציר־זמן, רשת עיתונים, ופירוט פתיל. כל בלוק שהופק ע"י LLM נצבע כך שניתן לראות מה אנושי ומה אוטומטי.
+lessons	goal[ב].title	אגרת 3442 — דף־מכתב מועשר לפרויקט בן־יהודה ↗
+lessons	goal[ב].sub	גרסה מועשרת של אגרת גורדון מטעלז, עם מתג שקיפות הצורה — מודל לאופן שבו פולמוס מאותר מוחזר אל המקור.
+findings	label	האפליקציה החיה
+findings	h2	Polemicon — Annotation & Keyword Discovery
+findings	demo-open-link	פתחו במסך מלא ↗
+findings	p	סביבת הסימון וחקר מילות־המפתח של הפולמיקון. 188 פתילים עברו הכרעה מלאה, 75 מהם פולמוס בהסכמה גורפת של שלושת המודלים. דפדפן הפתילים החי מציג כל פתיל, את פסיקות שלושת המודלים, מפת השחקנים ומסמכי־הליבה.
+close	h2	תודה
+close	p	פולמיקון הוא ארכיטקטורה היברידית של גרף, מודלים, ועריכה אנושית. הפיילוט מראה שאפשר לאתר פולמוס באופן חישובי — וגם איפה ההכרעה הסופית עדיין שייכת לחוקר.
+close	link[streamlit]	האפליקציה החיה
+close	link[press-demo]	דפדפן
+close	link[egeret-demo]	אגרת 3442
+close	back-to-top	↑ חזרה לראש

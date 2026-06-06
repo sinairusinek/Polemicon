@@ -112,6 +112,13 @@
   }
   footer a { color: var(--teal); text-decoration: none; }
   footer a:hover { text-decoration: underline; }
+  .dhdev-attribution {
+    display: flex; align-items: center; gap: 12px;
+    color: var(--ink-soft); font-size: 13px;
+  }
+  .dhdev-attribution img {
+    height: 56px; width: auto; display: block;
+  }
 </style>
 </head>
 <body>
@@ -141,8 +148,15 @@
   </main>
 
   <footer>
-    <span>פרויקט הפולמיקון · 2026</span>
-    <a href="https://github.com/sinairusinek/Polemicon">המאגר ב־GitHub</a>
+    <div>
+      <span>פרויקט הפולמיקון · 2026</span>
+      &nbsp;·&nbsp;
+      <a href="https://github.com/sinairusinek/Polemicon">המאגר ב־GitHub</a>
+    </div>
+    <a class="dhdev-attribution" href="https://www.dh-dev.com/" target="_blank" rel="noopener">
+      <span>פותח על־ידי</span>
+      <img src="dh-devLogo.jpeg" alt="DHDEV — Digital Humanities Development">
+    </a>
   </footer>
 </body>
 </html>
