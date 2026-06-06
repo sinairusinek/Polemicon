@@ -211,6 +211,35 @@
   .goals-list.compact .goal-sub { font-size: 14px; line-height: 1.4; }
   .goals-list li > a { grid-column: 1 / -1; width: 100%; }
 
+  /* row variant — items laid out side by side as cards */
+  .goals-list.row {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+    border-top: none; padding: 0; margin-top: 32px;
+  }
+  .goals-list.row li {
+    display: block; padding: 24px; gap: 0;
+    background: var(--paper-3); border: 1px solid var(--rule);
+    border-radius: 4px; border-bottom: 1px solid var(--rule);
+  }
+  .goals-list.row li > a {
+    display: flex; flex-direction: column; gap: 10px;
+    align-items: stretch; width: 100%;
+  }
+  .goals-list.row .goal-ord {
+    font-size: 32px; padding: 0 0 8px; border-left: none;
+    border-bottom: 2px solid var(--brick); align-self: flex-end;
+    text-align: right; line-height: 1;
+  }
+  .goals-list.row .goal-title { font-size: 18px; margin-bottom: 4px; }
+  .goals-list.row .goal-sub { font-size: 14px; line-height: 1.5; }
+  @media (max-width: 900px) {
+    .goals-list.row { grid-template-columns: 1fr; }
+  }
+
+  /* lessons bullets */
+  .lessons-bullets { padding-inline-start: 22px; margin: 12px 0 16px; }
+  .lessons-bullets li { padding: 8px 0; line-height: 1.6; }
+
   /* corpus — three-genre pillars */
   .genre-grid {
     display: grid; grid-template-columns: repeat(3, 1fr);
@@ -562,7 +591,7 @@
         <span class="goal-ord">3</span>
         <div class="goal-body">
           <span class="goal-title">תוצאות והצעות להמשך</span>
-          <span class="goal-sub">מה לא הצלחנו ומה נסיק מכך, ושתי הצעות־ממשק ציבוריות: דפדפן הפולמוס בעיתונות ודף־האגרת המועשר.</span>
+          <span class="goal-sub">מה הצליח ומה לא, ומה נסיק מכך לגבי המשך העבודה. שתי הדגמות מוצעות לממשק ציבורי: דפדפן הפולמוסים/הנושאים בעיתונות ופורטל לקריאה מועשרת ומעשירה באגרות בפרוייקט בן־יהודה.</span>
         </div>
       </a>
     </li>
@@ -571,7 +600,7 @@
         <span class="goal-ord">4</span>
         <div class="goal-body">
           <span class="goal-title">Polemicon — Annotation &amp; Keyword Discovery</span>
-          <span class="goal-sub">האפליקציה החיה: 188 פתילים שהוכרעו, 75 פולמוסים בהסכמה גורפת.</span>
+          <span class="goal-sub">סביבת העבודה החיה לסקירת התוצאות: 188 מועמדים, מתוכם כ־80 שזוהו כפולמוסים, 75 בהסכמה גורפת של המודלים.</span>
         </div>
       </a>
     </li>
@@ -584,7 +613,7 @@
     <div class="eyebrow">השאלה</div>
     <h2 class="big">האם אפשר לאתר פולמוס באופן חישובי?</h2>
     <p class="lead">
-      פולמוס אינו רק <em>טון</em> פולמוסי — הוא חליפה של טענות סביב נושא משותף, עם מענה ומענה־שכנגד. הפיילוט בודק האם צינור חישובי, בעזרת מודלים גדולים, יכול לזהות את החליפות הללו ולהבחין בין פולמוס של ממש לבין דיון לוהט אך חד־צדדי.
+      פולמוס אינו רק סגנון כתיבה ביקורתי — הוא חליפה של טענות סביב נושא משותף, עם מענה ומענה־שכנגד. הפיילוט בודק האם תהליך עבודה חישובי, הנעזר במודלים גדולים של שפה טבעית (LLM), יכול לאתר פולמוסים משמעותיים בקורפוס טקסטואלי גדול.
     </p>
   </div>
   <div class="reveal" style="margin-top:28px;">
@@ -593,22 +622,22 @@
       <li>
         <span class="goal-ord">א׳</span>
         <div class="goal-body">
-          <span class="goal-title">לבנות צינור איתור הניתן לרפלקציה</span>
-          <span class="goal-sub">כל שלב גלוי, כל הכרעה ניתנת לערעור, כל קוד וקריטריון פתוחים לבדיקה חוזרת.</span>
+          <span class="goal-title">לבנות תהליך עבודה חישובי (pipeline) הניתן להחלה על קורפוס גדול</span>
+          <span class="goal-sub">הפיילוט הוסב על קורפוס מוגבל ולא מאוזן מן השנים 1874–1884, שהיה ברשותנו, מתוך שאיפה להרחיב את הקורפוס לתקופות אחרות אם הניסוי יוכיח את עצמו.</span>
         </div>
       </li>
       <li>
         <span class="goal-ord">ב׳</span>
         <div class="goal-body">
           <span class="goal-title">להעריך מתודות־הכרעה</span>
-          <span class="goal-sub">קריאה הדוקה (פולמוס מוגדר־נושא) מול קריאה רחבה (מעורבות חוצת־עיתונים) — והכרעה איזו עונה על איזו שאלה מחקרית.</span>
+          <span class="goal-sub">מכיוון שקריאה אנושית של הקורפוס כולו אינה אפשרית: האם אוצר־מילים יכול לעזור באיתור פולמוסים? האם אפשר להשתמש בשיטות של למידת מכונה שיעזרו באיתור, או להעזר במודלי־שפה גדולים?</span>
         </div>
       </li>
       <li>
         <span class="goal-ord">ג׳</span>
         <div class="goal-body">
-          <span class="goal-title">לחשוף מועמדי־ממצא חדשים</span>
-          <span class="goal-sub">לאתר פתילים שלא תועדו במחקר הקיים על העיתונות העברית — לא להחליף את החוקר, להאיר עבורו פינות.</span>
+          <span class="goal-title">לחשוף פולמוסים חדשים מתקופת הקורפוס</span>
+          <span class="goal-sub">לאתר פולמוסים שלא תועדו במחקר הקיים ולהגישם לציבור החוקרים ולציבור הכללי.</span>
         </div>
       </li>
     </ol>
@@ -619,8 +648,8 @@
 <section id="workflow">
   <div class="reveal">
     <div class="eyebrow">תהליך העבודה</div>
-    <h2 class="big">מ־26,200 מסמכים ל־188 פסקי־דין</h2>
-    <p class="lead">צינור היברידי בשישה שלבים. כל שלב מצמצם את הגוף ומשאיר עקבות גלויות — מהקורפוס הרחב, דרך זיהוי אוצר־מילים פולמוסי וקישור לפתילים, אל עבודת ה־LLM, הערכה אנושית, וכיול.</p>
+    <h2 class="big">מ־26,200 מסמכים ל־75 פולמוסים</h2>
+    <p class="lead">צינור היברידי בשישה שלבים. מהקורפוס הרחב, דרך זיהוי אוצר־מילים פולמוסי וקישור ל׳פתילים׳, אל עבודת ה־LLM, הערכה אנושית, וכיול.</p>
   </div>
   <div class="funnel reveal">
     <div class="funnel-stage" data-w="3">
@@ -628,23 +657,23 @@
       <div class="funnel-num">~26,200</div>
       <div class="funnel-unit">מסמכים גולמיים</div>
       <div class="funnel-name">קורפוס רחב</div>
-      <p>שלושה ז'אנרים בגוף־מקור אחד: עיתונות עברית (ארכיון JPress), אגרות פרטיות (פרויקט בן־יהודה), וספרי זיכרון מקוצרים (compact memory). כל ז'אנר נכנס עם המבנה שלו — תאריך, מחבר, נמען, עיתון.</p>
+      <p>מספר סוגות בקורפוס אחד: עיתונות עברית (ארכיוני עיתונות יהודית היסטורית — JPRESS ו־Compact Memory), ומסמכים שונים מתוך אוסף פרויקט בן־יהודה.</p>
     </div>
     <div class="funnel-arrow" aria-hidden="true"></div>
     <div class="funnel-stage" data-w="2">
-      <div class="funnel-stage-label">שלב 1 · ייצוג</div>
+      <div class="funnel-stage-label">שלב 1 · סינון ראשוני</div>
       <div class="funnel-num">7,457</div>
       <div class="funnel-unit">מועמדים פולמוסיים</div>
       <div class="funnel-name">אוצר־מילים פולמוסי</div>
-      <p>הטמעות (DictaBERT) + סינון לפי קרבה לטופוי פולמוסיים. רוב החדשות והמודעות נושרות; נשארים קטעי דעה ומאמרים מסומני־מחבר.</p>
+      <p>שיכון משפטים ומסמכים בעזרת מודל DictaBERT, וסינון לפי קרבה לאוצר־מילים פולמוסי ראשוני. בשלב זה נושרים רוב פריטי החדשות והמודעות; נשארים מאמרי דעה וכתבות עומק.</p>
     </div>
     <div class="funnel-arrow" aria-hidden="true"></div>
     <div class="funnel-stage" data-w="1">
       <div class="funnel-stage-label">שלב 2 · קישור</div>
       <div class="funnel-num">438</div>
       <div class="funnel-unit">פתילים מועמדים</div>
-      <div class="funnel-name">קישור לפתילים · clustering</div>
-      <p>3,110 מסמכים מתאגדים לפתילים על־פי הפניות מפורשות, שזירה כרונולוגית, וקרבה סמנטית. מגבלת־מסמכים מונעת איחוד־יתר.</p>
+      <div class="funnel-name">אישכול וקישור ל׳פתילים׳ (threads)</div>
+      <p>3,110 מסמכים מתאגדים לפתילים על־פי קרבה סמנטית וכרונולוגית, ושזירה באמצעות הפניות מפורשות. מגבלה של מספר מסמכים מונעת איחוד־יתר.</p>
     </div>
     <div class="funnel-arrow" aria-hidden="true"></div>
     <div class="funnel-stage" data-w="1">
@@ -656,11 +685,11 @@
     </div>
     <div class="funnel-arrow" aria-hidden="true"></div>
     <div class="funnel-stage" data-w="1">
-      <div class="funnel-stage-label">שלב 4 · אדם בלולאה</div>
+      <div class="funnel-stage-label">שלב 4 · האדם בלולאה</div>
       <div class="funnel-num">↺</div>
       <div class="funnel-unit">הערכה ותיקון</div>
       <div class="funnel-name">הערכה אנושית · אפליקציית פולמיקון</div>
-      <p>חוקרים בדקו את פסיקות המודלים באפליקציית פולמיקון, סימנו טעויות וקצוות, והזינו את התובנות חזרה אל הפרומפט — לולאת־כיול אנושית שעיצבה את ההכרעה (למשל סעיף ה־COUNTERWEIGHT, שצמצם איחוד־יתר של פתילים נושאיים).</p>
+      <p>חוקרת העריכה את פסיקות המודלים באפליקציית פולמיקון, סימנה טעויות ומקרי קצה. את התובנות שהתקבלו הזנו חזרה אל הפייפליין — לולאת־כיול אנושית שעיצבה את תהליך העבודה.</p>
     </div>
     <div class="funnel-arrow" aria-hidden="true"></div>
     <div class="funnel-stage" data-w="1">
@@ -668,7 +697,7 @@
       <div class="funnel-num">3×</div>
       <div class="funnel-unit">שכבות אימות</div>
       <div class="funnel-name">כיול · calibration</div>
-      <p>הסכמה בין־מודלית, הכרעת Opus כבורר במקרי מחלוקת, ובקרת בייסליין לא־LLM שמודדת כמה ההכרעה הסמנטית באמת נחוצה.</p>
+      <p>על בסיס האוסף שתויג בשלב הקודם (2,000 טקסטים) נעשה אימון מסווג (classifier) של DictaBERT שירוץ על שאר הקורפוס (24,200 טקסטים) מבלי צורך בשימוש במודלי שפה גדולים בתשלום.</p>
     </div>
   </div>
 </section>
@@ -682,16 +711,21 @@
 
   <div class="reveal" style="margin-top:32px;">
     <h3>מה לא הצלחנו ומה נסיק מכך</h3>
-    <p class="lead">שלושה תחומים שבהם הצינור עוד לא נסגר: הפולמוס שבקורפוס ה־compact memory, הפולמוס הפנימי בתוך פרויקט בן־יהודה, והקשרים בין פרויקט בן־יהודה לעיתונות.</p>
+    <p class="lead">בשתי נקודות אפשר לומר שהתוצאות שליליות:</p>
+    <ul class="lessons-bullets">
+      <li>הטקסטים שנדלו מאוסף העיתונות של compact memory היו לא־פולמוסיים כלל. מדובר בקורפוס קטן יחסית, ויש לזכור שלא כל הטקסטים באתר זמינים כטקסט דיגיטלי. גם הסינון התקופתי צמצם את הקורפוס מאוד. לא מן הנמנע שעם הרחבת הפרויקט לתקופות אחרות והשקעה בקידום ה־OCR יהיו בקורפוס זה תרומות לחקר פולמוסים.</li>
+      <li>הקשרים שנמצאו בין המסמכים בפרויקט בן־יהודה לבין קורפוס העיתונות היו מאכזבים: הסתבר שברובם מדובר היה למעשה במסמכים — מסות או מכתבים — שממילא התפרסמו בעיתונות. בכך השאיפה הראשונית שלנו לחבר את הסוגות האישיות יותר עם הבמות הציבוריות הביאה לתובנה שממילא מרבית המסמכים של פרויקט בן־יהודה שהיו רלוונטיים לנושאים הנדונים בציבור היו ציבוריים מלכתחילה.</li>
+    </ul>
+    <p class="lead">מכאן אנחנו מסיקים ששילוב הקורפוס אינו הדרך הנכונה להמשיך את הפרויקט.</p>
   </div>
 
   <div class="reveal" style="margin-top:48px;">
-    <h3>שתי הצעות־ממשק ציבוריות</h3>
-    <p class="lead">שתי דרכים מוחשיות שבהן הממצאים יכולים להגיע לקהל — שתיהן בנויות כך שניתן לראות מה אנושי ומה אוטומטי. ההדגמות פתוחות במסך מלא.</p>
+    <h3>שתי הצעות ראשוניות (mock-up) לממשקי הצגה לציבור</h3>
+    <p class="lead">שתי דרכים מוחשיות שבהן הממצאים יכולים להגיע לקהל החוקרים/ות והציבור הרחב. שתיהן בנויות כך שניתן לראות מה אנושי ומה מבוסס בינה מלאכותית, ולהוסיף אינטראקציה מעשירה, מלמדת, זהירה וביקורתית באמצעות בינה מלאכותית. שתי האפשרויות מזמינות יישום מחקרי ו/או חינוכי פעיל תוך כדי העשרת הידע הנאצר באתר.</p>
   </div>
-  <ol class="goals-list reveal" style="margin-top:32px;">
+  <ol class="goals-list row reveal">
     <li>
-      <a href="demo_press_polemic_browser.html" target="_blank" style="display:flex; gap:18px; align-items:baseline; text-decoration:none; color:inherit;">
+      <a href="demo_press_polemic_browser.html" target="_blank" style="text-decoration:none; color:inherit;">
         <span class="goal-ord">א</span>
         <div class="goal-body">
           <span class="goal-title">דפדפן הפולמוס בעיתונות ↗</span>
@@ -700,11 +734,20 @@
       </a>
     </li>
     <li>
-      <a href="demo_egeret_3442_bypage_mockup.html" target="_blank" style="display:flex; gap:18px; align-items:baseline; text-decoration:none; color:inherit;">
+      <a href="demo_egeret_3442_bypage_mockup.html" target="_blank" style="text-decoration:none; color:inherit;">
         <span class="goal-ord">ב</span>
         <div class="goal-body">
-          <span class="goal-title">אגרת 3442 — דף־מכתב מועשר לפרויקט בן־יהודה ↗</span>
-          <span class="goal-sub">גרסה מועשרת של אגרת גורדון מטעלז, עם מתג שקיפות הצורה — מודל לאופן שבו פולמוס מאותר מוחזר אל המקור.</span>
+          <span class="goal-title">ממשק האגרות — סביבה מועשרת ומעשירה לחקר אגרות מפרויקט בן־יהודה ↗</span>
+          <span class="goal-sub">הסביבה מודגמת על אגרת מאת י.ל. גורדון מטעלז, ומראה כיצד זיהוי ישויות, מובאות והפניות, המחשות ויזואליות על ציר זמן ומפה, ושילוב ספרות משנית ומחקר המשך הנעזר בבינה מלאכותית, יכולים להפוך את הטקסט לסביבת לימוד ומחקר חיה.</span>
+        </div>
+      </a>
+    </li>
+    <li>
+      <a href="#findings" style="text-decoration:none; color:inherit;">
+        <span class="goal-ord">ג</span>
+        <div class="goal-body">
+          <span class="goal-title">האפליקציה החיה לחקר פולמוסים ↓</span>
+          <span class="goal-sub">כאן בהמשך: הממשק בו השתמשנו להעריך את הפולמוסים שנמצאו. עיינו בו כדי לשפוט את הממצאים: האם הם מעידים שהשיטה אכן מאפשרת לאתר פולמוסים? האם יש טעם בהעברתם להצגה באמצעות ׳דפדפן הפולמוסים׳? האם יש בהם פוטנציאל לחידוש במחקר או לעניין את הקהל הרחב?</span>
         </div>
       </a>
     </li>
@@ -718,7 +761,7 @@
       <div class="label">האפליקציה החיה</div>
       <h2>Polemicon — Annotation &amp; Keyword Discovery</h2>
       <a class="demo-open-link" href="https://0800ah-3vlzb68g5kkxsfhj3iyzw2.streamlit.app/" target="_blank">פתחו במסך מלא ↗</a>
-      <p>סביבת הסימון וחקר מילות־המפתח של הפולמיקון. 188 פתילים עברו הכרעה מלאה, 75 מהם פולמוס בהסכמה גורפת של שלושת המודלים. דפדפן הפתילים החי מציג כל פתיל, את פסיקות שלושת המודלים, מפת השחקנים ומסמכי־הליבה.</p>
+      <p>סביבת הסימון וחקר מילות־המפתח של הפולמיקון. 188 ׳פתילים׳ עברו הכרעה מלאה, 75 מהם זוהו כפולמוס בהסכמה גורפת של שלושת המודלים. לחיצה על כל כרטיס בדפדפן פותחת למטה את הפתיל, את פסיקות שלושת המודלים, מפת השחקנים ומסמכי־הליבה.</p>
     </div>
     <iframe src="https://0800ah-3vlzb68g5kkxsfhj3iyzw2.streamlit.app/?embed=true" loading="lazy" title="Polemicon — Annotation & Keyword Discovery"></iframe>
   </div>
@@ -730,15 +773,15 @@
     <img class="logo-close" src="../../dh-devLogo.jpeg" alt="DH-Dev — Digital Humanities Development">
     <h2>תודה</h2>
     <p style="opacity:0.8; max-width:680px; margin:24px auto;">
-      פולמיקון הוא ארכיטקטורה היברידית של גרף, מודלים, ועריכה אנושית. הפיילוט מראה שאפשר לאתר פולמוס באופן חישובי — וגם איפה ההכרעה הסופית עדיין שייכת לחוקר.
+      הפולמיקון הוא ארכיטקטורה היברידית של חישוביות, בינה מלאכותית, ושילוב האדם במכונה. הפיילוט מראה שאפשר לאתר פולמוס באופן חישובי — וגם מצביע על מקום החוקר/ת בהמשך תהליך החקירה.
     </p>
     <div class="links">
       <a href="https://0800ah-3vlzb68g5kkxsfhj3iyzw2.streamlit.app/" target="_blank">האפליקציה החיה</a>
       <a href="demo_press_polemic_browser.html" target="_blank">דפדפן</a>
-      <a href="demo_egeret_3442_bypage_mockup.html" target="_blank">אגרת 3442</a>
+      <a href="demo_egeret_3442_bypage_mockup.html" target="_blank">ממשק האגרות</a>
     </div>
     <div style="margin-top:60px; font-family:'IBM Plex Mono',monospace; font-size:12px; opacity:0.5; letter-spacing:0.1em;">
-      ↑ חזרה לראש
+      ↑ חזרה להתחלה
     </div>
   </div>
 </section>
